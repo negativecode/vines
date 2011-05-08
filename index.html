@@ -3,7 +3,7 @@ layout: site
 title: Vines - XMPP/Jabber chat server for Ruby
 ---
 <div id="nav" class="grid_3">
-  <h1>vines></h1>
+  <h1>vines&gt;</h1>
 </div>
 <div id="content" class="grid_6">
   <p id="intro">
@@ -16,7 +16,7 @@ title: Vines - XMPP/Jabber chat server for Ruby
 <pre>
 $ gem install vines
 $ vines init wonderland.lit
-$ cd wonderland.lit && vines start
+$ cd wonderland.lit &amp;&amp; vines start
 </pre>
   <p>
     That's all there is to it. No database to setup, no web console to configure.
@@ -187,10 +187,10 @@ end
     on our machine.
   </p>
 <pre>
-  client '0.0.0.0', 5222 do
-    max_stanza_size 65536
-    max_resources_per_account 5
-  end
+client '0.0.0.0', 5222 do
+  max_stanza_size 65536
+  max_resources_per_account 5
+end
 </pre>
   <p>
     The <em>max_resources_per_account</em> property specifies how many times one
@@ -204,10 +204,10 @@ end
     domain can chat with users at verona.lit through a server to server connection.
   </p> 
 <pre>
-  server '0.0.0.0', 5269 do
-    max_stanza_size 131072
-    hosts ['verona.lit']
-  end
+server '0.0.0.0', 5269 do
+  max_stanza_size 131072
+  hosts ['verona.lit']
+end
 </pre>
   <p>
     The <em>hosts</em> property is a white list of remote chat servers to which
@@ -222,9 +222,9 @@ end
     normal XMPP clients.
   </p> 
 <pre>
-  http '0.0.0.0', 5280 do
-    max_stanza_size 131072
-  end
+http '0.0.0.0', 5280 do
+  max_stanza_size 131072
+end
 </pre>
 
   <h2>Components</h2>
@@ -233,11 +233,11 @@ end
     services, or bots.
   </p> 
 <pre>
-  component '0.0.0.0', 5347 do
-    max_stanza_size 131072
-    components 'tea.wonderland.lit'  => 'secr3t',
-               'cake.wonderland.lit' => 'passw0rd'
-  end
+component '0.0.0.0', 5347 do
+  max_stanza_size 131072
+  components 'tea.wonderland.lit'  => 'secr3t',
+             'cake.wonderland.lit' => 'passw0rd'
+end
 </pre>
   <p>
     Each sub-domain listed in the <em>components</em> attribute is allowed to
