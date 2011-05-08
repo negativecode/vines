@@ -1,0 +1,32 @@
+The certs/ directory contains the TLS certificates required for encrypting
+client to server and server to server XMPP connections. TLS encryption
+is mandatory for these streams so this directory must be configured properly.
+
+The ca-bundle.crt file contains root Certificate Authority (CA) certificates.
+These are used to validate certificates presented during TLS handshake
+negotiation. The source for this file is the cacert.pem file available
+at http://curl.haxx.se/docs/caextract.html.
+
+Any self-signed CA certificate placed in this directory will be considered
+a trusted certificate. For example, let's say you're running the wonderland.lit
+XMPP server and would like to allow verona.lit to connect a server to server
+stream.  The verona.lit server hasn't purchased a legitimate TLS certificate
+from a CA known in ca-bundle.crt. Instead, they've created a self-signed
+certificate and sent it to you. Place the certificate in this directory
+with a name of verona.lit.crt and it will be trusted. TLS connections from
+verona.lit will now work.
+
+For TLS connections to work for a virtual host, two files are needed in this
+directory: <vhost_domain>.key and <vhost_domain>.crt.  The key file must contain
+a PEM encoded private key.  Do not give this file to anyone.  This is your
+private key so keep it private. The crt file must contain a PEM encoded TLS
+certificate. This contains your public key so feel free to share it with other
+servers. For example, you add a new virtual host named wonderland.lit to
+the XMPP server. You need to run the 'vines cert wonderland.lit' command to
+generate the private key file and the self-signed certificate file in this
+directory. After running that command you will have a certs/wonderland.lit.key
+and a certs/wonderland.lit.crt file.
+
+Alternatively, you can purchase a TLS certificate from a CA (e.g. Go Daddy,
+VeriSign, etc.) and place it in this directory. This will avoid the hassles
+of managing self-signed certificates.

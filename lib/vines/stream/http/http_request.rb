@@ -1,0 +1,22 @@
+# encoding: UTF-8
+
+module Vines
+  class Stream
+    class Http
+      class HttpState
+        class HttpRequest
+          attr_accessor :rid
+
+          def initialize(rid)
+            @rid = rid
+            @received = Time.now
+          end
+
+          def timed_out?
+            Time.now - @received > 55
+          end
+        end
+      end
+    end
+  end
+end

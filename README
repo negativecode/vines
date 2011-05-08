@@ -1,0 +1,34 @@
+== Welcome to Vines
+
+Vines is an XMPP chat server that supports thousands of simultaneous connections
+by using EventMachine for asynchronous IO. User data is stored in a SQL database,
+CouchDB, Redis, the file system, or a custom storage implementation that you provide.
+LDAP authentication can be used so user names and passwords aren't stored in the chat
+database. SSL encryption is mandatory on all client and server connections.
+
+== Usage
+
+1. gem install vines
+2. vines init wonderland.lit
+3. cd wonderland.lit && vines start
+4. Login with your favorite chat program (iChat, Adium, Pidgin, etc.) to
+   start chatting!
+
+== Dependencies
+
+* bcrypt-ruby >= 2.1.4
+* eventmachine >= 1.0.0
+* nokogiri >= 1.4.4
+* ruby >= 1.9.1
+
+== Ubuntu setup
+$ sudo apt-get install build-essential ruby1.9.1 ruby1.9.1-dev libxml2-dev libxslt-dev
+
+== Contact
+
+* David Graham  <david@negativecode.com>
+* Chris Johnson <chris@negativecode.com>
+
+== License
+
+Vines is released under the MIT license. Check the LICENSE file for details.
