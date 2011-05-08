@@ -1,0 +1,56 @@
+body {
+  background-color: #fff;
+  color: #222;
+  font-family: "proxima-nova-1","proxima-nova-2", Helvetica, sans-serif;
+}
+p {
+  font-size: 14px;
+}
+p#intro {
+  background-color: #8cd050;
+  color: #3a5621;
+  font-size: 14px;
+  padding: 5px 10px 10px 10px;
+  text-align: center;
+  text-shadow: 0 1px 1px #000;
+}
+h1 {
+  font-family: "ff-cocon-web-pro-1","ff-cocon-web-pro-2", Helvetica, sans-serif;
+  font-size: 46px;
+  letter-spacing: -0.04em;
+  margin: 0px 0;
+  text-align: right;
+  text-shadow: 0 0px 2px #000;
+}
+h2 {
+  color: #8cd050;
+  font-size: 16px;
+  font-weight: 400;
+  margin-bottom: 5px;
+}
+pre {
+  background: #f8f8f8;
+  display: block;
+  font-size: 13px;
+  padding: 10px;
+}
+#top {
+  background-color: #8cd050;
+  height: 5px;
+}
+#footer {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  color: #aaa;
+  padding-right: 10px;
+}
+#logo {
+  color: #000;
+  font-family: "league-gothic-1","league-gothic-2", Helvetica, sans-serif;
+  font-size: 24px;
+  text-decoration: none;
+}
+#logo span {
+  color: #981a1a;
+}
