@@ -9,7 +9,6 @@ p {
 p#intro {
   background-color: #8cd050;
   color: #3a5621;
-  font-size: 14px;
   padding: 5px 10px 10px 10px;
   text-align: center;
   text-shadow: 0 1px 1px #000;
@@ -18,7 +17,7 @@ h1 {
   font-family: "ff-cocon-web-pro-1","ff-cocon-web-pro-2", Helvetica, sans-serif;
   font-size: 46px;
   letter-spacing: -0.04em;
-  margin: 0px 0;
+  margin: 0;
   text-align: right;
   text-shadow: 0 0px 2px #000;
 }
