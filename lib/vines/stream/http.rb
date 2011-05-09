@@ -20,6 +20,10 @@ module Vines
         @state = Auth.new(self)
       end
 
+      def domain
+        @http_state.domain
+      end
+
       def user
         @http_state.user
       end
@@ -98,19 +102,16 @@ module Vines
         end
       end
 
+      private
+
       def send_bosh_error
-        body = "<body type='terminate' condition='remote-connection-failed' xmlns='http://jabber.org/protocol/httpbind'/>"
+        body = '<body type="terminate" condition="remote-connection-failed" xmlns="http://jabber.org/protocol/httpbind"/>'
         header = [
           "HTTP/1.1 404 OK",
           "Content-Type: text/xml; charset=utf-8",
           "Content-Length: #{body.bytesize}"
         ].join("\r\n")
-
-        send_data([header, body].join("\r\n\r\n"))
-      end
-
-      def domain
-        @http_state.domain
+        stream_write([header, body].join("\r\n\r\n"))
       end
     end
   end
