@@ -3,7 +3,6 @@
 module Vines
   class Stream
     class Http < Client
-      include Thin
       include Vines::Log
 
       attr_accessor :last_broadcast_presence
