@@ -12,7 +12,7 @@ module Vines
             @received = Time.now
           end
 
-          def timed_out?
+          def expired?
             Time.now - @received > 55
           end
         end

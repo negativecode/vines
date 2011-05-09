@@ -6,7 +6,7 @@ module Vines
       include Thin
       include Vines::Log
 
-      attr_accessor :last_broadcast_presence, :last_activity
+      attr_accessor :last_broadcast_presence
 
       def initialize(config)
         @config = config
@@ -98,7 +98,7 @@ module Vines
             @nodes.push(Nokogiri::XML(node.to_s.sub(' xmlns="jabber:client"', '')).root)
           end
         else
-          self.setup_new_client(body['rid'], body['to'])
+          setup_new_client(body['rid'], body['to'])
         end
       end
 

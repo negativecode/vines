@@ -7,50 +7,39 @@ module Vines
         include Nokogiri::XML
 
         attr_reader :domain
-        attr_accessor :last_broadcast_presence, :expiration, :domain
-        attr_accessor :last_activity, :queued_stanzas, :queued_requests, :user
+        attr_accessor :domain, :last_broadcast_presence, :user
 
-        def initialize(stream, sid, rid, domain=nil)
+        def initialize(stream, sid, rid, domain)
           @stream, @sid, @domain = stream, sid, domain
           @last_activity = Time.now
           @state = Stream::Client::Start.new(self)
-          @queued_stanzas = []
-          @queued_requests = []
-          @expiration = 65
+          @requests, @responses = [], []
           @pinged = false
-          create_session(rid, sid)
+          start_session(rid)
         end
 
         def method_missing(method, *args, &block)
           @stream.send(method, *args, &block)
         end
 
-        def send_response(data, sid, rid)
+        def send_response(data, rid)
           doc = Document.new
           body = doc.create_element('body',
             'rid' => rid,
-            'sid' => sid,
+            'sid' => @sid,
             'xmlns' => NAMESPACES[:http_bind]) do |node|
-              node.inner_html = data
+              node.inner_html = data.to_s
             end
           reply(body)
         end
 
         def expired?
           cleanup_requests
-          (Time.now - @last_activity > @expiration) && @queued_requests.empty?
-        end
-
-        def cleanup_requests
-          timed_out_requests.each do |request|
-            log.debug("Clearing out #{request.rid}")
-            send_response("", @sid, request.rid)
-            @queued_requests.delete(request)
-          end
+          @requests.empty? && (Time.now - @last_activity > 65)
         end
 
         def ping
-          log.debug("Pinging #{self}. Request queue: #{@queued_requests}")
+          log.debug("Pinging #{self}. Request queue: #{@requests}")
           @last_activity = Time.now
           write("")
           @pinged = true
@@ -60,58 +49,23 @@ module Vines
           @pinged
         end
 
-        def create_session(rid, sid)
-          doc = Document.new
-          node = doc.create_element('body',
-            'accept'     => 'deflate,gzip',
-            'ack'        => rid,
-            'charsets'   => 'UTF-8',
-            'from'       => domain, 
-            'hold'       => '1',
-            'inactivity' => '30',
-            'maxpause'   => '120',
-            'polling'    => '5',
-            'requests'   => '2',
-            'sid'        => sid,
-            'ver'        => '1.6',
-            'wait'       => '60',
-            'xmlns'      => 'http://jabber.org/protocol/httpbind')
-
-          node << doc.create_element('features', 'xmlns' => 'jabber:client') do |el|
-            el << doc.create_element('mechanisms') do |parent|
-              parent.default_namespace = NAMESPACES[:sasl]
-              mechanisms.each {|name| parent << doc.create_element('mechanism', name) }
-            end
-          end
-          reply(node)
-        end
-
         def request(rid)
           @pinged = false
           @last_activity = Time.now
-          if @queued_stanzas.size > 0
-            send_response(@queued_stanzas.join(" "), @sid, rid)
-            @queued_stanzas.clear
+          if @responses.any?
+            send_response(@responses.join(' '), rid)
+            @responses.clear
           else
-            @queued_requests << HttpRequest.new(rid)
+            @requests << HttpRequest.new(rid)
           end
         end
 
         def write(node)
-          request = @queued_requests.shift
-          unless request.nil?
-            send_response(node.to_s, @sid, request.rid)
+          if request = @requests.shift
+            send_response(node, request.rid)
           else
-            @queued_stanzas << node.to_s
+            @responses << node.to_s
           end
-        end
-
-        def timed_out_requests
-          @queued_requests.select {|request| request.timed_out? }
-        end
-
-        def mechanisms
-          ['EXTERNAL', 'PLAIN']
         end
 
         def handle_restart
@@ -128,6 +82,14 @@ module Vines
 
         private
 
+        def cleanup_requests
+          expired = @requests.select {|request| request.expired? }
+          expired.each do |request|
+            send_response('', request.rid)
+            @requests.delete(request)
+          end
+        end
+
         # Send an HTTP 200 OK response wrapping the XMPP node content back
         # to the client.
         def reply(node)
@@ -139,6 +101,33 @@ module Vines
           ].join("\r\n")
 
           @stream.stream_write([header, body].join("\r\n\r\n"))
+        end
+
+        def start_session(rid)
+          doc = Document.new
+          node = doc.create_element('body',
+            'accept'     => 'deflate,gzip',
+            'ack'        => rid,
+            'charsets'   => 'UTF-8',
+            'from'       => @domain, 
+            'hold'       => '1',
+            'inactivity' => '30',
+            'maxpause'   => '120',
+            'polling'    => '5',
+            'requests'   => '2',
+            'sid'        => @sid,
+            'ver'        => '1.6',
+            'wait'       => '60',
+            'xmlns'      => 'http://jabber.org/protocol/httpbind')
+
+          node << doc.create_element('features', 'xmlns' => 'jabber:client') do |el|
+            el << doc.create_element('mechanisms') do |mechanisms|
+              mechanisms.default_namespace = NAMESPACES[:sasl]
+              mechanisms << doc.create_element('mechanism', 'EXTERNAL')
+              mechanisms << doc.create_element('mechanism', 'PLAIN')
+            end
+          end
+          reply(node)
         end
       end
     end
