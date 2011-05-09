@@ -3,18 +3,16 @@
 module Vines
   class Stream
     class Http
-      class HttpState
-        class HttpRequest
-          attr_accessor :rid
+      class HttpRequest
+        attr_accessor :rid
 
-          def initialize(rid)
-            @rid = rid
-            @received = Time.now
-          end
+        def initialize(rid)
+          @rid = rid
+          @received = Time.now
+        end
 
-          def expired?
-            Time.now - @received > 55
-          end
+        def expired?
+          Time.now - @received > 55
         end
       end
     end
