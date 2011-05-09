@@ -38,6 +38,12 @@ module Vines
         error(StreamErrors::NotWellFormed.new)
       end
 
+      # Alias the Stream#write method before overriding it so we can call
+      # it later from an HttpState instance.
+      alias :stream_write :write
+
+      # Override Stream#write to queue stanzas rather than immediately writing
+      # to the stream. Stanza responses must be paired with a queued request.
       def write(data)
         @http_state.write(data)
       end

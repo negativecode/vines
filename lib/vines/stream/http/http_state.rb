@@ -32,15 +32,8 @@ module Vines
             'sid' => sid,
             'xmlns' => NAMESPACES[:http_bind]) do |node|
               node.inner_html = data
-            end.to_s
-          @stream.log_node(body, :out)
-          @stream.send_data([create_header(body.bytesize), body].join("\r\n\r\n"))
-        end
-
-        def create_header(content_length)
-          ["HTTP/1.1 200 OK",
-            "Content-Type: text/xml; charset=utf-8",
-            "Content-Length: #{content_length}"].join("\r\n")
+            end
+          reply(body)
         end
 
         def expired?
@@ -90,8 +83,7 @@ module Vines
               mechanisms.each {|name| parent << doc.create_element('mechanism', name) }
             end
           end
-
-          @stream.send_data([create_header(node.to_s.bytesize), node.to_s].join("\r\n\r\n"))
+          reply(node)
         end
 
         def request(rid)
@@ -131,7 +123,22 @@ module Vines
             features << doc.create_element('bind', 'xmlns' => NAMESPACES[:bind])
           end
           @available = true
-          @stream.send_data([create_header(node.to_s.bytesize), node.to_s].join("\r\n\r\n"))
+          reply(node)
+        end
+
+        private
+
+        # Send an HTTP 200 OK response wrapping the XMPP node content back
+        # to the client.
+        def reply(node)
+          body = node.to_s
+          header = [
+            "HTTP/1.1 200 OK",
+            "Content-Type: text/xml; charset=utf-8",
+            "Content-Length: #{body.bytesize}"
+          ].join("\r\n")
+
+          @stream.stream_write([header, body].join("\r\n\r\n"))
         end
       end
     end
