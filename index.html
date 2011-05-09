@@ -33,12 +33,12 @@ $ cd wonderland.lit &amp;&amp; vines start
     <a href="http://www.pidgin.im/">Pidgin</a> chat clients are nice to get started
     with because they allow us to specify a chat server host name that's different
     from our wonderland.lit domain, which obviously won't route with the fanciful
-    .lit extension. So we open our chat client and set the server name to
-    localhost and the port to 5222. Then we login with a user name of
-    alice@wonderland.lit and password <em>secr3t</em>.
+    .lit extension. Launch one of those clients and set the server name to
+    <em>localhost</em> and the port to <em>5222</em>. To log in, use
+    alice@wonderland.lit with password <em>secr3t</em>.
   </p>
   <p>
-    We do this once more with arthur@wonderland.lit, his password is also
+    Do this once more with arthur@wonderland.lit, his password is also
     <em>secr3t</em>, and we should see each user online and ready to chat.
   </p>
 
@@ -114,7 +114,7 @@ end
   </p>
 <pre>
 name: Alice 
-password: $2a$10$kDyV4w7tKIEuM5Ii7qFQiuGLbIyH3kXW . . .
+password: $2a$10$kDyV4w7tKIEuM5Ii7qFQiuGLbIyH3k . . .
 roster: 
   cat@wonderland.lit: 
     name: Cheshire Cat
@@ -193,6 +193,11 @@ client '0.0.0.0', 5222 do
 end
 </pre>
   <p>
+    The <em>max_stanza_size</em> property defines, in bytes, the largest message
+    the server will allow a client to send. This helps prevent denial of service
+    attacks where an attacker floods the server with huge messages.
+  </p>
+  <p>
     The <em>max_resources_per_account</em> property specifies how many times one
     user can login at the same time. For example, Alice may be logged in to chat
     on her laptop and her mobile phone.
@@ -209,6 +214,11 @@ server '0.0.0.0', 5269 do
   hosts ['verona.lit']
 end
 </pre>
+  <p>
+    It's a good idea to set <em>max_stanza_size</em> much higher for server
+    connections than clients, so we've set it to 128 KB. We trust servers a bit
+    more than clients to be well behaved.
+  </p>
   <p>
     The <em>hosts</em> property is a white list of remote chat servers to which
     we're allowed to connect. The domain must be listed here and its SSL
