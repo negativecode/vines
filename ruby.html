@@ -1,0 +1,69 @@
+---
+layout: site
+title: Vines - Install Ruby
+---
+<h2>Install Ruby 1.9.2</h2>
+<p>
+  Before we can install the Vines gem, we need to install Ruby 1.9.2. The easiest
+  way to do this is with
+  <a href="https://rvm.beginrescueend.com/">RVM: Ruby Version Manager</a>.
+</p>
+<p>
+The install is only two steps:
+</p>
+<ol>
+  <li>Install the OS libraries upon which Ruby depends.</li>
+  <li>Install Ruby using RVM.</li>
+</ol>
+
+<h2>Mac OS X</h2>
+<p>
+  Install <a href="http://itunes.apple.com/us/app/xcode/id422352214">Xcode</a>
+  from the Mac App Store. This installs all of the libraries and compiler tools
+  needed to build Ruby.
+</p>
+
+<h2>Ubuntu</h2>
+<p>
+  Install the following packages using apt-get.
+</p>
+<pre>
+$ sudo apt-get -y install build-essential bison \
+  openssl libreadline6 libreadline6-dev curl \
+  git-core zlib1g zlib1g-dev libssl-dev libyaml-dev \
+  libsqlite3-0 libsqlite3-dev sqlite3 libxml2-dev \
+  libxslt-dev autoconf libc6-dev ncurses-dev
+</pre>
+
+<h2>Fedora</h2>
+<p>
+  Install the following packages using yum.
+</p>
+<pre>
+$ sudo yum install -y bash curl git gcc-c++ patch \
+  readline readline-devel zlib zlib-devel \
+  libyaml-devel libffi-devel openssl-devel make \
+  bzip2 iconv-devel libxslt libxslt-devel libxml2 \
+  libxml2-devel
+</pre>
+
+<h2>Install RVM &amp; Ruby 1.9.2</h2>
+<p>
+  With the OS libraries installed, we can now use RVM to install Ruby.
+</p>
+<pre>
+$ bash &lt; &lt;(curl -sk https://rvm.beginrescueend.com/install/rvm)
+$ echo '[[ -s "$HOME/.rvm/scripts/rvm" ]] &amp;&amp; . "$HOME/.rvm/scripts/rvm" # Load RVM function' &gt;&gt; ~/.bash_profile
+$ source .bash_profile
+$ rvm install 1.9.2
+$ rvm use 1.9.2
+$ gem install vines
+</pre>
+
+<p>
+  That's all there is to it! RVM can manage not just Ruby versions, but also
+  <a href="https://rvm.beginrescueend.com/gemsets/basics/">gemsets</a> for each
+  app. Read the
+  <a href="https://rvm.beginrescueend.com/">RVM documentation</a> for more
+  advanced uses.
+</p>

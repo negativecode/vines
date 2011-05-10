@@ -21,17 +21,45 @@ h1 {
   text-align: right;
   text-shadow: 0 0px 2px #000;
 }
+h1 a {
+  color: inherit;
+  text-decoration: none;
+}
 h2 {
   color: #8cd050;
   font-size: 16px;
   font-weight: 400;
   margin-bottom: 5px;
 }
+ul#nav-links {
+  margin-top: 31px;
+}
+ul#nav-links li {
+  font-size: 14px;
+  list-style: none;
+  margin: 0 0 6px 0;
+  text-align: right;
+}
+ul#nav-links li a {
+  text-decoration: none;
+}
+ul#nav-links li a:hover {
+  text-decoration: underline;
+}
 pre {
   background: #f8f8f8;
   display: block;
   font-size: 13px;
+  overflow-x: auto;
   padding: 10px 15px;
+}
+pre::-webkit-scrollbar {
+  border-radius: 1ex;
+  height: 5px;
+}
+pre::-webkit-scrollbar-thumb:horizontal {
+  background: rgba(0, 0, 0, .2);
+  border-radius: 1ex;
 }
 #top {
   background-color: #8cd050;
