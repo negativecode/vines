@@ -164,10 +164,10 @@ end
     field deleted. It's never used as long as the LDAP connector is in place.
   </p>
   <p>
-    The user_attr property must match the user's chat ID (e.g.
-    alice@wonderland.lit). We need to set user_attr to the attribute in our LDAP
-    directory with this value. The <em>mail</em> attribute is popular because
-    the user's email address generally matches their chat ID.
+    The LDAP attribute defined by <em>user_attr</em> must contain the user's
+    full chat ID. In our example, the value of Alice's <em>uid</em> field in our
+    LDAP directory is alice@wonderland.lit. The LDAP <em>mail</em> attribute is
+    also popular because the user's email address generally matches their chat ID.
   </p>
 
   <h2>Client Connections</h2>
