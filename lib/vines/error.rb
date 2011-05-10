@@ -98,7 +98,7 @@ module Vines
   module StreamErrors
     class BadFormat < StreamError; end
     class BadNamespacePrefix < StreamError; end
-    class Confict < StreamError; end
+    class Conflict < StreamError; end
     class ConnectionTimeout < StreamError; end
     class HostGone < StreamError; end
     class HostUnknown < StreamError; end
