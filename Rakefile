@@ -38,7 +38,7 @@ all client and server connections."
   s.add_development_dependency "rake"
   s.add_development_dependency "sqlite3"
 
-  s.required_ruby_version = '>= 1.9.1'
+  s.required_ruby_version = '>= 1.9.2'
 end
 
 Rake::GemPackageTask.new(spec) do |pkg| 

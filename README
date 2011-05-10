@@ -19,7 +19,7 @@ database. SSL encryption is mandatory on all client and server connections.
 * bcrypt-ruby >= 2.1.4
 * eventmachine >= 1.0.0
 * nokogiri >= 1.4.4
-* ruby >= 1.9.1
+* ruby >= 1.9.2
 
 == Ubuntu setup
 $ sudo apt-get install build-essential ruby1.9.1 ruby1.9.1-dev libxml2-dev libxslt-dev
