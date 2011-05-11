@@ -302,6 +302,7 @@ class ConfigTest < Test::Unit::TestCase
     assert_equal '0.0.0.0', port.host
     assert_equal 5280, port.port
     assert_equal 131_072, port.max_stanza_size
+    assert_equal 5, port.max_resources_per_account
     assert_equal Vines::Stream::Http, port.stream
     assert_same config, port.config 
     assert_equal 1, config.ports.size
@@ -314,6 +315,7 @@ class ConfigTest < Test::Unit::TestCase
       end
       http '0.0.0.1', 42 do
         max_stanza_size 60_000
+        max_resources_per_account 1
       end
     end
     port = config.ports.first
@@ -322,6 +324,7 @@ class ConfigTest < Test::Unit::TestCase
     assert_equal '0.0.0.1', port.host
     assert_equal 42, port.port
     assert_equal 60_000, port.max_stanza_size
+    assert_equal 1, port.max_resources_per_account
     assert_equal Vines::Stream::Http, port.stream
     assert_same config, port.config 
     assert_equal 1, config.ports.size

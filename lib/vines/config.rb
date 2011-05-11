@@ -167,6 +167,14 @@ module Vines
         @stream = Vines::Stream::Http
         super(config, host, port, &block)
       end
+
+      def max_resources_per_account(max=nil)
+        if max
+          @settings[:max_resources_per_account] = max
+        else
+          @settings[:max_resources_per_account]
+        end
+      end
     end
 
     class ComponentPort < Port

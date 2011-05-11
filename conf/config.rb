@@ -69,6 +69,7 @@ Vines::Config.configure do
   # the XMPP server.
   http '0.0.0.0', 5280 do
     max_stanza_size 131072
+    max_resources_per_account 5
   end
 
   # Configure the XEP-0114 external component port. Add entries for each
