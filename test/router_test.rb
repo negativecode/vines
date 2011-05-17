@@ -1,10 +1,9 @@
 # encoding: UTF-8
 
 require 'vines'
-require 'minitest/mock'
-require 'test/unit'
+require 'minitest/autorun'
 
-class RouterTest < Test::Unit::TestCase
+class RouterTest < MiniTest::Unit::TestCase
   def setup
     @router = Vines::Router.new
   end
@@ -29,6 +28,7 @@ class RouterTest < Test::Unit::TestCase
     config.expect(:vhost?, true, ['wonderland.lit'])
     stream = MiniTest::Mock.new
     stream.expect(:config, config)
+    stream.expect(:stream_type, :client)
     @router << stream
 
     stanza = MiniTest::Mock.new
@@ -46,6 +46,7 @@ class RouterTest < Test::Unit::TestCase
     config.expect(:vhost?, false, ['wonderland.lit'])
     stream = MiniTest::Mock.new
     stream.expect(:config, config)
+    stream.expect(:stream_type, :client)
     @router << stream
 
     stanza = MiniTest::Mock.new

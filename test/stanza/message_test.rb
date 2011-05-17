@@ -2,10 +2,9 @@
 
 require 'vines'
 require 'ext/nokogiri'
-require 'minitest/mock'
-require 'test/unit'
+require 'minitest/autorun'
 
-class MessageTest < Test::Unit::TestCase
+class MessageTest < MiniTest::Unit::TestCase
   def setup
     @stream = MiniTest::Mock.new
   end
@@ -13,7 +12,7 @@ class MessageTest < Test::Unit::TestCase
   def test_bad_type_returns_error
     node = node('<message type="bogus">hello!</message>')
     stanza = Vines::Stanza::Message.new(node, @stream)
-    assert_raise(Vines::StanzaErrors::BadRequest) { stanza.process }
+    assert_raises(Vines::StanzaErrors::BadRequest) { stanza.process }
   end
 
   def test_missing_to_address_is_sent_to_sender
@@ -21,16 +20,18 @@ class MessageTest < Test::Unit::TestCase
     node = node('<message>hello!</message>')
 
     recipient = MiniTest::Mock.new
+    recipient.expect(:user, alice)
+    recipient.expect(:write, nil, [node])
+
     router = MiniTest::Mock.new
     router.expect(:local?, true, [node])
     router.expect(:connected_resources, [recipient], [alice.jid.bare])
 
     @stream.expect(:router, router)
     @stream.expect(:user, alice)
-    @stream.expect(:broadcast, nil, [node, [recipient]])
 
     stanza = Vines::Stanza::Message.new(node, @stream)
-    assert_nothing_raised { stanza.process }
+    stanza.process
     assert @stream.verify
     assert router.verify
     assert recipient.verify
@@ -51,7 +52,7 @@ class MessageTest < Test::Unit::TestCase
     @stream.expect(:storage, storage, [bogus.domain])
 
     stanza = Vines::Stanza::Message.new(node, @stream)
-    assert_nothing_raised { stanza.process }
+    stanza.process
     assert @stream.verify
     assert router.verify
     assert storage.verify
@@ -72,26 +73,31 @@ class MessageTest < Test::Unit::TestCase
     @stream.expect(:storage, storage, [hatter.jid.domain])
 
     stanza = Vines::Stanza::Message.new(node, @stream)
-    assert_raise(Vines::StanzaErrors::ServiceUnavailable) { stanza.process }
+    assert_raises(Vines::StanzaErrors::ServiceUnavailable) { stanza.process }
     assert @stream.verify
     assert router.verify
     assert storage.verify
   end
 
   def test_message_to_local_user_in_different_domain_is_delivered
+    alice = Vines::User.new(:jid => 'alice@wonderland.lit/tea')
     romeo = Vines::User.new(:jid => 'romeo@verona.lit/balcony')
     node = node(%Q{<message to="#{romeo.jid}">hello!</message>})
+    expected = node(%Q{<message to="#{romeo.jid}" from="#{alice.jid}">hello!</message>})
 
     recipient = MiniTest::Mock.new
+    recipient.expect(:user, romeo)
+    recipient.expect(:write, nil, [expected])
+
     router = MiniTest::Mock.new
     router.expect(:local?, true, [node])
     router.expect(:connected_resources, [recipient], [romeo.jid])
 
     @stream.expect(:router, router)
-    @stream.expect(:broadcast, nil, [node, [recipient]])
+    @stream.expect(:user, alice)
 
     stanza = Vines::Stanza::Message.new(node, @stream)
-    assert_nothing_raised { stanza.process }
+    stanza.process
     assert @stream.verify
     assert router.verify
     assert recipient.verify
@@ -111,7 +117,7 @@ class MessageTest < Test::Unit::TestCase
     @stream.expect(:user, alice)
 
     stanza = Vines::Stanza::Message.new(node, @stream)
-    assert_nothing_raised { stanza.process }
+    stanza.process
     assert @stream.verify
     assert router.verify
   end

@@ -37,11 +37,11 @@ module StorageTests
       assert_nil db.authenticate('clear_password@wonderland.lit', 'secret')
 
       user = db.authenticate('bcrypt_password@wonderland.lit', 'secret')
-      assert_not_nil user
+      refute_nil user
       assert_equal('bcrypt_password@wonderland.lit', user.jid.to_s)
 
       user = db.authenticate('full@wonderland.lit', 'secret')
-      assert_not_nil user
+      refute_nil user
       assert_equal 'Tester', user.name
       assert_equal 'full@wonderland.lit', user.jid.to_s
 
@@ -67,15 +67,15 @@ module StorageTests
       assert_nil user
 
       user = db.find_user('full@wonderland.lit')
-      assert_not_nil user
+      refute_nil user
       assert_equal 'full@wonderland.lit', user.jid.to_s
 
       user = db.find_user(Vines::JID.new('full@wonderland.lit'))
-      assert_not_nil user
+      refute_nil user
       assert_equal 'full@wonderland.lit', user.jid.to_s
 
       user = db.find_user(Vines::JID.new('full@wonderland.lit/resource'))
-      assert_not_nil user
+      refute_nil user
       assert_equal 'full@wonderland.lit', user.jid.to_s
     end
   end
@@ -92,7 +92,7 @@ module StorageTests
         :name => 'Contact 1')
       db.save_user(user)
       user = db.find_user('save_user@domain.tld')
-      assert_not_nil user
+      refute_nil user
       assert_equal 'save_user@domain.tld', user.jid.to_s
       assert_equal 'Save User', user.name
       assert_equal 1, user.roster.length
@@ -108,15 +108,15 @@ module StorageTests
       assert_nil card
 
       card = db.find_vcard('full@wonderland.lit')
-      assert_not_nil card
+      refute_nil card
       assert_equal VCARD, card
 
       card = db.find_vcard(Vines::JID.new('full@wonderland.lit'))
-      assert_not_nil card
+      refute_nil card
       assert_equal VCARD, card
 
       card = db.find_vcard(Vines::JID.new('full@wonderland.lit/resource'))
-      assert_not_nil card
+      refute_nil card
       assert_equal VCARD, card
     end
   end
@@ -127,7 +127,7 @@ module StorageTests
       db.save_user(Vines::User.new(:jid => 'save_user@domain.tld'))
       db.save_vcard('save_user@domain.tld/resource1', VCARD)
       card = db.find_vcard('save_user@domain.tld')
-      assert_not_nil card
+      refute_nil card
       assert_equal VCARD, card
     end
   end

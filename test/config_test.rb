@@ -1,11 +1,11 @@
 # encoding: UTF-8
 
 require 'vines'
-require 'test/unit'
+require 'minitest/autorun'
 
-class ConfigTest < Test::Unit::TestCase
+class ConfigTest < MiniTest::Unit::TestCase
   def test_missing_host
-    assert_raise(RuntimeError) do
+    assert_raises(RuntimeError) do
       Vines::Config.new do
         # missing hosts
       end
@@ -13,7 +13,7 @@ class ConfigTest < Test::Unit::TestCase
   end
 
   def test_duplicate_host
-    assert_raise(RuntimeError) do
+    assert_raises(RuntimeError) do
       Vines::Config.new do
         host 'wonderland.lit' do
           storage 'fs' do
@@ -30,7 +30,7 @@ class ConfigTest < Test::Unit::TestCase
   end
 
   def test_duplicate_host_in_one_call
-    assert_raise(RuntimeError) do
+    assert_raises(RuntimeError) do
       Vines::Config.new do
         host 'wonderland.lit', 'wonderland.lit' do
           storage 'fs' do
@@ -42,7 +42,7 @@ class ConfigTest < Test::Unit::TestCase
   end
 
   def test_missing_storage
-    assert_raise(RuntimeError) do
+    assert_raises(RuntimeError) do
       Vines::Config.new do
         host 'wonderland.lit' do
           # missing storage
@@ -52,7 +52,7 @@ class ConfigTest < Test::Unit::TestCase
   end
 
   def test_bad_storage
-    assert_raise(RuntimeError) do
+    assert_raises(RuntimeError) do
       Vines::Config.new do
         host 'wonderland.lit' do
           storage 'bogus' do
@@ -64,7 +64,7 @@ class ConfigTest < Test::Unit::TestCase
   end
 
   def test_duplicate_storage
-    assert_raise(RuntimeError) do
+    assert_raises(RuntimeError) do
       Vines::Config.new do
         host 'wonderland.lit' do
           storage('fs') { dir '.' }
@@ -74,13 +74,11 @@ class ConfigTest < Test::Unit::TestCase
     end
   end
 
-  def test_good_storage
-    assert_nothing_raised do
-      Vines::Config.new do
-        host 'wonderland.lit' do
-          storage 'fs' do
-            dir '.'
-          end
+  def test_good_storage_raises_no_errors
+    Vines::Config.new do
+      host 'wonderland.lit' do
+        storage 'fs' do
+          dir '.'
         end
       end
     end
@@ -117,7 +115,7 @@ class ConfigTest < Test::Unit::TestCase
       end
     end
     %w[wonderland.lit verona.lit].each do |domain|
-      assert_not_nil config.vhosts[domain].ldap
+      refute_nil config.vhosts[domain].ldap
       assert config.vhosts[domain].ldap?
     end
   end
@@ -130,7 +128,7 @@ class ConfigTest < Test::Unit::TestCase
         end
       end
     end
-    assert_not_nil config
+    refute_nil config
     assert_same config, Vines::Config.instance
   end
 
@@ -152,13 +150,13 @@ class ConfigTest < Test::Unit::TestCase
       end
       client
     end
-    assert_not_nil config[:client]
-    assert_raise(ArgumentError) { config[:server] }
-    assert_raise(ArgumentError) { config[:bogus] }
+    refute_nil config[:client]
+    assert_raises(ArgumentError) { config[:server] }
+    assert_raises(ArgumentError) { config[:bogus] }
   end
 
   def test_duplicate_client
-    assert_raise(RuntimeError) do
+    assert_raises(RuntimeError) do
       Vines::Config.new do
         client
         client
@@ -167,7 +165,7 @@ class ConfigTest < Test::Unit::TestCase
   end
 
   def test_duplicate_server
-    assert_raise(RuntimeError) do
+    assert_raises(RuntimeError) do
       Vines::Config.new do
         server
         server
@@ -176,7 +174,7 @@ class ConfigTest < Test::Unit::TestCase
   end
 
   def test_duplicate_http
-    assert_raise(RuntimeError) do
+    assert_raises(RuntimeError) do
       Vines::Config.new do
         http
         http
@@ -185,7 +183,7 @@ class ConfigTest < Test::Unit::TestCase
   end
 
   def test_duplicate_component
-    assert_raise(RuntimeError) do
+    assert_raises(RuntimeError) do
       Vines::Config.new do
         component
         component
@@ -201,7 +199,7 @@ class ConfigTest < Test::Unit::TestCase
       client
     end
     port = config.ports.first
-    assert_not_nil port
+    refute_nil port
     assert_equal Vines::Config::ClientPort, port.class
     assert_equal '0.0.0.0', port.host
     assert_equal 5222, port.port
@@ -223,7 +221,7 @@ class ConfigTest < Test::Unit::TestCase
       end
     end
     port = config.ports.first
-    assert_not_nil port
+    refute_nil port
     assert_equal Vines::Config::ClientPort, port.class
     assert_equal '0.0.0.1', port.host
     assert_equal 42, port.port
@@ -254,7 +252,7 @@ class ConfigTest < Test::Unit::TestCase
       server
     end
     port = config.ports.first
-    assert_not_nil port
+    refute_nil port
     assert !config.s2s?('verona.lit')
     assert_equal Vines::Config::ServerPort, port.class
     assert_equal '0.0.0.0', port.host
@@ -276,7 +274,7 @@ class ConfigTest < Test::Unit::TestCase
       end
     end
     port = config.ports.first
-    assert_not_nil port
+    refute_nil port
     assert config.s2s?('verona.lit')
     assert config.s2s?('denmark.lit')
     assert !config.s2s?('bogus')
@@ -297,7 +295,7 @@ class ConfigTest < Test::Unit::TestCase
       http
     end
     port = config.ports.first
-    assert_not_nil port
+    refute_nil port
     assert_equal Vines::Config::HttpPort, port.class
     assert_equal '0.0.0.0', port.host
     assert_equal 5280, port.port
@@ -319,7 +317,7 @@ class ConfigTest < Test::Unit::TestCase
       end
     end
     port = config.ports.first
-    assert_not_nil port
+    refute_nil port
     assert_equal Vines::Config::HttpPort, port.class
     assert_equal '0.0.0.1', port.host
     assert_equal 42, port.port
@@ -338,7 +336,7 @@ class ConfigTest < Test::Unit::TestCase
       component
     end
     port = config.ports.first
-    assert_not_nil port
+    refute_nil port
     assert port.components.empty?
     assert_nil port.password('bogus')
     assert_equal Vines::Config::ComponentPort, port.class
@@ -362,7 +360,7 @@ class ConfigTest < Test::Unit::TestCase
       end
     end
     port = config.ports.first
-    assert_not_nil port
+    refute_nil port
     assert_equal 2, port.components.size
     assert_equal 'secr3t', port.password('tea.wonderland.lit')
     assert_equal 'passw0rd', port.password('cake.wonderland.lit')
@@ -377,7 +375,7 @@ class ConfigTest < Test::Unit::TestCase
   end
 
   def test_invalid_log_level
-    assert_raise(RuntimeError) do
+    assert_raises(RuntimeError) do
       config = Vines::Config.new do
         log 'bogus'
         host 'wonderland.lit' do

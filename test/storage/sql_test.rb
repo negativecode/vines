@@ -48,8 +48,8 @@ class SqlTest < Test::Unit::TestCase
   end
 
   def test_init
-    assert_raise(RuntimeError) { Vines::Storage::Sql.new {} }
-    assert_raise(RuntimeError) { Vines::Storage::Sql.new { adapter 'postgresql' } }
-    assert_nothing_raised { Vines::Storage::Sql.new { adapter 'sqlite3'; database ':memory:' } }
+    assert_raises(RuntimeError) { Vines::Storage::Sql.new {} }
+    assert_raises(RuntimeError) { Vines::Storage::Sql.new { adapter 'postgresql' } }
+    Vines::Storage::Sql.new { adapter 'sqlite3'; database ':memory:' } # shouldn't raise an error
   end
 end

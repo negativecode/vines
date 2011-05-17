@@ -65,11 +65,11 @@ class RedisTest < Test::Unit::TestCase
     storage
   end
 
-  def test_init
+  def test_init_raises_no_errors
     EMLoop.new do
-      assert_nothing_raised { Vines::Storage::Redis.new {} }
-      assert_nothing_raised { Vines::Storage::Redis.new { host 'localhost' } }
-      assert_nothing_raised { Vines::Storage::Redis.new { host'localhost'; port '6379' } }
+      Vines::Storage::Redis.new {}
+      Vines::Storage::Redis.new { host 'localhost' }
+      Vines::Storage::Redis.new { host'localhost'; port '6379' }
     end
   end
 end

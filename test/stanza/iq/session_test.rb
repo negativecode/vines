@@ -2,10 +2,9 @@
 
 require 'vines'
 require 'ext/nokogiri'
-require 'minitest/mock'
-require 'test/unit'
+require 'minitest/autorun'
 
-class SessionTest < Test::Unit::TestCase
+class SessionTest < MiniTest::Unit::TestCase
   def test_session
     stream = MiniTest::Mock.new
     stream.expect(:domain, 'wonderland.lit')

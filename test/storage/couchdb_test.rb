@@ -88,14 +88,13 @@ class CouchDBTest < Test::Unit::TestCase
 
   def test_init
     EMLoop.new do
-      assert_raise(RuntimeError) { Vines::Storage::CouchDB.new {} }
-      assert_raise(RuntimeError) { Vines::Storage::CouchDB.new { host 'localhost' } }
-      assert_nothing_raised do
-        Vines::Storage::CouchDB.new do
-          host 'localhost'
-          port '5984'
-          database 'test'
-        end
+      assert_raises(RuntimeError) { Vines::Storage::CouchDB.new {} }
+      assert_raises(RuntimeError) { Vines::Storage::CouchDB.new { host 'localhost' } }
+      # shouldn't raise an error
+      Vines::Storage::CouchDB.new do
+        host 'localhost'
+        port '5984'
+        database 'test'
       end
     end
   end

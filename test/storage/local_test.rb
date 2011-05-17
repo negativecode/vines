@@ -46,9 +46,9 @@ class LocalTest < Test::Unit::TestCase
   end
 
   def test_init
-    assert_raise(RuntimeError) { Vines::Storage::Local.new {} }
-    assert_raise(RuntimeError) { Vines::Storage::Local.new { dir 'bogus' } }
-    assert_raise(RuntimeError) { Vines::Storage::Local.new { dir '/sbin' } }
-    assert_nothing_raised { Vines::Storage::Local.new { dir '.' } }
+    assert_raises(RuntimeError) { Vines::Storage::Local.new {} }
+    assert_raises(RuntimeError) { Vines::Storage::Local.new { dir 'bogus' } }
+    assert_raises(RuntimeError) { Vines::Storage::Local.new { dir '/sbin' } }
+    Vines::Storage::Local.new { dir '.' } # shouldn't raise an error
   end
 end

@@ -2,10 +2,9 @@
 
 require 'vines'
 require 'ext/nokogiri'
-require 'minitest/mock'
-require 'test/unit'
+require 'minitest/autorun'
 
-class SubscribeTest < Test::Unit::TestCase
+class SubscribeTest < MiniTest::Unit::TestCase
   def test_outbound_subscribe_to_local_jid_but_missing_contact
     alice = Vines::JID.new('alice@wonderland.lit/tea')
     hatter = Vines::JID.new('hatter@wonderland.lit')
@@ -22,7 +21,7 @@ class SubscribeTest < Test::Unit::TestCase
     storage.expect(:find_user, nil, [hatter])
 
     recipient = MiniTest::Mock.new
-    recipient.expect(:user, Vines::User.new(:jid => hatter))
+    recipient.expect(:user, user)
     def recipient.nodes; @nodes; end
     def recipient.write(node)
       @nodes ||= []

@@ -29,31 +29,27 @@ class LdapTest < Test::Unit::TestCase
     end
   end
 
-  def test_default_host_and_port
-    assert_nothing_raised do
-      Vines::Storage::Ldap.new do
-        tls true
-        dn 'cn=Directory Manager'
-        password 'secr3t'
-        basedn 'dc=wonderland,dc=lit'
-        object_class 'person'
-        user_attr 'uid'
-        name_attr 'cn'
-      end
+  def test_default_host_and_port_raises_no_errors
+    Vines::Storage::Ldap.new do
+      tls true
+      dn 'cn=Directory Manager'
+      password 'secr3t'
+      basedn 'dc=wonderland,dc=lit'
+      object_class 'person'
+      user_attr 'uid'
+      name_attr 'cn'
     end
   end
 
-  def test_configured_host_and_port
-    assert_nothing_raised do
-      Vines::Storage::Ldap.new('0.0.0.1', 42) do
-        tls true
-        dn 'cn=Directory Manager'
-        password 'secr3t'
-        basedn 'dc=wonderland,dc=lit'
-        object_class 'person'
-        user_attr 'uid'
-        name_attr 'cn'
-      end
+  def test_configured_host_and_port_raises_no_errors
+    Vines::Storage::Ldap.new('0.0.0.1', 42) do
+      tls true
+      dn 'cn=Directory Manager'
+      password 'secr3t'
+      basedn 'dc=wonderland,dc=lit'
+      object_class 'person'
+      user_attr 'uid'
+      name_attr 'cn'
     end
   end
 
@@ -78,17 +74,15 @@ class LdapTest < Test::Unit::TestCase
   end
 
   # Make sure we properly handle boolean false values.
-  def test_false_tls
-    assert_nothing_raised do
-      Vines::Storage::Ldap.new do
-        tls false
-        dn 'cn=Directory Manager'
-        password 'secr3t'
-        basedn 'dc=wonderland,dc=lit'
-        object_class 'person'
-        user_attr 'uid'
-        name_attr 'cn'
-      end
+  def test_false_tls_raises_no_errors
+    Vines::Storage::Ldap.new do
+      tls false
+      dn 'cn=Directory Manager'
+      password 'secr3t'
+      basedn 'dc=wonderland,dc=lit'
+      object_class 'person'
+      user_attr 'uid'
+      name_attr 'cn'
     end
   end
 

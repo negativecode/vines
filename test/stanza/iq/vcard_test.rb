@@ -2,10 +2,9 @@
 
 require 'vines'
 require 'ext/nokogiri'
-require 'minitest/mock'
-require 'test/unit'
+require 'minitest/autorun'
 
-class VcardTest < Test::Unit::TestCase
+class VcardTest < MiniTest::Unit::TestCase
   def setup
     @stream = MiniTest::Mock.new
   end
@@ -105,7 +104,7 @@ class VcardTest < Test::Unit::TestCase
     @stream.expect(:storage, storage, ['wonderland.lit'])
 
     stanza = Vines::Stanza::Iq::Vcard.new(node, @stream)
-    assert_raise(Vines::StanzaErrors::ItemNotFound) { stanza.process }
+    assert_raises(Vines::StanzaErrors::ItemNotFound) { stanza.process }
     assert @stream.verify
     assert router.verify
     assert storage.verify
@@ -122,7 +121,7 @@ class VcardTest < Test::Unit::TestCase
     @stream.expect(:router, router)
 
     stanza = Vines::Stanza::Iq::Vcard.new(node, @stream)
-    assert_raise(Vines::StanzaErrors::Forbidden) { stanza.process }
+    assert_raises(Vines::StanzaErrors::Forbidden) { stanza.process }
     assert @stream.verify
   end
 

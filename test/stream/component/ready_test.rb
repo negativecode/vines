@@ -2,10 +2,9 @@
 
 require 'vines'
 require 'ext/nokogiri'
-require 'minitest/mock'
-require 'test/unit'
+require 'minitest/autorun'
 
-class ComponentReadyTest < Test::Unit::TestCase
+class ComponentReadyTest < MiniTest::Unit::TestCase
   STANZAS = []
 
   def setup
@@ -34,7 +33,7 @@ class ComponentReadyTest < Test::Unit::TestCase
 
   def test_missing_to_and_from_addresses
     node = node('<message/>')
-    assert_raise(Vines::StreamErrors::ImproperAddressing) { @state.node(node) }
+    assert_raises(Vines::StreamErrors::ImproperAddressing) { @state.node(node) }
     assert_equal 1, STANZAS.size
     assert @stream.verify
   end
@@ -42,14 +41,14 @@ class ComponentReadyTest < Test::Unit::TestCase
   def test_missing_from_address
     @stream.expect(:remote_domain, 'tea.wonderland.lit')
     node = node(%q{<message to="hatter@wonderland.lit"/>})
-    assert_raise(Vines::StreamErrors::ImproperAddressing) { @state.node(node) }
+    assert_raises(Vines::StreamErrors::ImproperAddressing) { @state.node(node) }
     assert_equal 1, STANZAS.size
     assert @stream.verify
   end
 
   def test_missing_to_address
     node = node(%q{<message from="alice@tea.wonderland.lit"/>})
-    assert_raise(Vines::StreamErrors::ImproperAddressing) { @state.node(node) }
+    assert_raises(Vines::StreamErrors::ImproperAddressing) { @state.node(node) }
     assert_equal 1, STANZAS.size
     assert @stream.verify
   end
@@ -57,14 +56,14 @@ class ComponentReadyTest < Test::Unit::TestCase
   def test_invalid_from_address
     @stream.expect(:remote_domain, 'tea.wonderland.lit')
     node = node(%q{<message from="alice@bogus.wonderland.lit" to="hatter@wonderland.lit"/>})
-    assert_raise(Vines::StreamErrors::ImproperAddressing) { @state.node(node) }
+    assert_raises(Vines::StreamErrors::ImproperAddressing) { @state.node(node) }
     assert_equal 1, STANZAS.size
     assert @stream.verify
   end
 
   def test_unsupported_stanza_type
     node = node('<bogus/>')
-    assert_raise(Vines::StreamErrors::UnsupportedStanzaType) { @state.node(node) }
+    assert_raises(Vines::StreamErrors::UnsupportedStanzaType) { @state.node(node) }
     assert STANZAS.empty?
     assert @stream.verify
   end
@@ -72,7 +71,7 @@ class ComponentReadyTest < Test::Unit::TestCase
   def test_remote_message_routes
     @stream.expect(:remote_domain, 'tea.wonderland.lit')
     node = node(%q{<message from="alice@tea.wonderland.lit" to="romeo@verona.lit"/>})
-    assert_nothing_raised { @state.node(node) }
+    @state.node(node)
     assert_equal 1, STANZAS.size
     assert STANZAS.map {|s| s.verify }.all?
     assert @stream.verify
@@ -89,7 +88,7 @@ class ComponentReadyTest < Test::Unit::TestCase
     @router.expect(:connected_resources, [@recipient], ['hatter@wonderland.lit'])
     @stream.expect(:router, @router)
 
-    assert_nothing_raised { @state.node(node) }
+    @state.node(node)
     assert_equal 1, STANZAS.size
     assert STANZAS.map {|s| s.verify }.all?
     assert @stream.verify

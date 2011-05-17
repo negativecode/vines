@@ -2,10 +2,9 @@
 
 require 'vines'
 require 'ext/nokogiri'
-require 'minitest/mock'
-require 'test/unit'
+require 'minitest/autorun'
 
-class RosterTest < Test::Unit::TestCase
+class RosterTest < MiniTest::Unit::TestCase
   def setup
     @stream = MiniTest::Mock.new
   end
@@ -59,7 +58,7 @@ class RosterTest < Test::Unit::TestCase
       </iq>}.strip.gsub(/\n|\s{2,}/, ''))
 
     stanza = Vines::Stanza::Iq::Roster.new(node, @stream)
-    assert_raise(Vines::StanzaErrors::Forbidden) { stanza.process }
+    assert_raises(Vines::StanzaErrors::Forbidden) { stanza.process }
     assert @stream.verify
   end
 
@@ -70,7 +69,7 @@ class RosterTest < Test::Unit::TestCase
       </iq>}.strip.gsub(/\n|\s{2,}/, ''))
 
     stanza = Vines::Stanza::Iq::Roster.new(node, @stream)
-    assert_raise(Vines::StanzaErrors::BadRequest) { stanza.process }
+    assert_raises(Vines::StanzaErrors::BadRequest) { stanza.process }
     assert @stream.verify
   end
 
@@ -84,7 +83,7 @@ class RosterTest < Test::Unit::TestCase
       </iq>}.strip.gsub(/\n|\s{2,}/, ''))
 
     stanza = Vines::Stanza::Iq::Roster.new(node, @stream)
-    assert_raise(Vines::StanzaErrors::BadRequest) { stanza.process }
+    assert_raises(Vines::StanzaErrors::BadRequest) { stanza.process }
     assert @stream.verify
   end
 
@@ -97,7 +96,7 @@ class RosterTest < Test::Unit::TestCase
       </iq>}.strip.gsub(/\n|\s{2,}/, ''))
 
     stanza = Vines::Stanza::Iq::Roster.new(node, @stream)
-    assert_raise(Vines::StanzaErrors::BadRequest) { stanza.process }
+    assert_raises(Vines::StanzaErrors::BadRequest) { stanza.process }
     assert @stream.verify
   end
 
@@ -116,7 +115,7 @@ class RosterTest < Test::Unit::TestCase
       </iq>}.strip.gsub(/\n|\s{2,}/, ''))
 
     stanza = Vines::Stanza::Iq::Roster.new(node, @stream)
-    assert_raise(Vines::StanzaErrors::BadRequest) { stanza.process }
+    assert_raises(Vines::StanzaErrors::BadRequest) { stanza.process }
     assert @stream.verify
   end
 
@@ -134,7 +133,7 @@ class RosterTest < Test::Unit::TestCase
       </iq>}.strip.gsub(/\n|\s{2,}/, ''))
 
     stanza = Vines::Stanza::Iq::Roster.new(node, @stream)
-    assert_raise(Vines::StanzaErrors::NotAcceptable) { stanza.process }
+    assert_raises(Vines::StanzaErrors::NotAcceptable) { stanza.process }
     assert @stream.verify
   end
 
@@ -173,7 +172,6 @@ class RosterTest < Test::Unit::TestCase
 
     stanza = Vines::Stanza::Iq::Roster.new(node, @stream)
     stanza.process
-    assert_nothing_raised { stanza.process }
     assert @stream.verify
     assert storage.verify
     assert router.verify

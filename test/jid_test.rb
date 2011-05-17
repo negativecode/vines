@@ -1,12 +1,12 @@
 # encoding: UTF-8
 
 require 'vines'
-require 'test/unit'
+require 'minitest/autorun'
 
-class JidTest < Test::Unit::TestCase
+class JidTest < MiniTest::Unit::TestCase
   def test_nil_and_empty_jids
     [nil, ''].each do |text|
-      assert_nothing_raised { Vines::JID.new(text) }
+      Vines::JID.new(text) # shouldn't raise an error
       jid = Vines::JID.new(text)
       assert_nil jid.node
       assert_nil jid.resource
@@ -17,11 +17,11 @@ class JidTest < Test::Unit::TestCase
   end
 
   def test_jid_too_long_error
-    assert_nothing_raised { Vines::JID.new('n' * 1023) }
+    Vines::JID.new('n' * 1023) # shouldn't raise an error
     assert_raises(ArgumentError) { Vines::JID.new('n' * 1024) }
     assert_raises(ArgumentError) { Vines::JID.new('n', 'd' * 1024) }
     assert_raises(ArgumentError) { Vines::JID.new('n', 'd', 'r' * 1024) }
-    assert_nothing_raised { Vines::JID.new('n' * 1023, 'd' * 1023, 'r' * 1023) }
+    Vines::JID.new('n' * 1023, 'd' * 1023, 'r' * 1023) # shouldn't raise an error
   end
 
   def test_domain_only
@@ -57,7 +57,7 @@ class JidTest < Test::Unit::TestCase
     assert_equal 'wonderland.lit', jid.domain
     assert_equal 'alice', jid.node
     assert_equal 'tea', jid.resource
-    assert_not_equal jid, jid.bare
+    refute_equal jid, jid.bare
   end
 
   def test_parsed_full_jid
@@ -66,6 +66,6 @@ class JidTest < Test::Unit::TestCase
     assert_equal 'wonderland.lit', jid.domain
     assert_equal 'alice', jid.node
     assert_equal 'tea', jid.resource
-    assert_not_equal jid, jid.bare
+    refute_equal jid, jid.bare
   end
 end

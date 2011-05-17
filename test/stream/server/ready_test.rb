@@ -1,10 +1,9 @@
 # encoding: UTF-8
 
 require 'vines'
-require 'minitest/mock'
-require 'test/unit'
+require 'minitest/autorun'
 
-class ServerReadyTest < Test::Unit::TestCase
+class ServerReadyTest < MiniTest::Unit::TestCase
   STANZAS = []
 
   def setup
@@ -34,7 +33,7 @@ class ServerReadyTest < Test::Unit::TestCase
     @stream.expect(:domain, 'verona.lit')
     @stream.expect(:user=, nil, [Vines::User.new(:jid => 'alice@wonderland.lit')])
     node = node(%Q{<message from="alice@wonderland.lit" to="romeo@verona.lit"/>})
-    assert_nothing_raised { @state.node(node) }
+    @state.node(node)
     assert_equal 1, STANZAS.size
     assert STANZAS.map {|s| s.verify }.all?
     assert @stream.verify
@@ -42,35 +41,35 @@ class ServerReadyTest < Test::Unit::TestCase
 
   def test_unsupported_stanza_type
     node = node('<bogus/>')
-    assert_raise(Vines::StreamErrors::UnsupportedStanzaType) { @state.node(node) }
+    assert_raises(Vines::StreamErrors::UnsupportedStanzaType) { @state.node(node) }
     assert STANZAS.empty?
     assert @stream.verify
   end
 
   def test_improper_addressing_missing_to
     node = node(%Q{<message from="alice@wonderland.lit"/>})
-    assert_raise(Vines::StreamErrors::ImproperAddressing) { @state.node(node) }
+    assert_raises(Vines::StreamErrors::ImproperAddressing) { @state.node(node) }
     assert_equal 1, STANZAS.size
     assert @stream.verify
   end
 
   def test_improper_addressing_empty_to
     node = node(%Q{<message from="alice@wonderland.lit" to=" "/>})
-    assert_raise(Vines::StreamErrors::ImproperAddressing) { @state.node(node) }
+    assert_raises(Vines::StreamErrors::ImproperAddressing) { @state.node(node) }
     assert_equal 1, STANZAS.size
     assert @stream.verify
   end
 
   def test_improper_addressing_missing_from
     node = node(%Q{<message to="romeo@verona.lit"/>})
-    assert_raise(Vines::StreamErrors::ImproperAddressing) { @state.node(node) }
+    assert_raises(Vines::StreamErrors::ImproperAddressing) { @state.node(node) }
     assert_equal 1, STANZAS.size
     assert @stream.verify
   end
 
   def test_improper_addressing_empty_from
     node = node(%Q{<message from=" " to="romeo@verona.lit"/>})
-    assert_raise(Vines::StreamErrors::ImproperAddressing) { @state.node(node) }
+    assert_raises(Vines::StreamErrors::ImproperAddressing) { @state.node(node) }
     assert_equal 1, STANZAS.size
     assert @stream.verify
   end
@@ -78,7 +77,7 @@ class ServerReadyTest < Test::Unit::TestCase
   def test_invalid_from
     @stream.expect(:remote_domain, 'wonderland.lit')
     node = node(%Q{<message from="alice@bogus.lit" to="romeo@verona.lit"/>})
-    assert_raise(Vines::StreamErrors::InvalidFrom) { @state.node(node) }
+    assert_raises(Vines::StreamErrors::InvalidFrom) { @state.node(node) }
     assert_equal 1, STANZAS.size
     assert @stream.verify
   end
@@ -87,7 +86,7 @@ class ServerReadyTest < Test::Unit::TestCase
     @stream.expect(:remote_domain, 'wonderland.lit')
     @stream.expect(:domain, 'verona.lit')
     node = node(%Q{<message from="alice@wonderland.lit" to="romeo@bogus.lit"/>})
-    assert_raise(Vines::StreamErrors::HostUnknown) { @state.node(node) }
+    assert_raises(Vines::StreamErrors::HostUnknown) { @state.node(node) }
     assert_equal 1, STANZAS.size
     assert @stream.verify
   end

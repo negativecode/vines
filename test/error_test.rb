@@ -1,9 +1,9 @@
 # encoding: UTF-8
 
 require 'vines'
-require 'test/unit'
+require 'minitest/autorun'
 
-class ErrorTest < Test::Unit::TestCase
+class ErrorTest < MiniTest::Unit::TestCase
   def test_sasl_error_without_text
     expected = %q{<failure xmlns="urn:ietf:params:xml:ns:xmpp-sasl"><temporary-auth-failure/></failure>}
     assert_equal expected, Vines::SaslErrors::TemporaryAuthFailure.new.to_xml

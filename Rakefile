@@ -31,10 +31,11 @@ all client and server connections."
   s.add_dependency 'em-http-request', '>= 1.0.0.beta.3'
   s.add_dependency "em-redis", "~> 0.3"
   s.add_dependency "eventmachine", ">= 1.0.0.beta.3"
+  s.add_dependency "http_parser.rb", "~> 0.5"
   s.add_dependency "net-ldap", "~> 0.2"
   s.add_dependency "nokogiri", "~> 1.4"
-  s.add_dependency "thin", "~> 1.2"
 
+  s.add_development_dependency "minitest"
   s.add_development_dependency "rake"
   s.add_development_dependency "sqlite3"
 
@@ -43,6 +44,15 @@ end
 
 Rake::GemPackageTask.new(spec) do |pkg| 
   pkg.need_tar = true
+end
+
+module Rake
+  class TestTask
+    # use our custom test loader
+    def rake_loader
+      'test/rake_test_loader.rb'
+    end
+  end
 end
 
 Rake::TestTask.new(:test) do |test|

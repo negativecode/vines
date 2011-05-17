@@ -1,9 +1,9 @@
 # encoding: UTF-8
 
 require 'vines'
-require 'test/unit'
+require 'minitest/autorun'
 
-class UserTest < Test::Unit::TestCase
+class UserTest < MiniTest::Unit::TestCase
   def test_equality
     alice  = Vines::User.new(:jid => 'alice@wonderland.lit')
     alice2 = Vines::User.new(:jid => 'alice@wonderland.lit')
@@ -24,7 +24,7 @@ class UserTest < Test::Unit::TestCase
 
   def test_initialize_missing_roster
     user = Vines::User.new(:jid => 'alice@wonderland.lit')
-    assert_not_nil user.roster
+    refute_nil user.roster
     assert_equal 0, user.roster.size
   end
 

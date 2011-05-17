@@ -1,10 +1,9 @@
 # encoding: UTF-8
 
 require 'vines'
-require 'minitest/mock'
-require 'test/unit'
+require 'minitest/autorun'
 
-class ClientAuthTest < Test::Unit::TestCase
+class ClientAuthTest < MiniTest::Unit::TestCase
   # disable logging for tests
   Class.new.extend(Vines::Log).log.level = Logger::FATAL
 
@@ -34,42 +33,42 @@ class ClientAuthTest < Test::Unit::TestCase
 
   def test_invalid_element
     node = node('<bogus/>')
-    assert_raise(Vines::StreamErrors::NotAuthorized) { @state.node(node) }
+    assert_raises(Vines::StreamErrors::NotAuthorized) { @state.node(node) }
   end
 
   def test_invalid_sasl_element
     node = node(%Q{<bogus xmlns="#{Vines::NAMESPACES[:sasl]}"/>})
-    assert_raise(Vines::StreamErrors::NotAuthorized) { @state.node(node) }
+    assert_raises(Vines::StreamErrors::NotAuthorized) { @state.node(node) }
   end
 
   def test_missing_namespace
     node = node('<auth/>')
-    assert_raise(Vines::StreamErrors::NotAuthorized) { @state.node(node) }
+    assert_raises(Vines::StreamErrors::NotAuthorized) { @state.node(node) }
   end
 
   def test_invalid_namespace
     node = node('<auth xmlns="bogus"/>')
-    assert_raise(Vines::StreamErrors::NotAuthorized) { @state.node(node) }
+    assert_raises(Vines::StreamErrors::NotAuthorized) { @state.node(node) }
   end
 
   def test_missing_mechanism
     @stream.expect(:error, nil, [Vines::SaslErrors::InvalidMechanism.new])
     node = node(%Q{<auth xmlns="#{Vines::NAMESPACES[:sasl]}">tokens</auth>})
-    assert_nothing_raised { @state.node(node) }
+    @state.node(node)
     assert @stream.verify
   end
 
   def test_invalid_mechanism
     @stream.expect(:error, nil, [Vines::SaslErrors::InvalidMechanism.new])
     node = node(%Q{<auth xmlns="#{Vines::NAMESPACES[:sasl]}" mechanism="bogus">tokens</auth>})
-    assert_nothing_raised { @state.node(node) }
+    @state.node(node)
     assert @stream.verify
   end
 
   def test_missing_text
     @stream.expect(:error, nil, [Vines::SaslErrors::MalformedRequest.new])
     node = node(%Q{<auth xmlns="#{Vines::NAMESPACES[:sasl]}" mechanism="PLAIN"></auth>})
-    assert_nothing_raised { @state.node(node) }
+    @state.node(node)
     assert @stream.verify
   end
 
@@ -77,7 +76,7 @@ class ClientAuthTest < Test::Unit::TestCase
     @stream.expect(:storage, MockStorage.new(true))
     @stream.expect(:error, nil, [Vines::SaslErrors::TemporaryAuthFailure.new])
     node = node(%Q{<auth xmlns="#{Vines::NAMESPACES[:sasl]}" mechanism="PLAIN">tokens</auth>})
-    assert_nothing_raised { @state.node(node) }
+    @state.node(node)
     assert @stream.verify
   end
 
@@ -85,7 +84,7 @@ class ClientAuthTest < Test::Unit::TestCase
     @stream.expect(:storage, MockStorage.new)
     @stream.expect(:error, nil, [Vines::SaslErrors::NotAuthorized.new])
     node = node(%Q{<auth xmlns="#{Vines::NAMESPACES[:sasl]}" mechanism="PLAIN">#{Base64.encode64("alice@wonderland.lit\000\000bogus")}</auth>})
-    assert_nothing_raised { @state.node(node) }
+    @state.node(node)
     assert @stream.verify
   end
 
@@ -97,7 +96,7 @@ class ClientAuthTest < Test::Unit::TestCase
     @stream.expect(:write, nil, [%Q{<success xmlns="#{Vines::NAMESPACES[:sasl]}"/>}])
     @stream.expect(:advance, nil, [Vines::Stream::Client::BindRestart.new(@stream)])
     node = node(%Q{<auth xmlns="#{Vines::NAMESPACES[:sasl]}" mechanism="PLAIN">#{Base64.encode64("alice@wonderland.lit\000\000secr3t")}</auth>})
-    assert_nothing_raised { @state.node(node) }
+    @state.node(node)
     assert @stream.verify
   end
 
@@ -108,14 +107,14 @@ class ClientAuthTest < Test::Unit::TestCase
     end
 
     @stream.expect(:error, nil, [Vines::SaslErrors::NotAuthorized.new])
-    assert_nothing_raised { @state.node(node.call) }
+    @state.node(node.call)
     assert @stream.verify
 
-    assert_nothing_raised { @state.node(node.call) }
+    @state.node(node.call)
     assert @stream.verify
 
     @stream.expect(:error, nil, [Vines::StreamErrors::PolicyViolation.new])
-    assert_nothing_raised { @state.node(node.call) }
+    @state.node(node.call)
     assert @stream.verify
   end
 

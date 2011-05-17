@@ -1,10 +1,9 @@
 # encoding: UTF-8
 
 require 'vines'
-require 'minitest/mock'
-require 'test/unit'
+require 'minitest/autorun'
 
-class ClientReadyTest < Test::Unit::TestCase
+class ClientReadyTest < MiniTest::Unit::TestCase
   STANZAS = []
 
   def setup
@@ -28,14 +27,14 @@ class ClientReadyTest < Test::Unit::TestCase
 
   def test_good_node_processes
     node = node('<message/>')
-    assert_nothing_raised { @state.node(node) }
+    @state.node(node)
     assert_equal 1, STANZAS.size
     assert STANZAS.map {|s| s.verify }.all?
   end
 
   def test_unsupported_stanza_type
     node = node('<bogus/>')
-    assert_raise(Vines::StreamErrors::UnsupportedStanzaType) { @state.node(node) }
+    assert_raises(Vines::StreamErrors::UnsupportedStanzaType) { @state.node(node) }
     assert STANZAS.empty?
   end
 

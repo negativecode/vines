@@ -1,9 +1,9 @@
 # encoding: UTF-8
 
 require 'vines'
-require 'test/unit'
+require 'minitest/autorun'
 
-class ParserTest < Test::Unit::TestCase
+class ParserTest < MiniTest::Unit::TestCase
   STREAM_START = '<stream:stream to="wonderland.lit" xmlns="jabber:client" xmlns:stream="http://etherx.jabber.org/streams">'.freeze
 
   def setup
@@ -61,7 +61,7 @@ class ParserTest < Test::Unit::TestCase
     assert_equal 1, @events.size
     stream = @events.shift
     assert_equal 'stream', stream.name
-    assert_not_nil stream.namespace
+    refute_nil stream.namespace
     assert_equal 'stream', stream.namespace.prefix
     assert_equal 'http://etherx.jabber.org/streams', stream.namespace.href
     expected = {'xmlns' => 'jabber:client', 'xmlns:stream' => 'http://etherx.jabber.org/streams'}
@@ -98,7 +98,7 @@ class ParserTest < Test::Unit::TestCase
     assert_nil iq.namespace
 
     query = iq.elements.first
-    assert_not_nil query.namespace
+    refute_nil query.namespace
     assert_nil query.namespace.prefix
     assert_equal 'jabber:iq:roster', query.namespace.href
     expected = {'xmlns' => 'jabber:iq:roster'}
@@ -112,7 +112,7 @@ class ParserTest < Test::Unit::TestCase
     @events.shift # discard stream
     error = @events.shift
     assert_equal 'error', error.name
-    assert_not_nil error.namespace
+    refute_nil error.namespace
     assert_equal 'stream', error.namespace.prefix
     assert_equal 'http://etherx.jabber.org/streams', error.namespace.href
     expected = {'xmlns:stream' => 'http://etherx.jabber.org/streams'}
