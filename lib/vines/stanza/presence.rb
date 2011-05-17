@@ -40,7 +40,9 @@ module Vines
         else
           stream.user.subscribed_from?(to) ? router.available_resources(to) : []
         end
-        broadcast(recipients + router.available_resources(stream.user.jid))
+
+        broadcast(recipients)
+        broadcast(router.available_resources(stream.user.jid))
 
         if initial
           stream.available_subscribed_to_resources.each do |recipient|
