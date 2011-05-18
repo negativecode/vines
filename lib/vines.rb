@@ -124,9 +124,9 @@ end
   vines/stream/component/ready
 
   vines/stream/http
-  vines/stream/http/http_state
-  vines/stream/http/http_states
-  vines/stream/http/http_request
+  vines/stream/http/session
+  vines/stream/http/sessions
+  vines/stream/http/request
   vines/stream/http/start
   vines/stream/http/auth
   vines/stream/http/bind_restart
