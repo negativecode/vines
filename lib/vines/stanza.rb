@@ -5,6 +5,7 @@ module Vines
     include Nokogiri::XML
 
     attr_reader :stream
+
     MESSAGE = 'message'.freeze
     @@types = {}
 
@@ -24,8 +25,14 @@ module Vines
       @node, @stream = node, stream
     end
 
+    # Send the stanza to all recipients, stamping it with from and
+    # to addresses first.
     def broadcast(recipients)
-      stream.broadcast(@node, recipients)
+      @node['from'] = stream.user.jid.to_s
+      recipients.each do |recipient|
+        @node['to'] = recipient.user.jid.to_s
+        recipient.write(@node)
+      end
     end
 
     def local?

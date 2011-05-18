@@ -9,8 +9,9 @@ module Vines
       include Nokogiri::XML
       include Vines::Log
 
-      attr_reader :stream
+      attr_accessor :stream
 
+      BODY   = 'body'.freeze
       STREAM = 'stream'.freeze
 
       def initialize(stream, success=nil)
@@ -41,6 +42,10 @@ module Vines
 
       def stream?(node)
         node.name == STREAM && namespace(node) == NAMESPACES[:stream]
+      end
+
+      def body?(node)
+        node.name == BODY && namespace(node) == NAMESPACES[:http_bind]
       end
 
       def namespace(node)

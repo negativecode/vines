@@ -52,12 +52,12 @@ end
   em-redis
   eventmachine
   fiber
+  http/parser
   logger
   net/ldap
   nokogiri
   openssl
   socket
-  thin
   uri
   yaml
 
@@ -108,6 +108,7 @@ end
   vines/stream/parser
 
   vines/stream/client
+  vines/stream/client/session
   vines/stream/client/start
   vines/stream/client/tls
   vines/stream/client/auth_restart
@@ -126,6 +127,11 @@ end
   vines/stream/http/http_state
   vines/stream/http/http_states
   vines/stream/http/http_request
+  vines/stream/http/start
+  vines/stream/http/auth
+  vines/stream/http/bind_restart
+  vines/stream/http/bind
+  vines/stream/http/ready
 
   vines/stream/server
   vines/stream/server/start

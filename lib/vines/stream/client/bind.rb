@@ -25,12 +25,20 @@ module Vines
               bind << doc.create_element('jid', stream.user.jid.to_s)
             end
           end
+
           stream.write(result)
-          stream.write('<stream:features/>')
+          send_empty_features
           advance
         end
 
         private
+
+        # Write the final <stream:features/> element to the stream, indicating
+        # stream negotiation is complete and the client is cleared to send
+        # stanzas.
+        def send_empty_features
+          stream.write('<stream:features/>')
+        end
 
         def bind?(node)
           node.name == 'iq' && node['type'] == 'set' && node.xpath('ns:bind', 'ns' => NS).any?

@@ -57,7 +57,8 @@ module Vines
         @srv = options[:srv]
         @callback = options[:callback]
         @outbound = @remote_domain && @domain
-        @state = @outbound ? Outbound::Start.new(self) : Start.new(self)
+        start = @outbound ? Outbound::Start.new(self) : Start.new(self)
+        advance(start)
       end
 
       def post_init
@@ -73,9 +74,13 @@ module Vines
         close_connection unless cert_domain_matches?(@remote_domain)
       end
 
+      def stream_type
+        :server
+      end
+
       def unbind
         super
-        if @outbound && @state.class != Ready
+        if @outbound && !ready?
           Server.connect(@config, @remote_domain, @domain, @srv, @callback)
         end
       end
@@ -92,7 +97,7 @@ module Vines
       end
 
       def ready?
-        @state.class == Server::Ready
+        state.class == Server::Ready
       end
 
       def start(node)

@@ -13,7 +13,7 @@ module Vines
         @config = config
         @remote_domain = nil
         @stream_id = Kit.uuid
-        @state = Start.new(self)
+        advance(Start.new(self))
       end
 
       def max_stanza_size
@@ -21,7 +21,11 @@ module Vines
       end
 
       def ready?
-        @state.class == Component::Ready
+        state.class == Component::Ready
+      end
+
+      def stream_type
+        :component
       end
 
       def start(node)

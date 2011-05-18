@@ -8,9 +8,16 @@ module Vines
   class Router
     ROUTABLE_STANZAS = %w[message iq presence].freeze
 
+    STREAM_TYPES = [:client, :server, :component].freeze
+    STREAM_TYPES.each do |name|
+      define_method "#{name}s" do
+        @streams[name]
+      end
+    end
+
     @@instance = nil
     def self.instance
-      @@instance ||= Router.new
+      @@instance ||= self.new
     end
 
     def initialize
@@ -19,23 +26,12 @@ module Vines
       @pending = Hash.new {|h,k| h[k] = [] }
     end
 
-    %w[Client Server Component].each do |klass|
-      name = klass.split(/(?=[A-Z])/).join('_').downcase
-      define_method(name + 's') do
-        @streams["Vines::Stream::#{klass}"]
-      end
-    end
-
-    def http_states
-      @streams["Vines::Stream::Http::HttpState"]
-    end
-
     # Returns streams for all connected resources for this JID. A
     # resource is considered connected after it has completed authentication
     # and resource binding.
     def connected_resources(jid)
       jid = JID.new(jid)
-      (clients + http_states).select do |stream|
+      clients.select do |stream|
         stream.connected? && jid == (jid.bare? ? stream.user.jid.bare : stream.user.jid)
       end
     end
@@ -45,7 +41,7 @@ module Vines
     # This method accepts a single JID or a list of JIDs.
     def available_resources(*jid)
       ids = jid.flatten.map {|jid| JID.new(jid).bare }
-      (clients + http_states).select do |stream|
+      clients.select do |stream|
         stream.available? && ids.include?(stream.user.jid.bare)
       end
     end
@@ -55,20 +51,24 @@ module Vines
     # This method accepts a single JID or a list of JIDs.
     def interested_resources(*jid)
       ids = jid.flatten.map {|jid| JID.new(jid).bare }
-      (clients + http_states).select do |stream|
+      clients.select do |stream|
         stream.interested? && ids.include?(stream.user.jid.bare)
       end
     end
 
-    # Add the connection to the routing table.
+    # Add the connection to the routing table. The connection must return
+    # :client, :server, or :component from its +stream_type+ method so the
+    # router can properly route stanzas to the stream.
     def <<(connection)
+      type = stream_type(connection)
       @config ||= connection.config
-      @streams[connection.class.to_s] << connection
+      @streams[type] << connection
     end
 
     # Remove the connection from the routing table.
     def delete(connection)
-      @streams[connection.class.to_s].delete(connection)
+      type = stream_type(connection)
+      @streams[type].delete(connection)
     end
 
     # Send the stanza to the appropriate remote server-to-server stream
@@ -119,6 +119,14 @@ module Vines
     def connection_to(domain)
       (components + servers).find do |stream|
         stream.ready? && stream.remote_domain == domain
+      end
+    end
+
+    def stream_type(connection)
+      connection.stream_type.tap do |type|
+        unless STREAM_TYPES.include?(type)
+          raise ArgumentError, "unexpected stream type: #{type}"
+        end
       end
     end
   end

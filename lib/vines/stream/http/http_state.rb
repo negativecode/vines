@@ -3,131 +3,112 @@
 module Vines
   class Stream
     class Http
-      class HttpState
+      class Session < Client::Session
         include Nokogiri::XML
 
-        attr_reader :domain
-        attr_accessor :domain, :last_broadcast_presence, :user
+        attr_accessor :content_type, :hold, :inactivity, :wait
 
-        def initialize(stream, sid, rid, domain)
-          @stream, @sid, @domain = stream, sid, domain
-          @last_activity = Time.now
-          @state = Stream::Client::Start.new(self)
+        CONTENT_TYPE = 'text/xml; charset=utf-8'.freeze
+
+        def initialize(stream)
+          super
+          @state = Http::Start.new(stream)
+          @inactivity, @wait, @hold = 20, 60, 1
+          @replied = Time.now
           @requests, @responses = [], []
-          @pinged = false
-          start_session(rid)
+          @content_type = CONTENT_TYPE
         end
 
-        def method_missing(method, *args, &block)
-          @stream.send(method, *args, &block)
+        def close
+          Sessions.delete(@id)
+          Router.instance.delete(self)
+          @requests.each {|req| req.stream.close_connection }
+          @requests.clear
+          @responses.clear
+          @state = Client::Closed.new(nil)
+          broadcast_unavailable
         end
 
-        def send_response(data, rid)
-          doc = Document.new
-          body = doc.create_element('body',
-            'rid' => rid,
-            'sid' => @sid,
-            'xmlns' => NAMESPACES[:http_bind]) do |node|
-              node.inner_html = data.to_s
-            end
-          reply(body)
+        def ready?
+          @state.class == Http::Ready
+        end
+
+        def requests
+          @requests.clone
         end
 
         def expired?
-          cleanup_requests
-          @requests.empty? && (Time.now - @last_activity > 65)
+          respond_to_expired_requests
+          @requests.empty? && (Time.now - @replied > @inactivity)
         end
 
-        def ping
-          log.debug("Pinging #{self}. Request queue: #{@requests}")
-          @last_activity = Time.now
-          write("")
-          @pinged = true
+        # Resume this session from its most recent state with a new client
+        # stream and incoming node.
+        def resume(stream, node)
+          stream.session.requests.each do |req|
+            request(req)
+          end
+          stream.session = self
+          @state.stream = stream
+          @state.node(node)
         end
 
-        def pinged?
-          @pinged
-        end
-
-        def request(rid)
-          @pinged = false
-          @last_activity = Time.now
+        def request(request)
           if @responses.any?
-            send_response(@responses.join(' '), rid)
+            request.reply(wrap_body(@responses.join))
+            @replied = Time.now
             @responses.clear
           else
-            @requests << HttpRequest.new(rid)
-          end
-        end
-
-        def write(node)
-          if request = @requests.shift
-            send_response(node, request.rid)
-          else
-            @responses << node.to_s
-          end
-        end
-
-        def handle_restart
-          doc = Document.new
-          node = doc.create_element('body',
-            'xmlns' => NAMESPACES[:http_bind],
-            'xmlns:stream' => NAMESPACES[:stream])
-          node << doc.create_element('stream:features') do |features|
-            features << doc.create_element('bind', 'xmlns' => NAMESPACES[:bind])
-          end
-          @available = true
-          reply(node)
-        end
-
-        private
-
-        def cleanup_requests
-          expired = @requests.select {|request| request.expired? }
-          expired.each do |request|
-            send_response('', request.rid)
-            @requests.delete(request)
+            while @requests.size >= @hold
+              @requests.shift.reply(wrap_body(''))
+              @replied = Time.now
+            end
+            @requests << request
           end
         end
 
         # Send an HTTP 200 OK response wrapping the XMPP node content back
         # to the client.
         def reply(node)
-          body = node.to_s
-          header = [
-            "HTTP/1.1 200 OK",
-            "Content-Type: text/xml; charset=utf-8",
-            "Content-Length: #{body.bytesize}"
-          ].join("\r\n")
-
-          @stream.stream_write([header, body].join("\r\n\r\n"))
+          @requests.shift.reply(node)
+          @replied = Time.now
         end
 
-        def start_session(rid)
-          doc = Document.new
-          node = doc.create_element('body',
-            'accept'     => 'deflate,gzip',
-            'ack'        => rid,
-            'charsets'   => 'UTF-8',
-            'from'       => @domain, 
-            'hold'       => '1',
-            'inactivity' => '30',
-            'maxpause'   => '120',
-            'polling'    => '5',
-            'requests'   => '2',
-            'sid'        => @sid,
-            'ver'        => '1.6',
-            'wait'       => '60',
-            'xmlns'      => 'http://jabber.org/protocol/httpbind')
-
-          node << doc.create_element('features', 'xmlns' => 'jabber:client') do |el|
-            el << doc.create_element('mechanisms') do |mechanisms|
-              mechanisms.default_namespace = NAMESPACES[:sasl]
-              mechanisms << doc.create_element('mechanism', 'EXTERNAL')
-              mechanisms << doc.create_element('mechanism', 'PLAIN')
-            end
+        # Write the XMPP node to the client stream after wrapping it in a BOSH
+        # body tag. If there's a waiting request, the node is written
+        # immediately. If not, it's queued until the next request arrives.
+        def write(node)
+          if request = @requests.shift
+            request.reply(wrap_body(node))
+            @replied = Time.now
+          else
+            @responses << node.to_s
           end
-          reply(node)
+        end
+
+        def unbind!(stream)
+          @unbound = true
+          @available = false
+          @requests.reject! {|req| req.stream == stream }
+        end
+
+        private
+
+        def respond_to_expired_requests
+          expired = @requests.select {|req| req.age > @wait }
+          expired.each do |request|
+            request.reply(wrap_body(''))
+            @requests.delete(request)
+            @replied = Time.now
+          end
+        end
+
+        def wrap_body(data)
+          doc = Document.new
+          doc.create_element('body') do |node|
+            node.add_namespace(nil, NAMESPACES[:http_bind])
+            node.inner_html = data.to_s
+          end
         end
       end
     end

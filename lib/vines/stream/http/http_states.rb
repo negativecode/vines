@@ -3,50 +3,61 @@
 module Vines
   class Stream
     class Http
-      # HttpStates is a cache of HttpState objects for transient HTTP
+      # Sessions is a cache of Http::Session objects for transient HTTP
       # connections. The cache is monitored for expired client connections.
-      class HttpStates
+      class Sessions
         include Vines::Log
 
+        @@instance = nil
+        def self.instance
+          @@instance ||= self.new
+        end
+
+        def self.[](sid)
+          instance[sid]
+        end
+
+        def self.[]=(sid, session)
+          instance[sid] = session
+        end
+
+        def self.delete(sid)
+          instance.delete(sid)
+        end
+
         def initialize
-          @states = {}
+          @sessions = {}
           start_timer
         end
 
-        def []=(sid, state)
-          @states[sid] = state
+        def []=(sid, session)
+          @sessions[sid] = session
         end
 
         def [](sid)
-          @states[sid]
+          @sessions[sid]
         end
 
-        def connected_http_clients
-          @states
-        end
-
-        def delete
-          @states
+        def delete(sid)
+          @sessions.delete(sid)
         end
 
         private
 
-        # Check for expired clients to cleanup every 5 seconds.
+        # Check for expired clients to cleanup every second.
         def start_timer
-          @timer ||= EventMachine::PeriodicTimer.new(5) { cleanup }
+          @timer ||= EventMachine::PeriodicTimer.new(1) { cleanup }
         end
 
         # Remove cached information for all expired connections. An expired
         # HTTP client is one that has no queued requests and has had no activity
-        # for over 60 seconds.
+        # for over 20 seconds.
         def cleanup
-          expired = @states.select {|sid, state| state.expired? }
-          expired.each do |sid, http_state|
-            @states.delete(sid)
-            log.debug("Removed expired HTTP client #{sid}")
+          @sessions.each_value do |session|
+            session.close if session.expired?
           end
         rescue Exception => e
-          log.error("HTTP cleanup failed: #{e}")
+          log.error("Expired session cleanup failed: #{e}")
         end
       end
     end
