@@ -2,9 +2,9 @@
 
 require 'storage_tests'
 require 'vines'
-require 'test/unit'
+require 'minitest/autorun'
 
-class LocalTest < Test::Unit::TestCase
+class LocalTest < MiniTest::Unit::TestCase
   include StorageTests
 
   def setup

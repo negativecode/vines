@@ -1,10 +1,9 @@
 # encoding: UTF-8
 
 require 'vines'
-require 'minitest/mock'
-require 'test/unit'
+require 'minitest/autorun'
 
-class LdapTest < Test::Unit::TestCase
+class LdapTest < MiniTest::Unit::TestCase
   ALICE_DN = 'uid=alice@wondlerand.lit,ou=People,dc=wonderland,dc=lit'
   CONTEXT = {}
 
@@ -175,7 +174,7 @@ class LdapTest < Test::Unit::TestCase
       mock.expect(:bind, true)
     end
     user = ldap.authenticate('alice@wonderland.lit', 'passw0rd')
-    assert_not_nil user
+    refute_nil user
     assert_equal 'alice@wonderland.lit', user.jid.to_s
     assert_equal 'Alice Liddell', user.name
     assert_equal [], user.roster

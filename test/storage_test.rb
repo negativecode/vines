@@ -2,10 +2,9 @@
 
 require 'storage_tests'
 require 'vines'
-require 'minitest/mock'
-require 'test/unit'
+require 'minitest/autorun'
 
-class StorageTest < Test::Unit::TestCase
+class StorageTest < MiniTest::Unit::TestCase
   ALICE = 'alice@wonderland.lit'.freeze
 
   class MockLdapStorage < Vines::Storage
@@ -64,7 +63,7 @@ class StorageTest < Test::Unit::TestCase
       storage = MockLdapStorage.new(alice)
       storage.ldap.expect(:authenticate, alice, [ALICE, 'secr3t'])
       user = storage.authenticate(ALICE, 'secr3t')
-      assert_not_nil user
+      refute_nil user
       assert_equal ALICE, user.jid.to_s
       assert_equal 0, storage.authenticate_calls
       assert_equal 1, storage.find_user_calls
@@ -79,7 +78,7 @@ class StorageTest < Test::Unit::TestCase
       storage = MockLdapStorage.new
       storage.ldap.expect(:authenticate, alice, [ALICE, 'secr3t'])
       user = storage.authenticate(ALICE, 'secr3t')
-      assert_not_nil user
+      refute_nil user
       assert_equal ALICE, user.jid.to_s
       assert_equal 0, storage.authenticate_calls
       assert_equal 1, storage.find_user_calls

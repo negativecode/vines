@@ -2,9 +2,9 @@
 
 require 'storage_tests'
 require 'vines'
-require 'test/unit'
+require 'minitest/autorun'
 
-class CouchDBTest < Test::Unit::TestCase
+class CouchDBTest < MiniTest::Unit::TestCase
   include StorageTests
 
   URL = 'http://localhost:5984/xmpp_testcase'.freeze

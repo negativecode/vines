@@ -2,9 +2,9 @@
 
 require 'storage_tests'
 require 'vines'
-require 'test/unit'
+require 'minitest/autorun'
 
-class RedisTest < Test::Unit::TestCase
+class RedisTest < MiniTest::Unit::TestCase
   include StorageTests
 
   MOCK_REDIS = Class.new do

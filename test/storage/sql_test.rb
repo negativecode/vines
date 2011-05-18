@@ -2,9 +2,9 @@
 
 require 'storage_tests'
 require 'vines'
-require 'test/unit'
+require 'minitest/autorun'
 
-class SqlTest < Test::Unit::TestCase
+class SqlTest < MiniTest::Unit::TestCase
   include StorageTests
 
   DB_FILE = "./xmpp_testcase.db"
