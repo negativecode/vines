@@ -9,13 +9,15 @@ class UserTest < MiniTest::Unit::TestCase
     alice2 = Vines::User.new(:jid => 'alice@wonderland.lit')
     hatter = Vines::User.new(:jid => 'hatter@wonderland.lit')
 
+    assert_nil alice <=> 42
+
     assert alice == alice2
     assert alice.eql?(alice2)
     assert alice.hash == alice2.hash
 
-    assert alice != hatter
-    assert !alice.eql?(hatter)
-    assert alice.hash != hatter.hash
+    refute alice == hatter
+    refute alice.eql?(hatter)
+    refute alice.hash == hatter.hash
   end
 
   def test_initialize_missing_jid

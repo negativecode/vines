@@ -17,12 +17,10 @@ module Vines
     end
 
     def <=>(contact)
-      self.jid.to_s <=> contact.jid.to_s
+      contact.is_a?(Contact) ? self.jid.to_s <=> contact.jid.to_s : nil
     end
 
-    def eql?(contact)
-      contact.is_a?(Contact) && self == contact
-    end
+    alias :eql? :==
 
     def hash
       jid.to_s.hash

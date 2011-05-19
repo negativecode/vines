@@ -25,12 +25,10 @@ module Vines
         end
 
         def <=>(session)
-          @id <=> session.id
+          session.is_a?(Session) ? self.id <=> session.id : nil
         end
 
-        def eql?(session)
-          session.is_a?(Session) && self == session
-        end
+        alias :eql? :==
 
         def hash
           @id.hash

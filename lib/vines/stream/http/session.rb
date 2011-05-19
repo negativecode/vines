@@ -21,11 +21,13 @@ module Vines
 
         def close
           Sessions.delete(@id)
-          Router.instance.delete(self)
+          router.delete(self)
           @requests.each {|req| req.stream.close_connection }
           @requests.clear
           @responses.clear
           @state = Client::Closed.new(nil)
+          @unbound = true
+          @available = false
           broadcast_unavailable
         end
 
@@ -87,8 +89,6 @@ module Vines
         end
 
         def unbind!(stream)
-          @unbound = true
-          @available = false
           @requests.reject! {|req| req.stream == stream }
         end
 

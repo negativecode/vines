@@ -16,12 +16,10 @@ module Vines
     end
 
     def <=>(user)
-      self.jid.to_s <=> user.jid.to_s
+      user.is_a?(User) ? self.jid.to_s <=> user.jid.to_s : nil
     end
 
-    def eql?(user)
-      user.is_a?(User) && self == user
-    end
+    alias :eql? :==
 
     def hash
       jid.to_s.hash
