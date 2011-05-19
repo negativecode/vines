@@ -41,7 +41,8 @@ module Vines
       def process_request(body)
         # proxy server ping
         if body.empty?
-          send_data('online')
+          req = Request.new(self, nil, 'text/plain')
+          req.reply('online')
           close_connection_after_writing
         else
           body = Nokogiri::XML(body).root
