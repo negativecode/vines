@@ -14,7 +14,8 @@ class LocalTest < MiniTest::Unit::TestCase
       :clear_pass => './clear_password@wonderland.lit.user',
       :bcrypt     => './bcrypt_password@wonderland.lit.user',
       :full       => './full@wonderland.lit.user',
-      :vcard      => './full@wonderland.lit.vcard'
+      :vcard      => './full@wonderland.lit.vcard',
+      :fragment   => "./full@wonderland.lit-#{FRAGMENT_ID}.fragment"
     }
     File.open(@files[:empty], 'w') {|f| f.write('') }
     File.open(@files[:no_pass], 'w') {|f| f.write('foo: bar') }
@@ -32,11 +33,16 @@ class LocalTest < MiniTest::Unit::TestCase
       f.puts("    groups: [Group3, Group4]")
     end
     File.open(@files[:vcard], 'w') {|f| f.write(StorageTests::VCARD.to_xml) }
+    File.open(@files[:fragment], 'w') {|f| f.write(StorageTests::FRAGMENT.to_xml) }
   end
 
   def teardown
     misc = %w[user vcard].map {|ext| "./save_user@domain.tld.#{ext}" }
-    [*misc, *@files.values].each do |f|
+    [
+      "./save_user@domain.tld-#{FRAGMENT_ID}.fragment",
+      *misc,
+      *@files.values
+    ].each do |f|
       File.delete(f) if File.exist?(f)
     end
   end

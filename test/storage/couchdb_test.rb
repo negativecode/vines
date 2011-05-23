@@ -49,7 +49,13 @@ class CouchDBTest < MiniTest::Unit::TestCase
       save_doc({
         '_id'  => 'vcard:full@wonderland.lit',
         'type' => 'Vcard',
-        'card' => StorageTests::VCARD.to_xml
+        'card' => VCARD.to_xml
+      })
+
+      save_doc({
+        '_id'  => "fragment:full@wonderland.lit:#{FRAGMENT_ID}",
+        'type' => 'Fragment',
+        'xml'  => FRAGMENT.to_xml
       })
     end
   end

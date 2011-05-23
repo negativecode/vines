@@ -8,9 +8,13 @@ module Vines
       class Contact < ActiveRecord::Base
         belongs_to :user
       end
+      class Fragment < ActiveRecord::Base
+        belongs_to :user
+      end
       class Group < ActiveRecord::Base; end
       class User < ActiveRecord::Base
         has_many :contacts
+        has_many :fragments
       end
 
       %w[adapter host port database username password pool].each do |name|
@@ -38,7 +42,7 @@ module Vines
 
         jid = JID.new(jid || '').bare.to_s
         return if jid.empty?
-        xuser = by_jid(jid)
+        xuser = user_by_jid(jid)
         return Vines::User.new(:jid => jid).tap do |user|
           user.name, user.password = xuser.name, xuser.password
           xuser.contacts.each do |contact|
@@ -57,7 +61,7 @@ module Vines
       def save_user(user)
         ActiveRecord::Base.clear_reloadable_connections!
 
-        xuser = by_jid(user.jid) || Sql::User.new(:jid => user.jid.bare.to_s)
+        xuser = user_by_jid(user.jid) || Sql::User.new(:jid => user.jid.bare.to_s)
         xuser.name = user.name
         xuser.password = user.password
 
@@ -97,7 +101,7 @@ module Vines
 
         jid = JID.new(jid || '').bare.to_s
         return if jid.empty?
-        if xuser = by_jid(jid)
+        if xuser = user_by_jid(jid)
           Nokogiri::XML(xuser.vcard).root rescue nil
         end
       end
@@ -106,13 +110,38 @@ module Vines
       def save_vcard(jid, card)
         ActiveRecord::Base.clear_reloadable_connections!
 
-        xuser = by_jid(jid)
+        xuser = user_by_jid(jid)
         if xuser
           xuser.vcard = card.to_xml
           xuser.save
         end
       end
       defer :save_vcard
+
+      def find_fragment(jid, node)
+        ActiveRecord::Base.clear_reloadable_connections!
+
+        jid = JID.new(jid || '').bare.to_s
+        return if jid.empty?
+        if fragment = fragment_by_jid(jid, node)
+          Nokogiri::XML(fragment.xml).root rescue nil
+        end
+      end
+      defer :find_fragment
+
+      def save_fragment(jid, node)
+        ActiveRecord::Base.clear_reloadable_connections!
+
+        jid = JID.new(jid).bare.to_s
+        fragment = fragment_by_jid(jid, node) ||
+          Sql::Fragment.new(
+            :user => user_by_jid(jid),
+            :root => node.name,
+            :namespace => node.namespace.href)
+        fragment.xml = node.to_xml
+        fragment.save
+      end
+      defer :save_fragment
 
       # Create the tables and indexes used by this storage engine.
       def create_schema(args={})
@@ -148,6 +177,14 @@ module Vines
             t.integer :group_id,   :null => false
           end
           add_index :contacts_groups, [:contact_id, :group_id], :unique => true
+
+          create_table :fragments, :force => args[:force] do |t|
+            t.integer :user_id,   :null => false
+            t.string  :root,      :null => false
+            t.string  :namespace, :null => false
+            t.text    :xml,       :null => false
+          end
+          add_index :fragments, [:user_id, :root, :namespace], :unique => true
         end
       end
 
@@ -161,9 +198,15 @@ module Vines
         Sql::Group.has_and_belongs_to_many :contacts
       end
 
-      def by_jid(jid)
+      def user_by_jid(jid)
         jid = JID.new(jid).bare.to_s
         Sql::User.find_by_jid(jid, :include => {:contacts => :groups})
+      end
+
+      def fragment_by_jid(jid, node)
+        jid = JID.new(jid).bare.to_s
+        clause = 'user_id=(select id from users where jid=?) and root=? and namespace=?'
+        Sql::Fragment.where(clause, jid, node.name, node.namespace.href).first
       end
 
       def groups(contact)

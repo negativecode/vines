@@ -11,22 +11,30 @@ class RedisTest < MiniTest::Unit::TestCase
     def initialize
       @db = {}
     end
+    def del(key)
+      @db.delete(key)
+      EM.next_tick { yield if block_given? }
+    end
     def get(key)
       EM.next_tick { yield @db[key] }
-    end
-    def hgetall(key)
-      EM.next_tick { yield @db[key] || {} }
     end
     def set(key, value)
       @db[key] = value
       EM.next_tick { yield if block_given? }
     end
-    def hmset(key, *args)
-      @db[key] = Hash[*args]
+    def hget(key, field)
+      EM.next_tick { yield @db[key][field] rescue nil }
+    end
+    def hgetall(key)
+      EM.next_tick { yield @db[key] || {} }
+    end
+    def hset(key, field, value)
+      @db[key] ||= {}
+      @db[key][field] = value
       EM.next_tick { yield if block_given? }
     end
-    def del(key)
-      @db.delete(key)
+    def hmset(key, *args)
+      @db[key] = Hash[*args]
       EM.next_tick { yield if block_given? }
     end
     def flushdb
@@ -51,7 +59,8 @@ class RedisTest < MiniTest::Unit::TestCase
         {'name' => 'Contact1', 'groups' => %w[Group1 Group2]}.to_json,
         'contact2@wonderland.lit',
         {'name' => 'Contact2', 'groups' => %w[Group3 Group4]}.to_json)
-      db.set('vcard:full@wonderland.lit', {'card' => StorageTests::VCARD.to_xml}.to_json)
+      db.set('vcard:full@wonderland.lit', {'card' => VCARD.to_xml}.to_json)
+      db.hset('fragments:full@wonderland.lit', FRAGMENT_ID, {'xml' => FRAGMENT.to_xml}.to_json)
     end
   end
 

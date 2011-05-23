@@ -25,7 +25,7 @@ class SqlTest < MiniTest::Unit::TestCase
       :jid => 'full@wonderland.lit',
       :name => 'Tester',
       :password => BCrypt::Password.create('secret'),
-      :vcard => StorageTests::VCARD.to_xml)
+      :vcard => VCARD.to_xml)
     full.contacts << Vines::Storage::Sql::Contact.new(
       :jid => 'contact1@wonderland.lit',
       :name => 'Contact1',
@@ -37,6 +37,13 @@ class SqlTest < MiniTest::Unit::TestCase
       :groups => groups[2, 2],
       :subscription => 'both')
     full.save
+
+    fragment = Vines::Storage::Sql::Fragment.new(
+      :user => full,
+      :root => 'characters',
+      :namespace => 'urn:wonderland',
+      :xml => FRAGMENT.to_xml)
+    fragment.save
   end
 
   def teardown

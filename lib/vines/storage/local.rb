@@ -61,6 +61,28 @@ module Vines
           f.write(card.to_xml)
         end
       end
+
+      def find_fragment(jid, node)
+        jid = JID.new(jid || '').bare.to_s
+        return if jid.empty?
+        file = File.join(@dir, fragment_id(jid, node))
+        Nokogiri::XML(File.read(file)).root rescue nil
+      end
+
+      def save_fragment(jid, node)
+        jid = JID.new(jid).bare.to_s
+        file = File.join(@dir, fragment_id(jid, node))
+        File.open(file, 'w') do |f|
+          f.write(node.to_xml)
+        end
+      end
+
+      private
+
+      def fragment_id(jid, node)
+        id = Digest::SHA1.hexdigest("#{node.name}:#{node.namespace.href}")
+        "#{jid}-#{id}.fragment"
+      end
     end
   end
 end

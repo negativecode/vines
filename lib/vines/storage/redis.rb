@@ -74,7 +74,33 @@ module Vines
       end
       fiber :save_vcard
 
+      def find_fragment(jid, node)
+        jid = JID.new(jid || '').bare.to_s
+        if jid.empty? then yield; return end
+        redis.hget("fragments:#{jid}", fragment_id(node)) do |response|
+          fragment = if response
+            doc = JSON.parse(response) rescue nil
+            Nokogiri::XML(doc['xml']).root rescue nil
+          end
+          yield fragment
+        end
+      end
+      fiber :find_fragment
+
+      def save_fragment(jid, node)
+        jid = JID.new(jid).bare.to_s
+        doc = {:xml => node.to_xml}
+        redis.hset("fragments:#{jid}", fragment_id(node), doc.to_json) do
+          yield
+        end
+      end
+      fiber :save_fragment
+
       private
+
+      def fragment_id(node)
+        Digest::SHA1.hexdigest("#{node.name}:#{node.namespace.href}")
+      end
 
       # Retrieve the hash stored at roster:jid and yield an array of
       # +Vines::Contact+ objects to the provided block.

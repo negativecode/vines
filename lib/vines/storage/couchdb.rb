@@ -84,7 +84,36 @@ module Vines
       end
       fiber :save_vcard
 
+      def find_fragment(jid, node)
+        jid = JID.new(jid || '').bare.to_s
+        if jid.empty? then yield; return end
+        get(fragment_id(jid, node)) do |doc|
+          fragment = if doc && doc['type'] == 'Fragment'
+            Nokogiri::XML(doc['xml']).root rescue nil
+          end
+          yield fragment
+        end
+      end
+      fiber :find_fragment
+
+      def save_fragment(jid, node, &callback)
+        jid = JID.new(jid).bare.to_s
+        id = fragment_id(jid, node)
+        get(id) do |doc|
+          doc ||= {'_id' => id}
+          doc['type'] = 'Fragment'
+          doc['xml'] = node.to_xml
+          save_doc(doc, &callback)
+        end
+      end
+      fiber :save_fragment
+
       private
+
+      def fragment_id(jid, node)
+        id = Digest::SHA1.hexdigest("#{node.name}:#{node.namespace.href}")
+        "fragment:#{jid}:#{id}"
+      end
 
       def url(config)
         scheme = config[:tls] ? 'https' : 'http'

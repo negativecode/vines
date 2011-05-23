@@ -8,6 +8,14 @@ require 'minitest/autorun'
 # tests are the same regardless of implementation so share those methods
 # here.
 module StorageTests
+  FRAGMENT_ID = Digest::SHA1.hexdigest("characters:urn:wonderland")
+
+  FRAGMENT = Nokogiri::XML(%q{
+    <characters xmlns="urn:wonderland">
+      <character>Alice</character>
+    </characters>
+  }.strip).root
+
   VCARD = Nokogiri::XML(%q{
     <vCard xmlns="vcard-temp">
       <FN>Alice in Wonderland</FN>
@@ -129,6 +137,48 @@ module StorageTests
       card = db.find_vcard('save_user@domain.tld')
       refute_nil card
       assert_equal VCARD, card
+    end
+  end
+
+  def test_find_fragment
+    EMLoop.new do
+      db = storage
+      root = Nokogiri::XML(%q{<characters xmlns="urn:wonderland"/>}).root
+      bad_name = Nokogiri::XML(%q{<not_characters xmlns="urn:wonderland"/>}).root
+      bad_ns = Nokogiri::XML(%q{<characters xmlns="not:wonderland"/>}).root
+
+      node = db.find_fragment(nil, nil)
+      assert_nil node
+
+      node = db.find_fragment('full@wonderland.lit', bad_name)
+      assert_nil node
+
+      node = db.find_fragment('full@wonderland.lit', bad_ns)
+      assert_nil node
+
+      node = db.find_fragment('full@wonderland.lit', root)
+      refute_nil node
+      assert_equal FRAGMENT, node
+
+      node = db.find_fragment(Vines::JID.new('full@wonderland.lit'), root)
+      refute_nil node
+      assert_equal FRAGMENT, node
+
+      node = db.find_fragment(Vines::JID.new('full@wonderland.lit/resource'), root)
+      refute_nil node
+      assert_equal FRAGMENT, node
+    end
+  end
+
+  def test_save_fragment
+    EMLoop.new do
+      db = storage
+      root = Nokogiri::XML(%q{<characters xmlns="urn:wonderland"/>}).root
+      db.save_user(Vines::User.new(:jid => 'save_user@domain.tld'))
+      db.save_fragment('save_user@domain.tld/resource1', FRAGMENT)
+      node = db.find_fragment('save_user@domain.tld', root)
+      refute_nil node
+      assert_equal FRAGMENT, node
     end
   end
 end
