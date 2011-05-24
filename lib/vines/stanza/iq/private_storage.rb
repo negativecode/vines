@@ -12,6 +12,9 @@ module Vines
         register "/iq[@id and (@type='get' or @type='set')]/ns:query", 'ns' => NS
 
         def process
+          unless stream.private_storage?
+            raise StanzaErrors::ServiceUnavailable.new(self, 'cancel')
+          end
           validate_to_address
           validate_children_size
           validate_namespaces

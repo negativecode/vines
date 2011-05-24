@@ -15,6 +15,9 @@ module Vines
               query.default_namespace = NS
               query << el.document.create_element('feature', 'var' => NAMESPACES[:ping])
               query << el.document.create_element('feature', 'var' => NAMESPACES[:vcard])
+              if stream.private_storage?
+                query << el.document.create_element('feature', 'var' => NAMESPACES[:storage])
+              end
             end
           end
           stream.write(result)

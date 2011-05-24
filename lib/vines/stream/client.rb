@@ -24,18 +24,16 @@ module Vines
         end
       end
 
+      %w[max_stanza_size max_resources_per_account private_storage?].each do |name|
+        define_method name do |*args|
+          @config[:client].send(name, *args)
+        end
+      end
+
       def ssl_handshake_completed
         if get_peer_cert
           close_connection unless cert_domain_matches?(@session.domain)
         end
-      end
-
-      def max_stanza_size
-        @config[:client].max_stanza_size
-      end
-
-      def max_resources_per_account
-        @config[:client].max_resources_per_account
       end
 
       def unbind

@@ -51,7 +51,10 @@ Vines::Config.configure do
 
   # Configure the client-to-server port. The max_resources_per_account attribute
   # limits how many concurrent connections one user can have to the server.
+  # The private_storage attribute allows clients to store XML fragments
+  # on the server, using the XEP-0049 Private XML Storage feature.
   client '0.0.0.0', 5222 do
+    private_storage true
     max_stanza_size 65536
     max_resources_per_account 5
   end
@@ -68,7 +71,8 @@ Vines::Config.configure do
   # Configure the XEP-0124 BOSH port. This allows HTTP clients to connect to
   # the XMPP server.
   http '0.0.0.0', 5280 do
-    max_stanza_size 131072
+    private_storage true
+    max_stanza_size 65536
     max_resources_per_account 5
   end
 

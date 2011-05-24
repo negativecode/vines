@@ -144,6 +144,14 @@ module Vines
           @settings[:max_resources_per_account]
         end
       end
+
+      def private_storage(enabled)
+        @settings[:private_storage] = !!enabled
+      end
+
+      def private_storage?
+        @settings[:private_storage]
+      end
     end
 
     class ServerPort < Port
@@ -174,6 +182,14 @@ module Vines
         else
           @settings[:max_resources_per_account]
         end
+      end
+
+      def private_storage(enabled)
+        @settings[:private_storage] = !!enabled
+      end
+
+      def private_storage?
+        @settings[:private_storage]
       end
     end
 

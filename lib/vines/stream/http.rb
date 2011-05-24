@@ -30,12 +30,10 @@ module Vines
         @session.id == sid
       end
 
-      def max_stanza_size
-        @config[:http].max_stanza_size
-      end
-
-      def max_resources_per_account
-        @config[:http].max_resources_per_account
+      %w[max_stanza_size max_resources_per_account private_storage?].each do |name|
+        define_method name do |*args|
+          @config[:http].send(name, *args)
+        end
       end
 
       def process_request(body)
