@@ -180,8 +180,8 @@ module Vines
 
           create_table :fragments, :force => args[:force] do |t|
             t.integer :user_id,   :null => false
-            t.string  :root,      :null => false
-            t.string  :namespace, :null => false
+            t.string  :root,      :limit => 1000, :null => false
+            t.string  :namespace, :limit => 1000, :null => false
             t.text    :xml,       :null => false
           end
           add_index :fragments, [:user_id, :root, :namespace], :unique => true
