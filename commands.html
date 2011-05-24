@@ -176,6 +176,20 @@ end
 </p>
 <pre>
 $ vines schema wonderland.lit
+Various create table messages . . .
+</pre>
+<p>
+  With the tables and indexes created, the database is ready to use by the chat
+  server. Running this command again won't hurt anything. The schema objects will
+  only be created if they don't exist.
+</p>
+
+<h3>Database Errors</h3>
+<p>
+  If the database driver gems aren't installed, we will see this error.
+</p>
+<pre>
+$ vines schema wonderland.lit
 no such file to load -- pg
 </pre>
 <p>
@@ -185,9 +199,14 @@ no such file to load -- pg
 <pre>
 $ gem install pg
 Fetching: pg-0.11.0.gem (100%)
-Building native extensions.  This could take a while...
+Building native extensions. This could take a while.
 Successfully installed pg-0.11.0
 1 gem installed
+</pre>
+<p>
+  We'll see this error if the wonderland database hasn't been created yet.
+</p>
+<pre>
 $ vines schema wonderland.lit
 FATAL:  database "wonderland" does not exist
 </pre>
@@ -200,15 +219,6 @@ FATAL:  database "wonderland" does not exist
 $ createdb wonderland
 $ vines schema wonderland.lit
 </pre>
-<p>
-  Success! With the driver installed and database created, the schema command
-  was able to create the tables and indexes and the database is ready to use
-  by the chat server.
-</p>
-<p>
-  Running this command again won't hurt anything. The schema objects will only be
-  created if they don't exist.
-</p>
 
 <h2>start, stop, &amp; restart</h2>
 <p>
