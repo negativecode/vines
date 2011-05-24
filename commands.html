@@ -42,6 +42,30 @@ Run 'cd wonderland.lit && vines start' to begin
   The name of the directory is actually arbitrary. It doesn't need to match the
   domain of the chat ID's being hosted.
 </p>
+<h3>Linux Errors</h3>
+<p>
+  If the hostname isn't properly configured in /etc/hosts, we might run into
+  this error.
+</p>
+<pre>
+$ vines init wonderland.lit
+Created example user alice@wonderland.lit with password secr3t
+Created example user arthur@wonderland.lit with password secr3t
+getaddrinfo: Name or service not known
+</pre>
+<p>
+  Luckily, the fix is simple. The localhost line in /etc/hosts needs to be
+  configured properly by adding the machine's hostname before the localhost
+  entries.
+</p>
+<pre>
+$ hostname
+fedora.wonderland.lit
+$ sudo vi /etc/hosts
+127.0.0.1 fedora.wonderland.lit localhost.localdomain localhost
+$ rm -rf wonderland.lit
+$ vines init wonderland.lit
+</pre>
 
 <h2>bcrypt</h2>
 <p>

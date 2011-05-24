@@ -31,6 +31,11 @@ h2 {
   font-weight: 400;
   margin-bottom: 5px;
 }
+h3 {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
 ul#nav-links {
   margin-top: 31px;
 }
