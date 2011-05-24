@@ -1,0 +1,222 @@
+---
+layout: site
+title: Vines - Commands
+---
+<h2>Command Line Tools</h2>
+<p>
+  Run the vines command at the command line to get the list of tools.
+</p>
+<pre>
+$ vines 
+Usage: vines [options] start|stop|restart|init|bcrypt|cert|ldap|schema
+
+Daemon options:
+    -d, --daemonize                  Run daemonized in the background
+    -l, --log FILE                   File to redirect output (default: log/vines.log)
+    -P, --pid FILE                   File to store PID (default: pid/vines.pid)
+
+Common options:
+    -h, --help                       Show this message
+    -v, --version                    Show version
+</pre>
+
+<h2>init</h2>
+<p>
+  The init command is a quick way to get a chat server instance configured and
+  running.
+</p>
+<pre>
+$ vines init wonderland.lit
+Created example user alice@wonderland.lit with password secr3t
+Created example user arthur@wonderland.lit with password secr3t
+Initialized server directory: wonderland.lit
+Run 'cd wonderland.lit && vines start' to begin
+</pre>
+<p>
+  This creates a directory for the wonderland.lit domain. Chat users on this
+  server will have ID's that end with @wonderland.lit. A self-signed SSL
+  certificate is installed in wonderland.lit/conf/certs that's used to encrypt
+  chat connections.
+</p>
+<p>
+  The name of the directory is actually arbitrary. It doesn't need to match the
+  domain of the chat ID's being hosted.
+</p>
+
+<h2>bcrypt</h2>
+<p>
+  The storage engines supported out of the box all use
+  <a href="http://en.wikipedia.org/wiki/Bcrypt">bcrypt</a> to securely
+  store user passwords. When we're adding users to the database, we can use this
+  command to generate secure passwords.
+</p>
+<pre>
+$ vines bcrypt secr3t
+$2a$10$JCuI3u7AAkT0jxsQHb8NWuXIhXrCGQba.n9dtZ/tojMs2x/hTkSYa
+</pre>
+<p>
+  The hashed output can be copied and pasted into a database field.
+</p>
+<pre>
+$ vines bcrypt secr3t
+$2a$10$87oEgw75sz1YqTdlndC9tusEkhKLQg1UmSw64N8ZS0mJxrGdLucQC
+</pre>
+<p>
+  Running bcrypt on the same password multiple times gives different results. This
+  is normal and is an important property of the bcrypt algorithm. If two users
+  use the same password, their bcrypt hashes won't match, making attacks on the
+  password database much more difficult.
+</p>
+
+
+<h2>cert</h2>
+<p>
+  The cert command creates a self-signed certificate that can be used to
+  encrypt client and server connections. All connections to the chat server
+  must be encrypted. There is no clear text, unencrypted mode.
+</p>
+<pre>
+$ vines cert wonderland.lit
+$ ls conf/certs/wonderland*
+wonderland.lit.crt wonderland.lit.key
+</pre>
+<p>
+  The wonderland.lit.crt file contains the public key that can be shared with
+  anyone. The wonderland.lit.key file contains the private key and <em>must be
+  kept secret</em>. Make sure the file permissions allow only the chat server
+  to read this file.
+</p>
+
+<h2>ldap</h2>
+<p>
+  The ldap command is used to test the LDAP settings in conf/config.rb. Add
+  an LDAP connector to a virtual host in the config.rb file and run this command
+  to make sure we can connect properly. The <em>JID</em> prompt is an acronym for
+  Jabber ID, which is the full chat ID of our test user.
+</p>
+<pre>
+$ vines ldap wonderland.lit
+JID: alice@wonderland.lit
+Password: 
+LDAP connection failed: No such address or other socket error.
+</pre>
+<p>
+  This message means the host or port isn't set correctly.
+</p>
+<pre>
+$ vines ldap wonderland.lit
+JID: alice@wonderland.lit
+Password: 
+User not found
+</pre>
+<p>
+  We connected to the LDAP server, but the user ID and password weren't found.
+  Check that the <em>user_attr</em> LDAP property points to an attribute that 
+  contains the full JID of the user. The <em>mail</em> attribute is usually a
+  good choice because chat ID's and email addresses typically match.
+</p>
+
+<pre>
+$ vines ldap wonderland.lit
+JID: alice@wonderland.lit
+Password: 
+Found alice@wonderland.lit with name: Alice
+</pre>
+<p>
+  Success! Users can now login to the chat server using their LDAP user ID
+  and password.
+</p>
+
+<h2>schema</h2>
+<p>
+  When using the SQL database storage engine, we need a way to connect to the
+  database and create the tables and indexes. We'll use the schema command to
+  test the following storage settings for the wonderland.lit virtual host.
+</p>
+<pre>
+host 'wonderland.lit' do
+  storage 'sql' do
+    adapter 'postgresql'
+    host 'localhost'
+    port 5432
+    database 'wonderland'
+    username ''
+    password ''
+    pool 5
+  end
+end
+</pre>
+<p>
+  We've told the chat server to store data in a PostgreSQL database named
+  wonderland. Let's use the schema command to initialize the database.
+</p>
+<pre>
+$ vines schema wonderland.lit
+no such file to load -- pg
+</pre>
+<p>
+  We need to install the pg gem when connecting to a PostgreSQL database. This
+  gem provides the database driver that ActiveRecord uses to make the connection.
+</p>
+<pre>
+$ gem install pg
+Fetching: pg-0.11.0.gem (100%)
+Building native extensions.  This could take a while...
+Successfully installed pg-0.11.0
+1 gem installed
+$ vines schema wonderland.lit
+FATAL:  database "wonderland" does not exist
+</pre>
+<p>
+  The connection to the database server is working, but there's no database
+  yet for the tables. We need to use the PostgreSQL <em>createdb</em> tool 
+  before we install the schema.
+</p>
+<pre>
+$ createdb wonderland
+$ vines schema wonderland.lit
+</pre>
+<p>
+  Success! With the driver installed and database created, the schema command
+  was able to create the tables and indexes and the database is ready to use
+  by the chat server.
+</p>
+<p>
+  Running this command again won't hurt anything. The schema objects will only be
+  created if they don't exist.
+</p>
+
+<h2>start, stop, &amp; restart</h2>
+<p>
+  By default, vines runs in the foreground and logs messages to the console.
+  This is nice for quickly testing configuration changes, but not for running a
+  production chat server. Once we have the server configured correctly, we can
+  run it as a background process with the <em>-d</em> or <em>--daemonize</em>
+  flags.
+</p>
+<pre>
+$ vines -d start
+Vines has started
+$ vines stop
+Vines has been shutdown
+</pre>
+<p>
+  When the server is running in the background it writes its process ID to a file
+  in wonderland.lit/pid and its logs to wonderland.lit/log. We can customize
+  where these files are located with the <em>--pid</em> and <em>--log</em> flags.
+</p>
+<pre>
+$ vines -d --pid /var/run/vines.pid --log /var/log/vines.log start
+Vines has started
+$ vines stop
+Vines is not running
+$ vines --pid /var/run/vines.pid stop
+Vines has been shutdown
+</pre>
+<p>
+  Notice that we needed to tell the stop command where the pid file was located
+  because we moved it to a custom location when we started the server. Without
+  the <em>--pid</em> flag, the stop command thinks the server isn't running
+  because it can't find the pid file in the default location.
+</p>
+
