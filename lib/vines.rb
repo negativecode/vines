@@ -2,23 +2,25 @@
 
 module Vines
   NAMESPACES = {
-    :stream      => 'http://etherx.jabber.org/streams'.freeze,
-    :client      => 'jabber:client'.freeze,
-    :server      => 'jabber:server'.freeze,
-    :component   => 'jabber:component:accept'.freeze,
-    :roster      => 'jabber:iq:roster'.freeze,
-    :non_sasl    => 'jabber:iq:auth'.freeze,
-    :storage     => 'jabber:iq:private'.freeze,
-    :sasl        => 'urn:ietf:params:xml:ns:xmpp-sasl'.freeze,
-    :tls         => 'urn:ietf:params:xml:ns:xmpp-tls'.freeze,
-    :bind        => 'urn:ietf:params:xml:ns:xmpp-bind'.freeze,
-    :session     => 'urn:ietf:params:xml:ns:xmpp-session'.freeze,
-    :ping        => 'urn:xmpp:ping'.freeze,
-    :disco_items => 'http://jabber.org/protocol/disco#items'.freeze,
-    :disco_info  => 'http://jabber.org/protocol/disco#info'.freeze,
-    :http_bind   => 'http://jabber.org/protocol/httpbind'.freeze,
-    :bosh        => 'urn:xmpp:xbosh'.freeze,
-    :vcard       => 'vcard-temp'.freeze
+    :stream       => 'http://etherx.jabber.org/streams'.freeze,
+    :client       => 'jabber:client'.freeze,
+    :server       => 'jabber:server'.freeze,
+    :component    => 'jabber:component:accept'.freeze,
+    :roster       => 'jabber:iq:roster'.freeze,
+    :non_sasl     => 'jabber:iq:auth'.freeze,
+    :storage      => 'jabber:iq:private'.freeze,
+    :sasl         => 'urn:ietf:params:xml:ns:xmpp-sasl'.freeze,
+    :tls          => 'urn:ietf:params:xml:ns:xmpp-tls'.freeze,
+    :bind         => 'urn:ietf:params:xml:ns:xmpp-bind'.freeze,
+    :session      => 'urn:ietf:params:xml:ns:xmpp-session'.freeze,
+    :ping         => 'urn:xmpp:ping'.freeze,
+    :disco_items  => 'http://jabber.org/protocol/disco#items'.freeze,
+    :disco_info   => 'http://jabber.org/protocol/disco#info'.freeze,
+    :http_bind    => 'http://jabber.org/protocol/httpbind'.freeze,
+    :bosh         => 'urn:xmpp:xbosh'.freeze,
+    :vcard        => 'vcard-temp'.freeze,
+    :si           => 'http://jabber.org/protocol/si'.freeze,
+    :byte_streams => 'http://jabber.org/protocol/bytestreams'.freeze
   }.freeze
 
   module Log
@@ -67,6 +69,7 @@ end
   vines/stanza/iq
   vines/stanza/iq/query
   vines/stanza/iq/auth
+  vines/stanza/iq/byte_streams
   vines/stanza/iq/disco_info
   vines/stanza/iq/disco_items
   vines/stanza/iq/error
@@ -75,6 +78,7 @@ end
   vines/stanza/iq/result
   vines/stanza/iq/roster
   vines/stanza/iq/session
+  vines/stanza/iq/si
   vines/stanza/iq/vcard
   vines/stanza/message
   vines/stanza/presence
