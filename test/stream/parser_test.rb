@@ -31,6 +31,8 @@ class ParserTest < MiniTest::Unit::TestCase
       ['<iq id="42" type="get"><query xmlns="http://jabber.org/protocol/disco#info"></query></iq>', Vines::Stanza::Iq::Query::DiscoInfo],
       ['<iq id="42" type="get"><query xmlns="http://jabber.org/protocol/disco#items"></query></iq>', Vines::Stanza::Iq::Query::DiscoItems],
       ['<iq id="42" type="error"></iq>', Vines::Stanza::Iq::Error],
+      ['<iq id="42" type="get"><query xmlns="jabber:iq:private"/></iq>', Vines::Stanza::Iq::PrivateStorage],
+      ['<iq id="42" type="set"><query xmlns="jabber:iq:private"/></iq>', Vines::Stanza::Iq::PrivateStorage],
       ['<iq id="42" type="get"><ping xmlns="urn:xmpp:ping"/></iq>', Vines::Stanza::Iq::Ping],
       ['<iq id="42" type="result"></iq>', Vines::Stanza::Iq::Result],
       ['<iq id="42" type="get"><query xmlns="jabber:iq:roster"/></iq>', Vines::Stanza::Iq::Query::Roster],
