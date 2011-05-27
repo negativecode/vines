@@ -57,12 +57,12 @@ module Vines
 
         def request(request)
           if @responses.any?
-            request.reply(wrap_body(@responses.join))
+            request.reply(wrap_body(@responses.join), @content_type)
             @replied = Time.now
             @responses.clear
           else
             while @requests.size >= @hold
-              @requests.shift.reply(wrap_body(''))
+              @requests.shift.reply(wrap_body(''), @content_type)
               @replied = Time.now
             end
             @requests << request
@@ -72,7 +72,7 @@ module Vines
         # Send an HTTP 200 OK response wrapping the XMPP node content back
         # to the client.
         def reply(node)
-          @requests.shift.reply(node)
+          @requests.shift.reply(node, @content_type)
           @replied = Time.now
         end
 
@@ -81,7 +81,7 @@ module Vines
         # immediately. If not, it's queued until the next request arrives.
         def write(node)
           if request = @requests.shift
-            request.reply(wrap_body(node))
+            request.reply(wrap_body(node), @content_type)
             @replied = Time.now
           else
             @responses << node.to_s
@@ -97,7 +97,7 @@ module Vines
         def respond_to_expired_requests
           expired = @requests.select {|req| req.age > @wait }
           expired.each do |request|
-            request.reply(wrap_body(''))
+            request.reply(wrap_body(''), @content_type)
             @requests.delete(request)
             @replied = Time.now
           end

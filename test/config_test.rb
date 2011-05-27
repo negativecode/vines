@@ -304,6 +304,8 @@ class ConfigTest < MiniTest::Unit::TestCase
     assert_equal 5280, port.port
     assert_equal 131_072, port.max_stanza_size
     assert_equal 5, port.max_resources_per_account
+    assert_equal File.join(Dir.pwd, 'web'), port.root
+    assert_equal '/xmpp', port.bind
     refute port.private_storage?
     assert_equal Vines::Stream::Http, port.stream
     assert_same config, port.config 
@@ -316,9 +318,11 @@ class ConfigTest < MiniTest::Unit::TestCase
         storage(:fs) { dir '.' }
       end
       http '0.0.0.1', 42 do
+        bind '/custom'
         private_storage true
         max_stanza_size 60_000
         max_resources_per_account 1
+        root '/var/www/html'
       end
     end
     port = config.ports.first
@@ -328,6 +332,8 @@ class ConfigTest < MiniTest::Unit::TestCase
     assert_equal 42, port.port
     assert_equal 60_000, port.max_stanza_size
     assert_equal 1, port.max_resources_per_account
+    assert_equal '/var/www/html', port.root
+    assert_equal '/custom', port.bind
     assert port.private_storage?
     assert_equal Vines::Stream::Http, port.stream
     assert_same config, port.config 

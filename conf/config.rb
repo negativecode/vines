@@ -68,12 +68,17 @@ Vines::Config.configure do
     hosts []
   end
 
-  # Configure the XEP-0124 BOSH port. This allows HTTP clients to connect to
-  # the XMPP server.
+  # Configure the built-in HTTP server that serves static files and responds to
+  # XEP-0124 BOSH requests. This allows HTTP clients to connect to
+  # the XMPP server. The root attribute defines the web server's document root.
+  # It will only serve files out of this directory. The bind attribute defines
+  # the URL to which BOSH clients must POST their XMPP stanza requests.
   http '0.0.0.0', 5280 do
+    bind '/xmpp'
     private_storage true
     max_stanza_size 65536
     max_resources_per_account 5
+    root 'web'
   end
 
   # Configure the XEP-0114 external component port. Add entries for each

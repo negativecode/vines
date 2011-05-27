@@ -17,7 +17,7 @@ module Vines
           body = ''
           p.on_body = proc {|data| body << data }
           p.on_message_complete = proc {
-            process_request(body)
+            process_request(Request.new(self, @parser, body))
             body = ''
           }
         end
@@ -30,23 +30,19 @@ module Vines
         @session.id == sid
       end
 
-      %w[max_stanza_size max_resources_per_account private_storage?].each do |name|
+      %w[max_stanza_size max_resources_per_account private_storage? bind root].each do |name|
         define_method name do |*args|
           @config[:http].send(name, *args)
         end
       end
 
-      def process_request(body)
-        # proxy server ping
-        if body.empty?
-          req = Request.new(self, nil, 'text/plain')
-          req.reply('online')
-          close_connection_after_writing
-        else
-          body = Nokogiri::XML(body).root
-          req = Request.new(self, body['rid'], @session.content_type)
-          @session.request(req)
+      def process_request(request)
+        if request.path == self.bind
+          body = Nokogiri::XML(request.body).root
+          @session.request(request)
           @nodes.push(body)
+        else
+          request.reply_with_file(self.root)
         end
       end
 

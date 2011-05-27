@@ -174,6 +174,8 @@ module Vines
       def initialize(config, host='0.0.0.0', port=5280, &block)
         @stream = Vines::Stream::Http
         super(config, host, port, &block)
+        defaults = {:root => File.expand_path('web'), :bind => '/xmpp'}
+        @settings = defaults.merge(@settings)
       end
 
       def max_resources_per_account(max=nil)
@@ -190,6 +192,22 @@ module Vines
 
       def private_storage?
         @settings[:private_storage]
+      end
+
+      def root(dir=nil)
+        if dir
+          @settings[:root] = File.expand_path(dir)
+        else
+          @settings[:root]
+        end
+      end
+
+      def bind(url=nil)
+        if url
+          @settings[:bind] = url
+        else
+          @settings[:bind]
+        end
       end
     end
 
