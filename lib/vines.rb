@@ -69,7 +69,6 @@ end
   vines/stanza/iq
   vines/stanza/iq/query
   vines/stanza/iq/auth
-  vines/stanza/iq/byte_streams
   vines/stanza/iq/disco_info
   vines/stanza/iq/disco_items
   vines/stanza/iq/error
@@ -78,7 +77,6 @@ end
   vines/stanza/iq/result
   vines/stanza/iq/roster
   vines/stanza/iq/session
-  vines/stanza/iq/si
   vines/stanza/iq/vcard
   vines/stanza/message
   vines/stanza/presence

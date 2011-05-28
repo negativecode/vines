@@ -15,7 +15,7 @@ module Vines
 
       def process
         if self['id'] && VALID_TYPES.include?(self['type'])
-          raise StanzaErrors::FeatureNotImplemented.new(@node, 'cancel')
+          route_iq or raise StanzaErrors::FeatureNotImplemented.new(@node, 'cancel')
         else
           raise StanzaErrors::BadRequest.new(@node, 'modify')
         end
