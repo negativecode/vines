@@ -8,14 +8,12 @@
   text-align: center;
 }
 #login-page h1 {
-  color: #4693ff;
-  font-family: "ff-cocon-web-pro-1", "ff-cocon-web-pro-2", "Helvetica Neue", Helvetica, sans-serif;
-  font-size: 60pt;
-  letter-spacing: -4px;
-  line-height: 1;
-  margin-bottom: 30px;
-  text-align: center;
-  text-shadow: 0 1px 1px #000;
+  background: url(/lib/images/logo-large.png) no-repeat;
+  color: transparent;
+  height: 64px;
+  margin: 0 auto 30px auto;
+  text-shadow: none;
+  width: 245px;
 }
 #login-page #login-form {
   margin: 0 auto;
