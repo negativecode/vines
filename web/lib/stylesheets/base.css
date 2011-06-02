@@ -50,15 +50,15 @@ optgroup option {
   z-index: 10;
 }
 #app-strip #logo {
-  color: rgba(255, 255, 255, 0.2);
-  font-family: "ff-cocon-web-pro-1", "ff-cocon-web-pro-2", "Helvetica Neue", Helvetica, sans-serif;
-  font-size: 30pt;
-  letter-spacing: -1px;
-  line-height: 1;
-  text-shadow: none;
+  background: url(/lib/images/logo-small.png) no-repeat;
+  color: transparent;
+  height: 30px;
+  opacity: 0.2;
   position: absolute;
-  top: 7px;
+  top: 15px;
   right: 10px;
+  width: 117px;
+  text-shadow: none;
 }
 #app-strip #current-user {
   height: 50px;
