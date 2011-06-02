@@ -1,0 +1,204 @@
+#chat-page {
+  background: #fff;
+}
+#chat-page #container {
+  height: 100%;
+}
+#chat-page #alpha,
+#chat-page #beta,
+#chat-page #charlie {
+  height: 100%;
+  position: absolute;
+  top: 60px;
+}
+#chat-page #alpha {
+  background: #f8f8f8;
+  -webkit-box-shadow: 0 0 40px rgba(0, 0, 0, 0.1) inset;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.1) inset;
+  width: 260px;
+}
+#chat-page #alpha h2,
+#chat-page #beta h2,
+#chat-page #charlie h2 {
+  border-bottom: 1px solid #ddd;
+  font-size: 10pt;
+  padding-left: 10px;
+  text-shadow: 0 -1px 1px #fff;
+}
+#chat-page #beta {
+  -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, 0.5), 0 0 40px rgba(0, 0, 0, 0.1) inset;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5), 0 0 40px rgba(0, 0, 0, 0.1) inset;
+  width: 460px;
+  left: 260px;
+  z-index: 1;
+}
+#chat-page #charlie {
+  background: #f8f8f8;
+  -webkit-box-shadow: 0 0 40px rgba(0, 0, 0, 0.1) inset;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.1) inset;
+  width: 260px;
+  left: 720px;
+}
+#chat-page #chat-title {
+  background: #f8f8f8;
+}
+#chat-page #messages {
+  background: #fff;
+  height: 100%;
+  list-style: none;
+  overflow-y: auto;
+  text-shadow: 0 1px 1px #ddd;
+  width: 100%;
+}
+#chat-page #messages::-webkit-scrollbar,
+#chat-page #roster::-webkit-scrollbar {
+  width: 6px;
+}
+#chat-page #messages::-webkit-scrollbar-thumb,
+#chat-page #roster::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+}
+#chat-page #messages::-webkit-scrollbar-thumb:vertical,
+#chat-page #roster::-webkit-scrollbar-thumb:vertical {
+  background: rgba(0, 0, 0, .2);
+}
+#chat-page #messages li {
+  border-bottom: 1px solid #f0f0f0;
+  min-height: 40px;
+  padding: 10px;
+  position: relative;
+}
+#chat-page #messages li:hover > span .time {
+  opacity: 0.3;
+}
+#chat-page #messages li img {
+  border: 3px solid #fff;
+  -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 0 40px rgba(0, 0, 0, 0.06) inset;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 0 40px rgba(0, 0, 0, 0.06) inset;
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  height: 40px;
+  width: 40px;
+}
+#chat-page #messages li p {
+  line-height: 1.5;
+  width: 90%;
+}
+#chat-page #messages li footer {
+  font-size: 9pt;
+  padding-right: 50px;
+  text-align: right;
+}
+#chat-page #messages li footer span {
+  color: #d8d8d8;
+  margin-right: 0.5em;
+  text-shadow: none;
+}
+#chat-page #messages li footer .author::before {
+  content: '\2014 ';
+}
+#chat-page #message-form {
+  background: #f8f8f8;
+  border-top: 1px solid #dfdfdf;
+  height: 50px;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}
+#chat-page #message:focus {
+  -webkit-box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.6);
+  box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.6);
+}
+#chat-page #message {
+  display: block;
+  position: relative;
+  left: 10px;
+  top: 10px;
+  width: 428px;
+}
+#chat-page #roster {
+  height: 100%;
+  list-style: none;
+  overflow-y: auto;
+  text-shadow: 0 1px 1px #fff;
+  width: 260px;
+}
+#chat-page #roster li {
+  cursor: pointer;
+  border-bottom: 1px solid #ddd;
+  font-weight: bold;
+  height: 42px;
+  padding: 0 10px;
+  position: relative;
+  -moz-transition: background 0.3s;
+  -o-transition: background 0.3s;
+  -webkit-transition: background 0.3s;
+  transition: background 0.3s;
+}
+#chat-page #roster li:hover {
+  background: rgba(255, 255, 255, 1.0);
+}
+#chat-page #roster .status-msg {
+  display: block;
+  font-size: 11px;
+  font-weight: normal;
+  line-height: 11px;
+}
+#chat-page #roster .unread {
+  background: #1e4171;
+  border-radius: 30px;
+  color: #fff;
+  display: inline-block;
+  font-size: 11px;
+  font-weight: normal;
+  line-height: 15px;
+  padding: 0px 6px;
+  position: absolute;
+  right: 50px;
+  top: 14px;
+  text-shadow: none;
+}
+#chat-page #roster .vcard-img {
+  border: 1px solid #fff;
+  -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 0 40px rgba(0, 0, 0, 0.06) inset;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 0 40px rgba(0, 0, 0, 0.06) inset;
+  height: 32px;
+  width: 32px;
+  position: absolute;
+  top: 4px;
+  right: 10px;
+}
+#chat-page #controls {
+  background: rgba(255, 255, 255, 0.05);
+  border-top: 1px solid #ddd;
+  height: 50px;
+  position: absolute;
+  bottom: 0;
+  width: 260px;
+}
+#chat-page #controls > div {
+  cursor: pointer;
+  display: inline-block;
+  height: 27px;
+  margin: 0 10px;
+  position: relative;
+  top: 10px;
+  width: 27px;
+}
+#chat-page #edit-contact-form {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  padding: 10px;
+  position: absolute;
+  bottom: 50px;
+  left: 0;
+  width: 260px;
+}
+#chat-page #edit-contact-form input {
+  margin-bottom: 10px;
+  width: 230px;
+}
+#chat-page #edit-contact-form input:nth-child(0) {
+  margin-bottom: 0;
+}

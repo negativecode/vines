@@ -1,0 +1,151 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+html {
+  background: #0c1a2d;
+  height: 100%;
+}
+body {
+  background: #0c1a2d;
+  color: #222;
+  font-family: "Helvetica Neue", Helvetica, sans-serif;
+  font-size: 10pt;
+  height: 100%;
+  line-height: 20pt;
+}
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  border-radius: 2px;
+  border: none;
+  -webkit-box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.2);
+  box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.2);
+  font-family: "Helvetica Neue", Helvetica, sans-serif;
+  font-size: 10pt;
+  outline: none;
+  padding: 6px;
+}
+fieldset {
+  border: none;
+}
+optgroup {
+  font-style: normal;
+}
+optgroup option {
+  padding-left: 20px;
+}
+#app-strip {
+  background: #0c1a2d;
+  background: -moz-linear-gradient(#1e4171, #0c1a2d);
+  background: -o-linear-gradient(#1e4171, #0c1a2d);
+  background: -webkit-gradient(linear, left top, left bottom, from(#1e4171), to(#0c1a2d));
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  -webkit-box-shadow: 0 0 3px 1px #222;
+  box-shadow: 0 0 3px 1px #222;
+  color: #bdd5ff;
+  height: 60px;
+  position: relative;
+  text-shadow: 0 1px 1px #000, 0 0 1px #fff;
+  z-index: 10;
+}
+#app-strip #logo {
+  color: rgba(255, 255, 255, 0.2);
+  font-family: "ff-cocon-web-pro-1", "ff-cocon-web-pro-2", "Helvetica Neue", Helvetica, sans-serif;
+  font-size: 30pt;
+  letter-spacing: -1px;
+  line-height: 1;
+  text-shadow: none;
+  position: absolute;
+  top: 7px;
+  right: 10px;
+}
+#app-strip #current-user {
+  height: 50px;
+  width: 260px;
+  position: relative;
+  top: 5px;
+  left: 10px;
+}
+#app-strip #current-user-avatar {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  -webkit-box-shadow: 0 0 1px 0px #bdd5ff;
+  box-shadow: 0 0 1px 0px #bdd5ff;
+  height: 48px;
+  width: 48px;
+}
+#app-strip #current-user-info {
+  position: relative;
+  top: -60px;
+  left: 58px;
+}
+#app-strip #current-user-name {
+  font-size: 11pt;
+  font-weight: normal;
+  line-height: 1.7;
+}
+#app-strip #current-user-presence-form .select {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 30px;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 16px;
+}
+#app-strip #current-user-presence {
+  border: 1px solid;
+}
+#app-strip #app-nav {
+  position: absolute;
+  left: 260px;
+  top: 15px;
+  width: 600px;
+}
+#app-strip #nav-links li {
+  border: 1px solid transparent;
+  border-radius: 30px;
+  color: rgba(255, 255, 255, 0.8);
+  display: inline-block;
+  font-size: 11px;
+  line-height: 1;
+  list-style: none;
+  margin-left: 10px;
+  padding: 3px 10px;
+  text-transform: uppercase;
+}
+#app-strip #nav-links li:first-child {
+  margin-left: 0;
+}
+#app-strip #nav-links li:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+#app-strip #nav-links li.selected {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+#app-strip #nav-links li a {
+  color: inherit;
+  text-decoration: none;
+}
+.select {
+  background: #f0f0f0;
+  border-radius: 3px;
+  display: inline-block;
+  font-size: 11px;
+  line-height: 18px;
+  padding: 0 5px;
+  position: relative;
+}
+.select span::after {
+  margin-left: 3px;
+  content: '\25be';
+}
+.select select {
+  cursor: pointer;
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
