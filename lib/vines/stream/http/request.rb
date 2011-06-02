@@ -11,13 +11,14 @@ module Vines
         IF_MODIFIED   = 'If-Modified-Since'.freeze
         TEXT_PLAIN    = 'text/plain'.freeze
         CONTENT_TYPES = {
-          'html' => 'text/html; charset="utf-8"',
-          'js'   => 'application/javascript; charset="utf-8"',
-          'css'  => 'text/css',
-          'png'  => 'image/png',
-          'jpg'  => 'image/jpeg',
-          'jpeg' => 'image/jpeg',
-          'gif'  => 'image/gif'
+          'html'     => 'text/html; charset="utf-8"',
+          'js'       => 'application/javascript; charset="utf-8"',
+          'css'      => 'text/css',
+          'png'      => 'image/png',
+          'jpg'      => 'image/jpeg',
+          'jpeg'     => 'image/jpeg',
+          'gif'      => 'image/gif',
+          'manifest' => 'text/cache-manifest'
         }.freeze
 
         attr_reader :stream, :body, :headers, :method, :path, :url, :query
