@@ -21,7 +21,7 @@ all client and server connections."
   s.email        = %w[david@negativecode.com chris@negativecode.com]
   s.homepage     = "http://www.getvines.com"
 
-  s.files        = FileList['[A-Z]*', '{bin,lib,conf}/**/*']
+  s.files        = FileList['[A-Z]*', '{bin,lib,conf,web}/**/*']
   s.test_files   = FileList["test/**/*"]
   s.executables  = %w[vines]
   s.require_path = "lib"

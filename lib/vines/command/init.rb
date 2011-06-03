@@ -10,7 +10,9 @@ module Vines
         raise "Directory already initialized: #{domain}" if File.exists?(dir)
         Dir.mkdir(dir)
 
-        FileUtils.cp_r(File.expand_path('../../../../conf', __FILE__), dir)
+        %w[conf web].each do |sub|
+          FileUtils.cp_r(File.expand_path("../../../../#{sub}", __FILE__), dir)
+        end
         users, log, pid = %w[conf/users log pid].map do |sub|
           File.join(dir, sub).tap {|subdir| Dir.mkdir(subdir) }
         end
