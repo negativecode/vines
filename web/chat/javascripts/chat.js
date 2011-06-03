@@ -59,7 +59,7 @@ var ChatPage = Class.create({
   roster: function() {
     var roster = $('#roster').empty();
     $H(this.session.roster).values().each(function(contact) {
-      var node = $('<li></li>', {'class': contact.jid})
+      var node = $('<li></li>', {'data-jid': contact.jid})
         .text(contact.name || contact.jid)
         .append($('<span></span>', {'class': 'status-msg'}).text('Offline'))
         .append($('<span></span>', {'class': 'unread'}).hide())
@@ -89,9 +89,8 @@ var ChatPage = Class.create({
   },
 
   eachContact: function(jid, callback) {
-    $('#roster li').each(function() {
-      var node = $(this);
-      if (node.hasClass(jid)) callback(node);
+    $('#roster li[data-jid="'+ jid +'"]').each(function() {
+      callback($(this));
     });
   },
 
@@ -138,10 +137,13 @@ var ChatPage = Class.create({
   },
 
   selectContact: function(event) {
-    var jid = event.currentTarget.className;
+    var jid = $(event.currentTarget).attr('data-jid');
     var contact = this.session.roster[jid];
     if (this.currentContact == jid) return;
     this.currentContact = jid;
+
+    $('#roster li').removeClass('selected');
+    $(event.currentTarget).addClass('selected');
     $('#title').text('Chat with ' + (contact.name || contact.jid));
     $('#messages').empty();
 

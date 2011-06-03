@@ -139,6 +139,18 @@
 #chat-page #roster li:hover {
   background: rgba(255, 255, 255, 1.0);
 }
+#chat-page #roster li.selected {
+  background: #4693FF;
+  background: -moz-linear-gradient(#4693FF, #015de6);
+  background: -o-linear-gradient(#4693FF, #015de6);
+  background: -webkit-gradient(linear, left top, left bottom, from(#4693FF), to(#015de6));
+  border-bottom: 1px solid #fff;
+  color: #fff;
+  text-shadow: 0 -1px 1px #1b3a65;
+}
+#chat-page #roster li.selected .status-msg {
+  color: rgba(255, 255, 255, 0.85);
+}
 #chat-page #roster .status-msg {
   display: block;
   font-size: 11px;
@@ -146,7 +158,10 @@
   line-height: 11px;
 }
 #chat-page #roster .unread {
-  background: #1e4171;
+  background: #4693FF;
+  background: -moz-linear-gradient(#4693FF, #015de6);
+  background: -o-linear-gradient(#4693FF, #015de6);
+  background: -webkit-gradient(linear, left top, left bottom, from(#4693FF), to(#015de6));
   border-radius: 30px;
   color: #fff;
   display: inline-block;
