@@ -1,7 +1,7 @@
 var Session = Class.create({
   initialize: function() {
     this.xmpp = new Strophe.Connection('/xmpp');
-    this.listeners = {'cards': [], 'message': [], 'presence': [], 'roster': []};
+    this.listeners = {'card': [], 'message': [], 'presence': [], 'roster': []};
     this.roster = {};
   },
 
@@ -25,8 +25,8 @@ var Session = Class.create({
     }.bind(this));
   },
 
-  onCards: function(callback) {
-    this.listeners['cards'].push(callback);
+  onCard: function(callback) {
+    this.listeners['card'].push(callback);
   },
 
   onRoster: function(callback) {
@@ -60,17 +60,14 @@ var Session = Class.create({
   },
 
   findCards: function() {
-    var me = this.jid().split('/').first();
-    var jids = [$H(this.roster).keys(), me].flatten()
+    var jids = [].concat.apply([], [$H(this.roster).keys(), this.bareJid()])
       .filter(function(jid) { return !this.loadCard(jid) }, this);
 
-    var notified = false;
     var success = function(card) {
-      if (card) this.storeCard(card);
       this.findCard(jids.shift(), success);
-      if (!notified) {
-        notified = true;
-        this.notify('cards');
+      if (card) {
+        this.storeCard(card);
+        this.notify('card', card);
       }
     }.bind(this);
     this.findCard(jids.shift(), success);

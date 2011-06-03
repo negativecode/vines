@@ -20,7 +20,7 @@ var ChatPage = Class.create({
     this.router = router;
     this.session = session;
     this.session.onRoster(this.roster.bind(this));
-    this.session.onCards(this.cards.bind(this));
+    this.session.onCard(this.card.bind(this));
     this.session.onMessage(this.message.bind(this));
     this.session.onPresence(this.presence.bind(this));
     this.chats = {};
@@ -46,14 +46,14 @@ var ChatPage = Class.create({
     return image;
   },
 
-  cards: function() {
-    $H(this.session.roster).keys().each(function(jid) {
-      this.eachContact(jid, function(node) {
-        $('.vcard-img', node).attr('src', this.avatar(jid));
-      }.bind(this));
-    }, this);
+  card: function(card) {
+    this.eachContact(card.jid, function(node) {
+      $('.vcard-img', node).attr('src', this.avatar(card.jid));
+    }.bind(this));
 
-    $('#current-user-avatar').attr('src', this.avatar(this.session.jid()));
+    if (card.jid == this.session.bareJid()) {
+      $('#current-user-avatar').attr('src', this.avatar(card.jid));
+    }
   },
 
   roster: function() {
@@ -235,7 +235,7 @@ var ChatPage = Class.create({
       this.session.sendPresence(selected.val() == 'xa', selected.text());
     }.bind(this));
 
-    var alpha = $('<div></div>', {id: 'alpha'})
+    $('<div></div>', {id: 'alpha'})
       .append($('<h2></h2>').text('Buddies'))
       .append($('<ul></ul>', {id: 'roster'}))
       .append($('<div></div>', {id: 'controls'})
@@ -261,7 +261,7 @@ var ChatPage = Class.create({
         placeholder: 'Your email'}))
       .appendTo('#alpha');
 
-    var beta = $('<div></div>', {id: 'beta'})
+    $('<div></div>', {id: 'beta'})
       .append($('<div></div>', {id: 'chat-title'})
         .append($('<h2></h2>', {id: 'title'}).text('Select a buddy to chat'))
       )
@@ -275,11 +275,11 @@ var ChatPage = Class.create({
           placeholder: 'Type a message and press enter to send'}))
       ).appendTo('#container');
 
-      var charlie = $('<div></div>', {id: 'charlie'})
-        .append($('<h2></h2>').text('Notifications'))
-        .append($('<ul></ul>', {id: 'notifications'}))
-        .append($('<div></div>', {id: 'notification-controls'})
-        ).appendTo('#container');
+    $('<div></div>', {id: 'charlie'})
+      .append($('<h2></h2>').text('Notifications'))
+      .append($('<ul></ul>', {id: 'notifications'}))
+      .append($('<div></div>', {id: 'notification-controls'})
+      ).appendTo('#container');
 
     this.button('add-contact', this.PLUS);
     this.button('remove-contact', this.MINUS);
@@ -290,27 +290,32 @@ var ChatPage = Class.create({
     $('#edit-contact-form').hide();
     $('#edit-contact').click(this.toggleEditForm.bind(this));
 
-    var win  = $(window);
-    var msg  = $('#message');
-    var msgs = $('#messages');
-    var form = $('#message-form');
+    this.resize();
+    $('#container').hide().fadeIn(200);
+  },
+
+  resize: function() {
+    var win    = $(window);
+    var a      = $('#alpha');
+    var b      = $('#beta');
+    var c      = $('#charlie');
+    var msg    = $('#message');
+    var msgs   = $('#messages');
+    var form   = $('#message-form');
     var roster = $('#roster');
     var sizer = function() {
       var height = win.height() - 60;
-      alpha.height(height);
-      beta.height(height);
-      charlie.height(height);
-
-      roster.height(alpha.height() - 80);
-      msgs.height(beta.height() - 80);
-
-      beta.width(win.width() - alpha.width() - charlie.width());
-      charlie.css('left', alpha.width() + beta.width());
+      a.height(height);
+      b.height(height);
+      c.height(height);
+      roster.height(height - 80);
+      msgs.height(height - 80);
+      b.width(win.width() - a.width() - c.width());
+      c.css('left', a.width() + b.width());
       msg.width(form.width() - 32);
     };
     win.resize(sizer);
     sizer();
-    $('#container').hide().fadeIn(200);
   },
 
   button: function(id, path) {
