@@ -1,10 +1,43 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Not found</title>
+  <meta charset="utf-8"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <title>Vines</title>
+  <link rel="shortcut icon" type="image/png" href="/favicon.png"/>
+  <link rel="stylesheet" href="/lib/stylesheets/base.css"/>
+  <style type="text/css">
+    body {
+      background: -moz-radial-gradient(#1a3762, #0c1a2d);
+      background: -webkit-gradient(radial, 50% 50%, 0, 50% 50%, 500, from(#1a3762), to(#0c1a2d));
+      display: table;
+      text-align: center;
+      width: 100%;
+    }
+    header {
+      display: table-cell;
+      vertical-align: middle;
+      width: 100%;
+    }
+    h1 {
+      background: url(/lib/images/logo-large.png) no-repeat center;
+      color: transparent;
+      height: 64px;
+      text-shadow: none;
+      width: 100%;
+    }
+    p {
+      color: #fff;
+      font-size: 11pt;
+      margin: 20px auto;
+      text-shadow: 0 1px 1px #000;
+    }
+  </style>
 </head>
 <body>
-  <h1>Not found</h1>
-  <p>This is not the page you're looking for.</p>
+  <header>
+    <h1>Page not found</h1>
+    <p>This is not the page you're looking for.</p>
+  </header>
 </body>
 </html>
