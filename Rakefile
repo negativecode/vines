@@ -114,6 +114,7 @@ end
 task :cleanup do
   # move index.html back into place after gem packaging
   FileUtils.cp('/tmp/index.html', 'web/chat/index.html')
+  File.delete('/tmp/index.html')
 end
 
 task :default => [:clobber, :test, :compile, :gem, :cleanup]
