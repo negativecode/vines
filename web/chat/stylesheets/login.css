@@ -28,8 +28,9 @@
 }
 #login-page #start {
   background: #285696;
+  background: -moz-linear-gradient(#4693ff, #285696);
+  background: -o-linear-gradient(#4693ff, #285696);
   background: -webkit-gradient(linear, left top, left bottom, from(#4693ff), to(#285696));
-  background: -moz-linear-gradient(top, #4693ff, #285696);
   border: 1px solid #4693ff;
   border-radius: 30px;
   -webkit-box-shadow: 0 1px 1px #000;
