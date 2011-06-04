@@ -1,6 +1,3 @@
-#chat-page {
-  background: #fff;
-}
 #chat-page #container {
   height: 100%;
 }
@@ -199,6 +196,10 @@
   margin: 0 10px;
   position: relative;
   top: 10px;
+  width: 27px;
+}
+#chat-page #controls > div > svg {
+  height: 27px;
   width: 27px;
 }
 #chat-page #edit-contact-form {
