@@ -62,7 +62,7 @@ optgroup option {
 }
 #app-strip #current-user {
   height: 50px;
-  width: 260px;
+  width: 240px;
   position: relative;
   top: 5px;
   left: 10px;
@@ -80,9 +80,12 @@ optgroup option {
   left: 58px;
 }
 #app-strip #current-user-name {
-  font-size: 11pt;
+  font-size: 10pt;
   font-weight: normal;
   line-height: 1.7;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 180px;
 }
 #app-strip #current-user-presence-form .select {
   background: rgba(255, 255, 255, 0.2);
@@ -95,37 +98,43 @@ optgroup option {
   border: 1px solid;
 }
 #app-strip #app-nav {
+  height: 100%;
   position: absolute;
   left: 260px;
-  top: 15px;
+  top: 0;
   width: 600px;
 }
+#app-strip #nav-links {
+  height: 100%;
+}
 #app-strip #nav-links li {
-  border: 1px solid transparent;
-  border-radius: 30px;
+  border-left: 1px solid transparent;
+  border-right: 1px solid transparent;
   color: rgba(255, 255, 255, 0.8);
   display: inline-block;
+  font-family: "Trebuchet MS";
+  font-weight: bold;
   font-size: 11px;
+  height: 100%;
+  min-width: 100px;
   line-height: 1;
   list-style: none;
-  margin-left: 10px;
-  padding: 3px 10px;
+  text-align: center;
   text-transform: uppercase;
 }
-#app-strip #nav-links li:first-child {
-  margin-left: 0;
-}
-#app-strip #nav-links li:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
+#app-strip #nav-links li:hover,
 #app-strip #nav-links li.selected {
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.1);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
 }
 #app-strip #nav-links li a {
   color: inherit;
+  display: inline-block;
+  height: 100%;
+  line-height: 60px;
   text-decoration: none;
+  width: 100%;
 }
 .select {
   background: #f0f0f0;
