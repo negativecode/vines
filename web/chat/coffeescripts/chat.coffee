@@ -249,6 +249,7 @@ class ChatPage
   resize: ->
     win    = $ window
     header = $ '#app-strip'
+    nav    = $ '#app-nav'
     a      = $ '#alpha'
     b      = $ '#beta'
     c      = $ '#charlie'
@@ -270,6 +271,7 @@ class ChatPage
       msgs.height   b.height() - form.height() - btitle.height()
 
       b.width win.width() - a.width() - c.width()
+      nav.width b.width()
       c.css 'left', a.width() + b.width()
       msg.width form.width() - 32
 
