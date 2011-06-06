@@ -99,6 +99,7 @@ optgroup option {
 }
 #app-strip #app-nav {
   height: 100%;
+  overflow: hidden;
   position: absolute;
   left: 260px;
   top: 0;
@@ -133,8 +134,20 @@ optgroup option {
   display: inline-block;
   height: 100%;
   line-height: 60px;
+  position: relative;
   text-decoration: none;
   width: 100%;
+}
+#chat-page #nav-links li a svg {
+  height: 30px;
+  width: 30px;
+  position: absolute;
+  left: 32px;
+  top: 3px;
+}
+#app-strip #nav-links li a span {
+  position: relative;
+  top: 15px;
 }
 .select {
   background: #f0f0f0;
