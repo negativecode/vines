@@ -22,6 +22,8 @@ class Session
             this.findCards()
           @xmpp.send $pres().tree()
 
+  disconnect: -> @xmpp.disconnect()
+
   onCard: (callback) ->
     @listeners['card'].push callback
 
@@ -33,6 +35,9 @@ class Session
 
   onPresence: (callback) ->
     @listeners['presence'].push callback
+
+  connected: ->
+    @xmpp.jid && @xmpp.jid.length > 0
 
   jid: -> @xmpp.jid
 
