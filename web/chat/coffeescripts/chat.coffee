@@ -1,9 +1,9 @@
 class ChatPage
+  MINUS: 'M25.979,12.896,19.312,12.896,5.979,12.896,5.979,19.562,25.979,19.562z'
+
   PLUS:  'M25.979,12.896 19.312,12.896 19.312,6.229 12.647,6.229 12.647,' +
          '12.896 5.979,12.896 5.979,19.562 12.647,19.562 12.647,26.229 ' +
          '19.312,26.229 19.312,19.562 25.979,19.562z'
-
-  MINUS: 'M25.979,12.896,19.312,12.896,5.979,12.896,5.979,19.562,25.979,19.562z'
 
   USER:  'M20.771,12.364c0,0,0.849-3.51,0-4.699c-0.85-1.189-1.189-1.981-' +
          '3.058-2.548s-1.188-0.454-2.547-0.396c-1.359,0.057-2.492,0.792-' +
@@ -16,7 +16,7 @@ class ChatPage
          '1.584-1.698-1.584-1.698s-0.51,0.282-0.51-0.51s0.51,0.51,1.02-' +
          '2.548c0,0,1.414-0.397,1.132-3.68H20.771z'
 
-  constructor: (@router, @session) ->
+  constructor: (@session) ->
     @session.onRoster   ( ) => this.roster()
     @session.onCard     (c) => this.card(c)
     @session.onMessage  (m) => this.message(m)
@@ -163,7 +163,12 @@ class ChatPage
     if form.is ':hidden' then form.fadeIn() else form.fadeOut()
 
   draw: ->
+    unless @session.connected()
+      window.location.hash = ''
+      return
+
     $('body').attr 'id', 'chat-page'
+    $('#container').remove()
     $('<div id="container"></div>').hide().appendTo 'body'
     this.drawHeader()
     $("""
@@ -201,14 +206,14 @@ class ChatPage
 
     $('#message').focus -> $('#edit-contact-form').fadeOut()
     $('#message-form').submit => this.send()
-    $('#edit-contact').click => this.toggleEditForm()
+    $('#edit-contact').click  => this.toggleEditForm()
 
     $('#container').fadeIn 200
     this.resize()
 
   drawHeader: ->
     avatar = this.avatar(@session.jid()) || ''
-    $(""""
+    $("""
       <header id="app-strip">
         <h1 id="logo">vines&gt;</h1>
         <div id="current-user">
@@ -287,9 +292,8 @@ class ChatPage
       opacity: 0.6
       scale: 0.85
 
-    $('#' + id).hover(
+    node = $('#' + id)
+    node.hover(
       -> icon.animate(opacity: 1.0, 200),
       -> icon.animate(opacity: 0.6, 200))
-
-    $('#' + id).get 0
-
+    node.get 0

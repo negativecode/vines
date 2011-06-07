@@ -1,5 +1,5 @@
 class LoginPage
-  constructor: (@router, @session) ->
+  constructor: (@session) ->
 
   start: ->
     $('#error').hide()
@@ -7,13 +7,15 @@ class LoginPage
       ($('#error').show(); return) unless success
       localStorage['jid'] = $('#jid').val()
       $('#container').fadeOut 200, =>
-        $('#container').remove()
-        @router.showChat()
+        window.location.hash = '/messages/'
+
     @session.connect $('#jid').val(), $('#password').val(), callback
 
   draw: ->
+    @session.disconnect()
     jid = localStorage['jid'] || ''
     $('body').attr 'id', 'login-page'
+    $('#container').remove()
     $("""
       <div id="container" style="display:none;">
         <form id="login-form">
