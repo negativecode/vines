@@ -141,7 +141,7 @@ optgroup option {
   text-decoration: none;
   width: 100%;
 }
-#chat-page #nav-links li a svg {
+#navbar #nav-links li a svg {
   height: 30px;
   width: 30px;
   position: absolute;
