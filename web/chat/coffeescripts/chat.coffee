@@ -33,17 +33,9 @@ class ChatPage
     minutes = '0' + minutes if minutes.length == 1
     hour + ':' + minutes + meridian
 
-  avatar: (jid) ->
-    card = @session.loadCard(jid)
-    if card && card.photo
-      "data:#{card.photo.type};base64,#{card.photo.binval}"
-
   card: (card) ->
     this.eachContact card.jid, (node) =>
-      $('.vcard-img', node).attr 'src', this.avatar card.jid
-
-    if card.jid == @session.bareJid()
-      $('#current-user-avatar').attr 'src', this.avatar card.jid
+      $('.vcard-img', node).attr 'src', @session.avatar card.jid
 
   roster: ->
     roster = $('#roster').empty()
@@ -52,7 +44,7 @@ class ChatPage
         .text(contact.name || jid)
         .append($('<span></span>', class: 'status-msg').text('Offline'))
         .append($('<span></span>', class: 'unread').hide())
-        .append($('<img/>', class: 'vcard-img', src: this.avatar(jid), alt: jid))
+        .append($('<img/>', class: 'vcard-img', src: @session.avatar(jid), alt: jid))
       node.click (event) => this.selectContact(event)
       roster.append node
 
@@ -83,7 +75,7 @@ class ChatPage
 
     $('<li></li>', 'data-jid': from)
       .append($('<p></p>').text message.text)
-      .append($('<img/>', src: this.avatar(from), alt: from))
+      .append($('<img/>', src: @session.avatar(from), alt: from))
       .append($('<footer></footer>')
         .append($('<span></span>', class: 'author').text name)
         .append($('<span></span>', class: 'time').text this.datef message.received))
@@ -168,9 +160,7 @@ class ChatPage
       return
 
     $('body').attr 'id', 'chat-page'
-    $('#container').remove()
-    $('<div id="container"></div>').hide().appendTo 'body'
-    this.drawHeader()
+    $('#container').hide().empty()
     $("""
       <div id="alpha">
         <h2>Buddies</h2>
@@ -211,50 +201,11 @@ class ChatPage
     $('#container').fadeIn 200
     this.resize()
 
-  drawHeader: ->
-    avatar = this.avatar(@session.jid()) || ''
-    $("""
-      <header id="app-strip">
-        <h1 id="logo">vines&gt;</h1>
-        <div id="current-user">
-          <img id="current-user-avatar" src="#{avatar}"/>
-          <div id="current-user-info">
-            <h1 id="current-user-name">#{@session.bareJid()}</h1>
-            <form id="current-user-presence-form">
-              <span class="select">
-                <span class="text">Available</span>
-                <select id="current-user-presence">
-                  <optgroup label="Available">
-                    <option>Available</option>
-                    <option>Surfing the web</option>
-                    <option>Reading email</option>
-                  </optgroup>
-                  <optgroup label="Away">
-                    <option value="xa">Away</option>
-                    <option value="xa">Out to lunch</option>
-                    <option value="xa">On the phone</option>
-                    <option value="xa">In a meeting</option>
-                  </optgroup>
-                </select>
-              </span>
-            </form>
-          </div>
-        </div>
-        <nav id="app-nav">
-          <ul id="nav-links"></ul>
-        </nav>
-      </header>
-    """).appendTo '#container'
-
-    $('#current-user-presence').change (event) =>
-      selected = $ 'option:selected', event.currentTarget
-      $('#current-user-presence-form .text').text selected.text()
-      @session.sendPresence selected.val() == 'xa', selected.text()
-
   resize: ->
     win    = $ window
-    header = $ '#app-strip'
+    header = $ '#navbar'
     nav    = $ '#app-nav'
+    page   = $ '#container'
     a      = $ '#alpha'
     b      = $ '#beta'
     c      = $ '#charlie'
@@ -267,7 +218,8 @@ class ChatPage
     form   = $ '#message-form'
     roster = $ '#roster'
     sizer = ->
-      height = win.height() - header.height()
+      height = win.height() - header.height() - 1
+      page.height height
       a.height height
       b.height height
       c.height height

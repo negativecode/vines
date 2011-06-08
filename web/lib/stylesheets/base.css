@@ -35,7 +35,10 @@ optgroup {
 optgroup option {
   padding-left: 20px;
 }
-#app-strip {
+#container {
+  position: relative;
+}
+#navbar {
   background: #0c1a2d;
   background: -moz-linear-gradient(#1e4171, #0c1a2d);
   background: -o-linear-gradient(#1e4171, #0c1a2d);
@@ -49,7 +52,7 @@ optgroup option {
   text-shadow: 0 1px 1px #000, 0 0 1px #fff;
   z-index: 10;
 }
-#app-strip #logo {
+#navbar #logo {
   background: url(/lib/images/logo-small.png) no-repeat;
   color: transparent;
   height: 30px;
@@ -60,26 +63,26 @@ optgroup option {
   width: 117px;
   text-shadow: none;
 }
-#app-strip #current-user {
+#navbar #current-user {
   height: 50px;
   width: 240px;
   position: relative;
   top: 5px;
   left: 10px;
 }
-#app-strip #current-user-avatar {
+#navbar #current-user-avatar {
   border: 1px solid rgba(255, 255, 255, 0.1);
   -webkit-box-shadow: 0 0 1px 0px #bdd5ff;
   box-shadow: 0 0 1px 0px #bdd5ff;
   height: 48px;
   width: 48px;
 }
-#app-strip #current-user-info {
+#navbar #current-user-info {
   position: relative;
   top: -60px;
   left: 58px;
 }
-#app-strip #current-user-name {
+#navbar #current-user-name {
   font-size: 10pt;
   font-weight: normal;
   line-height: 1.7;
@@ -87,17 +90,17 @@ optgroup option {
   text-overflow: ellipsis;
   width: 180px;
 }
-#app-strip #current-user-presence-form .select {
+#navbar #current-user-presence-form .select {
   background: rgba(255, 255, 255, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 30px;
   color: rgba(255, 255, 255, 0.8);
   line-height: 16px;
 }
-#app-strip #current-user-presence {
+#navbar #current-user-presence {
   border: 1px solid;
 }
-#app-strip #app-nav {
+#navbar #app-nav {
   height: 100%;
   overflow: hidden;
   position: absolute;
@@ -105,10 +108,10 @@ optgroup option {
   top: 0;
   width: 600px;
 }
-#app-strip #nav-links {
+#navbar #nav-links {
   height: 100%;
 }
-#app-strip #nav-links li {
+#navbar #nav-links li {
   border-left: 1px solid transparent;
   border-right: 1px solid transparent;
   color: rgba(255, 255, 255, 0.8);
@@ -123,13 +126,13 @@ optgroup option {
   text-align: center;
   text-transform: uppercase;
 }
-#app-strip #nav-links li:hover,
-#app-strip #nav-links li.selected {
+#navbar #nav-links li:hover,
+#navbar #nav-links li.selected {
   background: rgba(255, 255, 255, 0.1);
   border-left: 1px solid rgba(255, 255, 255, 0.15);
   border-right: 1px solid rgba(255, 255, 255, 0.15);
 }
-#app-strip #nav-links li a {
+#navbar #nav-links li a {
   color: inherit;
   display: inline-block;
   height: 100%;
@@ -145,7 +148,7 @@ optgroup option {
   left: 32px;
   top: 3px;
 }
-#app-strip #nav-links li a span {
+#navbar #nav-links li a span {
   position: relative;
   top: 15px;
 }

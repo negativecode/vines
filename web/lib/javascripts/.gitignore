@@ -1,3 +1,5 @@
 base.js
+login.js
+navbar.js
 router.js
 session.js

@@ -43,6 +43,11 @@ class Session
 
   bareJid: -> @xmpp.jid.split('/')[0]
 
+  avatar: (jid) ->
+    card = this.loadCard(jid)
+    if card && card.photo
+      "data:#{card.photo.type};base64,#{card.photo.binval}"
+
   loadCard: (jid) ->
     jid = jid.split('/')[0]
     found = localStorage['vcard:' + jid]

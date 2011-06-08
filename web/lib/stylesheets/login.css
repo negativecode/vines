@@ -7,17 +7,17 @@
   width: 100%;
   text-align: center;
 }
-#login-page h1 {
+#login-page #login-form {
+  margin: 0 auto;
+  position: relative;
+}
+#login-page #login-form h1 {
   background: url(/lib/images/logo-large.png) no-repeat;
   color: transparent;
   height: 64px;
   margin: 0 auto 30px auto;
   text-shadow: none;
   width: 245px;
-}
-#login-page #login-form {
-  margin: 0 auto;
-  position: relative;
 }
 #login-page #jid,
 #login-page #password {
