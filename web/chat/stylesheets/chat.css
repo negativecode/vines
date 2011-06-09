@@ -102,7 +102,8 @@
   bottom: 0;
   width: 100%;
 }
-#chat-page #message:focus {
+#chat-page input[type="text"]:focus,
+#chat-page input[type="email"]:focus {
   -webkit-box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.6);
   box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.6);
 }
@@ -201,19 +202,36 @@
   height: 27px;
   width: 27px;
 }
-#chat-page #edit-contact-form {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
-  padding: 10px;
+#chat-page .contact-form {
+  border-top: 1px solid #ddd;
+  padding-top: 10px;
   position: absolute;
   bottom: 50px;
   left: 0;
   width: 260px;
 }
-#chat-page #edit-contact-form input {
+#chat-page .contact-form h2 {
+  border: none !important;
+  line-height: 1;
   margin-bottom: 10px;
-  width: 230px;
 }
-#chat-page #edit-contact-form input:nth-child(0) {
-  margin-bottom: 0;
+#chat-page .contact-form p {
+  line-height: 1.5;
+  margin: 0 10px 10px 10px;
+  text-shadow: 0 1px 1px #fff;
+}
+#chat-page .contact-form .buttons {
+  padding-right: 10px;
+  text-align: right;
+}
+#chat-page .contact-form input[type="text"],
+#chat-page .contact-form input[type="email"] {
+  margin-bottom: 10px;
+  width: 228px;
+  position: relative;
+  left: 10px;
+}
+#chat-page #edit-contact-jid {
+  color: #444;
+  margin-top: -5px;
 }

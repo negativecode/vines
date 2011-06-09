@@ -150,9 +150,15 @@ class ChatPage
     input.val ''
     false
 
-  toggleEditForm: ->
-    form = $('#edit-contact-form')
-    if form.is ':hidden' then form.fadeIn() else form.fadeOut()
+  addContact: -> false
+  removeContact: -> false
+  updateContact: -> false
+
+  toggleForm: (form) ->
+    form = $(form)
+    $('.contact-form').each ->
+      $(this).hide() unless this.id == form.attr 'id'
+    if form.is ':hidden' then form.fadeIn 100 else form.fadeOut 100
 
   draw: ->
     unless @session.connected()
@@ -170,9 +176,31 @@ class ChatPage
           <div id="remove-contact"></div>
           <div id="edit-contact"></div>
         </div>
-        <form id="edit-contact-form" style="display:none;">
-          <input id="name" name="name" type="text" maxlength="1024" placeholder="Your name"/>
-          <input id="email" name="email" type="text" maxlength="1024" placeholder="Your email"/>
+        <form id="add-contact-form" class="contact-form" style="display:none;">
+          <h2>Add Buddy</h2>
+          <input id="add-contact-jid" type="email" maxlength="1024" placeholder="Account name"/>
+          <input id="add-contact-name" type="text" maxlength="1024" placeholder="Real name"/>
+          <fieldset class="buttons">
+            <input id="add-contact-cancel" type="button" value="Cancel"/>
+            <input id="add-contact-ok" type="submit" value="Add"/>
+          </fieldset>
+        </form>
+        <form id="remove-contact-form" class="contact-form" style="display:none;">
+          <h2>Remove Buddy</h2>
+          <p id="remove-contact-msg">Are you sure you want to remove this buddy from your buddy list?</p>
+          <fieldset class="buttons">
+            <input id="remove-contact-cancel" type="button" value="Cancel"/>
+            <input id="remove-contact-ok" type="submit" value="Remove"/>
+          </fieldset>
+        </form>
+        <form id="edit-contact-form" class="contact-form" style="display:none;">
+          <h2>Update Profile</h2>
+          <p id="edit-contact-jid"></p>
+          <input id="edit-contact-name" type="text" maxlength="1024" placeholder="Real name"/>
+          <fieldset class="buttons">
+            <input id="edit-contact-cancel" type="button" value="Cancel"/>
+            <input id="edit-contact-ok" type="submit" value="Save"/>
+          </fieldset>
         </form>
       </div>
       <div id="beta">
@@ -195,8 +223,19 @@ class ChatPage
     this.button 'edit-contact', this.USER
 
     $('#message').focus -> $('#edit-contact-form').fadeOut()
-    $('#message-form').submit => this.send()
-    $('#edit-contact').click  => this.toggleEditForm()
+    $('#message-form').submit  => this.send()
+
+    $('#add-contact').click    => this.toggleForm('#add-contact-form')
+    $('#remove-contact').click => this.toggleForm('#remove-contact-form')
+    $('#edit-contact').click   => this.toggleForm('#edit-contact-form')
+
+    $('#add-contact-cancel').click    => this.toggleForm('#add-contact-form')
+    $('#remove-contact-cancel').click => this.toggleForm('#remove-contact-form')
+    $('#edit-contact-cancel').click   => this.toggleForm('#edit-contact-form')
+
+    $('#add-contact-form').submit    => this.addContact()
+    $('#remove-contact-form').submit => this.removeContact()
+    $('#edit-contact-form').submit   => this.updateContact()
 
     $('#container').fadeIn 200
     this.resize()
