@@ -4,7 +4,12 @@ class LoginPage
   start: ->
     $('#error').hide()
     callback = (success) =>
-      ($('#error').show(); return) unless success
+      unless success
+        @session.disconnect()
+        $('#error').show()
+        $('#password').val('').focus()
+        return
+
       localStorage['jid'] = $('#jid').val()
       $('#current-user-name').text @session.bareJid()
       $('#current-user-avatar').attr 'src', @session.avatar(@session.jid())
@@ -13,6 +18,7 @@ class LoginPage
         window.location.hash = @startPage
 
     @session.connect $('#jid').val(), $('#password').val(), callback
+    false
 
   draw: ->
     @session.disconnect()
@@ -26,13 +32,15 @@ class LoginPage
         <fieldset id="login-form-controls">
           <input id="jid" name="jid" type="email" maxlength="1024" value="#{jid}" placeholder="Your user name"/>
           <input id="password" name="password" type="password" maxlength="1024" placeholder="Your password"/>
-          <input id="start" type="button" value="Start Chat"/>
+          <input id="start" type="submit" value="Sign in"/>
         </fieldset>
         <p id="error" style="display:none;">User name and password not found.</p>
       </form>
     """).appendTo '#container'
-    $('#start').click => this.start()
+    $('#login-form').submit => this.start()
     $('#container').fadeIn 1000
+    $('#jid').keydown      -> $('#error').fadeOut()
+    $('#password').keydown -> $('#error').fadeOut()
     this.resize()
 
   resize: ->
