@@ -33,21 +33,24 @@
   background: -webkit-gradient(linear, left top, left bottom, from(#4693ff), to(#285696));
   border: 1px solid #4693ff;
   border-radius: 30px;
-  -webkit-box-shadow: 0 1px 1px #000;
-  box-shadow: 0 1px 1px #000;
+  -webkit-box-shadow: 0 1px 1px #0c1a2d, inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  box-shadow: 0 1px 1px #0c1a2d, inset 0 1px 1px rgba(255, 255, 255, 0.1);
   color: #76b6ff;
   cursor: pointer;
   font-family: "Helvetica Neue", Helvetica, sans-serif;
   font-size: 11pt;
+  font-weight: normal;
+  height: inherit;
+  line-height: 1;
   margin: 10px 0;
-  padding: 8px 35px 9px 35px;
+  padding: 8px 35px;
   text-shadow: 0 -1px 1px #0c1a2d;
 }
 #login-page #start:active {
-  background: -webkit-gradient(linear, left top, left bottom, from(#285696), to(#3270c3));
-  background: -moz-linear-gradient(top, #285696, #3270c3);
-  -webkit-box-shadow: none;
-  box-shadow: none;
+  -webkit-box-shadow: inset 0 1px 5px #0c1a2d;
+  box-shadow: inset 0 1px 7px #0c1a2d;
+  padding-top: 7px;
+  padding-bottom: 9px;
 }
 #login-page #error {
   background: rgba(255, 255, 255, 0.05);

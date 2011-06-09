@@ -26,6 +26,43 @@ input[type="password"] {
   outline: none;
   padding: 6px;
 }
+input[type="button"],
+input[type="submit"] {
+  background: -moz-linear-gradient(#ececec, #dcdcdc);
+  background: -o-linear-gradient(#ececec, #dcdcdc);
+  background: -webkit-gradient(linear, left top, left bottom, from(#ececec), to(#dcdcdc));
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  -webkit-box-shadow: 0 1px 1px #fff, inset 0 1px 1px rgba(255, 255, 255, 0.5);
+  box-shadow: 0 1px 1px #fff, inset 0 1px 1px rgba(255, 255, 255, 0.5);
+  color: #222;
+  cursor: pointer;
+  font-family: "Helvetica Neue", Helvetica, sans-serif;
+  font-size: 13px;
+  font-weight: bold;
+  height: 27px;
+  line-height: 1;
+  padding: 0 20px;
+  margin-bottom: 10px;
+  margin-left: 7px;
+  text-shadow: 0 1px 1px #fff;
+}
+input[type="submit"] {
+  background: #8dd2f7;
+  background: -moz-linear-gradient(#8dd2f7, #58b8f4);
+  background: -o-linear-gradient(#8dd2f7, #58b8f4);
+  background: -webkit-gradient(linear, left top, left bottom, from(#8dd2f7), to(#58b8f4));
+  border: 1px solid #448ccd;
+  border-top: 1px solid #5da8db;
+  color: #0d4078;
+  text-shadow: 0 1px 1px #a2d8f8;
+}
+input[type="button"]:active,
+input[type="submit"]:active {
+  -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
+}
 fieldset {
   border: none;
 }
