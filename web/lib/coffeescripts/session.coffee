@@ -14,8 +14,9 @@ class Session
         when Strophe.Status.CONNFAIL
           callback false
         when Strophe.Status.CONNECTED
-          @xmpp.addHandler ((m) => this.handleMessage(m)), null, 'message'
-          @xmpp.addHandler ((p) => this.handlePresence(p)), null, 'presence'
+          @xmpp.addHandler ((el) => this.handleIq(el)), null, 'iq'
+          @xmpp.addHandler ((el) => this.handleMessage(el)), null, 'message'
+          @xmpp.addHandler ((el) => this.handlePresence(el)), null, 'presence'
           callback true
           this.findRoster =>
             this.notify('roster')
@@ -88,17 +89,19 @@ class Session
 
     @xmpp.sendIQ iq, handler, handler, 5000
 
+  parseRoster: (node) ->
+    $('item', node).map(->
+      el = $(this)
+      jid: el.attr('jid')
+      name: el.attr('name')
+      subscription: el.attr('subscription')
+      ask: el.attr('ask')
+      groups: $('group', this).map(-> $(this).text()).get()
+    ).get()
+
   findRoster: (callback) ->
     handler = (result) =>
-      contacts = $('item', result).map(->
-        el = $(this)
-        jid: el.attr('jid')
-        name: el.attr('name')
-        subscription: el.attr('subscription')
-        ask: el.attr('ask')
-        groups: $('group', this).map(-> $(this).text()).get()
-      ).get()
-
+      contacts = this.parseRoster(result)
       @roster[contact.jid] = contact for contact in contacts
       callback()
 
@@ -120,6 +123,44 @@ class Session
     else
       stanza.c('status').t status if status != 'Available'
     @xmpp.send stanza.tree()
+
+  updateContact: (contact, add) ->
+    iq = $iq(type: 'set', id: @xmpp.getUniqueId())
+      .c('query', xmlns: 'jabber:iq:roster')
+      .c('item', jid: contact.jid, name: contact.name)
+    iq.c('group', group).up() for group in contact.groups
+    @xmpp.send iq.up().tree()
+    @xmpp.send $pres(type: 'subscribe', to: contact.jid).tree() if add
+
+  removeContact: (jid) ->
+    iq = $iq(type: 'set', id: @xmpp.getUniqueId())
+      .c('query', xmlns: 'jabber:iq:roster')
+      .c('item', jid: jid, subscription: 'remove')
+      .up().up()
+    @xmpp.send iq.tree()
+
+  sendSubscribe: (jid) ->
+    @xmpp.send $pres(type: 'subscribe', to: jid).tree()
+
+  sendSubscribed: (jid) ->
+    @xmpp.send $pres(type: 'subscribed', to: jid).tree()
+
+  sendUnsubscribed: (jid) ->
+    @xmpp.send $pres(type: 'unsubscribed', to: jid).tree()
+
+  handleIq: (node) ->
+    node = $(node)
+    type = node.attr 'type'
+    ns   = node.find('query').attr 'xmlns'
+    if type == 'set' && ns == 'jabber:iq:roster'
+      contacts = this.parseRoster(node)
+      for contact in contacts
+        if contact.subscription == 'remove'
+          delete @roster[contact.jid]
+        else
+          @roster[contact.jid] = contact
+      this.notify('roster')
+    true # keep handler alive
 
   handleMessage: (node) ->
     node  = $(node)
@@ -148,6 +189,7 @@ class Session
       from:    from
       status:  status.text()
       show:    show.text()
+      type:    type
       offline: type == 'unavailable'
       away:    show.text() == 'away' || show.text() == 'xa'
       dnd:     show.text() == 'dnd'
