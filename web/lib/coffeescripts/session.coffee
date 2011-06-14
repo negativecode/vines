@@ -190,7 +190,7 @@ class Session
       status:  status.text()
       show:    show.text()
       type:    type
-      offline: type == 'unavailable'
+      offline: type == 'unavailable' || type == 'error'
       away:    show.text() == 'away' || show.text() == 'xa'
       dnd:     show.text() == 'dnd'
     true # keep handler alive
