@@ -132,9 +132,14 @@ class ChatPage
   presence: (presence) ->
     from = presence.from.split('/')[0]
     return if from == @session.bareJid()
-    this.eachContact from, (node) ->
-      status = presence.status || 'Available'
-      $('.status-msg', node).text status
+    if !presence.type || presence.offline
+      status =
+        if presence.status       then presence.status
+        else if presence.offline then 'Offline'
+        else if presence.away    then 'Away'
+        else 'Available'
+      this.eachContact from, (node) ->
+        $('.status-msg', node).text status
 
     if presence.type == 'subscribe'
       node = $("""
@@ -252,6 +257,8 @@ class ChatPage
       name: $('#edit-contact-name').val()
       groups: []
     @session.updateContact contact
+    this.eachContact @currentContact, (node) ->
+      node.attr 'data-name', contact.name || ''
     false
 
   toggleForm: (form, fn) ->
@@ -259,6 +266,7 @@ class ChatPage
     $('.contact-form').each ->
       $(this).hide() unless this.id == form.attr 'id'
     if form.is ':hidden'
+      fn() if fn
       form.fadeIn 100
     else
       form.fadeOut 100, ->
@@ -354,7 +362,10 @@ class ChatPage
 
     $('#add-contact').click    => this.toggleForm '#add-contact-form'
     $('#remove-contact').click => this.toggleForm '#remove-contact-form'
-    $('#edit-contact').click   => this.toggleForm '#edit-contact-form'
+    $('#edit-contact').click   => this.toggleForm '#edit-contact-form', =>
+      if @currentContact
+        $('#edit-contact-jid').text @currentContact
+        $('#edit-contact-name').val @session.roster[@currentContact].name
 
     $('#add-contact-cancel').click    => this.toggleForm '#add-contact-form'
     $('#remove-contact-cancel').click => this.toggleForm '#remove-contact-form'
@@ -367,6 +378,7 @@ class ChatPage
 
     $('#search-roster-text').keyup  => this.filterRoster()
     $('#search-roster-text').change => this.filterRoster()
+    $('#search-roster-text').click  => this.filterRoster()
     $('#search-roster').click =>
       this.toggleForm '#search-roster-form', => this.filterRoster()
 
