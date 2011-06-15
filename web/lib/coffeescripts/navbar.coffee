@@ -5,12 +5,11 @@ class NavBar
         $('#current-user-avatar').attr 'src', @session.avatar card.jid
 
   draw: ->
-    avatar = @session.avatar(@session.jid()) || ''
     $("""
       <header id="navbar">
         <h1 id="logo">vines&gt;</h1>
         <div id="current-user">
-          <img id="current-user-avatar" src="#{avatar}"/>
+          <img id="current-user-avatar" alt="#{@session.bareJid()}" src="#{@session.avatar(@session.jid())}"/>
           <div id="current-user-info">
             <h1 id="current-user-name">#{@session.bareJid()}</h1>
             <form id="current-user-presence-form">

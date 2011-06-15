@@ -13,6 +13,7 @@ class LoginPage
       localStorage['jid'] = $('#jid').val()
       $('#current-user-name').text @session.bareJid()
       $('#current-user-avatar').attr 'src', @session.avatar(@session.jid())
+      $('#current-user-avatar').attr 'alt', @session.bareJid()
       $('#container').fadeOut 200, =>
         $('#navbar').show()
         window.location.hash = @startPage

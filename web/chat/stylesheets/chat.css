@@ -183,6 +183,7 @@
   text-shadow: none;
 }
 #chat-page #roster .vcard-img {
+  background: #fff;
   border: 1px solid #fff;
   -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 0 40px rgba(0, 0, 0, 0.06) inset;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 0 40px rgba(0, 0, 0, 0.06) inset;

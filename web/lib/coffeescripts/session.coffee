@@ -48,6 +48,8 @@ class Session
     card = this.loadCard(jid)
     if card && card.photo
       "data:#{card.photo.type};base64,#{card.photo.binval}"
+    else
+      '/lib/images/default-user.png'
 
   loadCard: (jid) ->
     jid = jid.split('/')[0]
