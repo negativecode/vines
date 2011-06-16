@@ -221,7 +221,11 @@
   width: 27px;
 }
 #chat-page .contact-form {
-  border-top: 1px solid #ddd;
+  background: inherit;
+  border-bottom: 1px solid #ddd;
+  border-top: 1px solid #fff;
+  -webkit-box-shadow: 0px -3px 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px -3px 5px rgba(0, 0, 0, 0.1);
   padding-top: 10px;
   position: absolute;
   bottom: 50px;
