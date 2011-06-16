@@ -419,8 +419,14 @@ class ChatPage
       c.css 'left', a.width() + b.width()
       msg.width form.width() - 32
 
-    win.resize sizer
+    id = null
+    win.resize ->
+      clearTimeout id
+      id = setTimeout sizer, 10
+      sizer()
+
     sizer()
+    setTimeout sizer, 500
 
   button: (id, path, options) ->
     options ||= {}
