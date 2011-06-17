@@ -147,6 +147,12 @@
 #chat-page #notifications li:hover {
   background: rgba(255, 255, 255, 1.0);
 }
+#chat-page #roster li.offline > * {
+  opacity: 0.4;
+}
+#chat-page #roster li.selected > * {
+  opacity: 1.0;
+}
 #chat-page #roster li.selected {
   background: #4693FF;
   background: -moz-linear-gradient(#4693FF, #015de6);

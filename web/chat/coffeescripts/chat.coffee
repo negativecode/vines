@@ -63,7 +63,7 @@ class ChatPage
       found = $("li[data-jid='#{jid}'] .text").text contact.name || jid
       if found.length == 0
         node = $("""
-          <li data-jid="#{jid}" data-name="">
+          <li data-jid="#{jid}" data-name="" class="offline">
             <span class="text"></span>
             <span class="status-msg">Offline</span>
             <span class="unread" style="display:none;"></span>
@@ -140,6 +140,10 @@ class ChatPage
         else 'Available'
       this.eachContact from, (node) ->
         $('.status-msg', node).text status
+        if presence.offline
+          node.addClass 'offline'
+        else
+          node.removeClass 'offline'
 
     if presence.type == 'subscribe'
       node = $("""
