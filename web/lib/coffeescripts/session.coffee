@@ -20,8 +20,8 @@ class Session
           callback true
           this.findRoster =>
             this.notify('roster')
+            @xmpp.send $pres().tree()
             this.findCards()
-          @xmpp.send $pres().tree()
 
   disconnect: -> @xmpp.disconnect()
 
