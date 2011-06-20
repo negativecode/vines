@@ -1,6 +1,7 @@
 # encoding: UTF-8
 
 require 'vines'
+require 'ext/nokogiri'
 require 'minitest/autorun'
 
 class ContactTest < MiniTest::Unit::TestCase
@@ -38,5 +39,44 @@ class ContactTest < MiniTest::Unit::TestCase
     }.strip.gsub(/\n/, '').gsub(/\s{2,}/, '')
 
     assert_equal expected, contact.to_roster_xml.to_xml(:indent => 0).gsub(/\n/, '')
+  end
+
+  def test_send_roster_push
+    contact = Vines::Contact.new(
+      :jid => 'alice@wonderland.lit',
+      :name => "Alice",
+      :groups => %w[Friends Buddies],
+      :subscription => 'from')
+
+    recipient = MiniTest::Mock.new
+    recipient.expect(:user, Vines::User.new(:jid => 'hatter@wonderland.lit'))
+    def recipient.nodes; @nodes; end
+    def recipient.write(node)
+      @nodes ||= []
+      @nodes << node
+    end
+
+    contact.send_roster_push(recipient)
+    assert recipient.verify
+    assert_equal 1, recipient.nodes.size
+
+    expected = node(%q{
+      <iq to="hatter@wonderland.lit" type="set">
+        <query xmlns="jabber:iq:roster">
+        <item jid="alice@wonderland.lit" name="Alice" subscription="from">
+          <group>Buddies</group>
+          <group>Friends</group>
+        </item>
+        </query>
+      </iq>
+    }.strip.gsub(/\n/, '').gsub(/\s{2,}/, ''))
+    recipient.nodes[0].remove_attribute('id') # id is random
+    assert_equal expected, recipient.nodes[0]
+  end
+
+  private
+
+  def node(xml)
+    Nokogiri::XML(xml).root
   end
 end

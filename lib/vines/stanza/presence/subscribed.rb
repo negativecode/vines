@@ -13,22 +13,23 @@ module Vines
         def process_outbound
           self['from'] = stream.user.jid.bare.to_s
           to = stamp_to
-          route unless local?
+          local? ? process_inbound : route
 
           stream.user.add_subscription_from(to)
           storage.save_user(stream.user)
           stream.update_user_streams(stream.user)
 
+          contact = stream.user.contact(to)
           router.interested_resources(stream.user.jid).each do |recipient|
-            send_subscribed_roster_push(recipient, to, stream.user.contact(to).subscription)
+            contact.send_roster_push(recipient)
           end
 
           presences = router.available_resources(stream.user.jid).map do |c|
-            doc = Document.new
-            doc.create_element('presence',
-              'from' => c.user.jid.to_s,
-              'id'   => Kit.uuid,
-              'to'   => to.to_s)
+            c.last_broadcast_presence.clone.tap do |node|
+              node['from'] = c.user.jid.to_s
+              node['id'] = Kit.uuid
+              node['to'] = to.to_s
+            end
           end
 
           if local?
@@ -38,8 +39,6 @@ module Vines
           else
             presences.each {|el| router.route(el) }
           end
-
-          process_inbound if local?
         end
 
         def process_inbound
@@ -55,7 +54,7 @@ module Vines
 
           router.interested_resources(to).each do |recipient|
             recipient.write(@node)
-            send_subscribed_roster_push(recipient, stream.user.jid.bare, contact.subscription)
+            contact.send_roster_push(recipient)
           end
         end
       end

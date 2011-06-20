@@ -177,7 +177,7 @@ class RosterTest < MiniTest::Unit::TestCase
     assert router.verify
 
     expected = node(%q{
-      <iq type="set" to="alice@wonderland.lit/tea">
+      <iq to="alice@wonderland.lit/tea" type="set">
         <query xmlns="jabber:iq:roster">
           <item jid="hatter@wonderland.lit" name="Mad Hatter" subscription="none">
             <group>Friends</group>

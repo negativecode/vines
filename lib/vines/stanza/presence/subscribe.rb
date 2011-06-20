@@ -13,16 +13,15 @@ module Vines
         def process_outbound
           self['from'] = stream.user.jid.bare.to_s
           to = stamp_to
-          route unless local?
+          local? ? process_inbound : route
 
           stream.user.request_subscription(to)
           storage.save_user(stream.user)
           stream.update_user_streams(stream.user)
 
-          process_inbound if local?
-
+          contact = stream.user.contact(to)
           router.interested_resources(stream.user.jid).each do |recipient|
-            send_subscribe_roster_push(recipient, stream.user.contact(to))
+            contact.send_roster_push(recipient)
           end
         end
 
@@ -43,22 +42,6 @@ module Vines
               recipients.each {|stream| stream.write(@node) }
             end
           end
-        end
-
-        private
-
-        def send_subscribe_roster_push(recipient, contact)
-          doc = Document.new
-          node = doc.create_element('iq') do |el|
-            el['id'] = Kit.uuid
-            el['to'] = recipient.user.jid.to_s
-            el['type'] = 'set'
-            el << doc.create_element('query') do |query|
-              query.default_namespace = NAMESPACES[:roster]
-              query << contact.to_roster_xml
-            end
-          end
-          recipient.write(node)
         end
       end
     end

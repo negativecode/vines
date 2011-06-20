@@ -80,6 +80,20 @@ module Vines
       }
     end
 
+    # Write an iq stanza to the recipient stream representing this contact's
+    # current roster item state.
+    def send_roster_push(recipient)
+      doc = Nokogiri::XML::Document.new
+      node = doc.create_element('iq',
+        'id'   => Kit.uuid,
+        'to'   => recipient.user.jid.to_s,
+        'type' => 'set')
+      node << doc.create_element('query', 'xmlns' => NAMESPACES[:roster]) do |query|
+        query << to_roster_xml
+      end
+      recipient.write(node)
+    end
+
     # Returns this contact as an xmpp <item> element.
     def to_roster_xml
       doc = Nokogiri::XML::Document.new

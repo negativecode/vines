@@ -77,13 +77,8 @@ module Vines
           raise StanzaErrors::ItemNotFound.new(self, 'modify') unless contact
           if router.local_jid?(contact.jid)
             user = storage(contact.jid.domain).find_user(contact.jid)
-            remove(contact, user)
-          else
-            remove(contact, nil)
           end
-        end
 
-        def remove(contact, user=nil)
           if user && user.contact(stream.user.jid)
             user.contact(stream.user.jid).subscription = 'none'
             user.contact(stream.user.jid).ask = nil
@@ -93,52 +88,53 @@ module Vines
             storage(save.jid.domain).save_user(save)
             stream.update_user_streams(save)
           end
+
           send_result_iq
           push_roster_updates(stream.user.jid, Contact.new(
             :jid => contact.jid,
             :subscription => 'remove'))
 
-          presence = [%w[to unsubscribe], %w[from unsubscribed]].map do |meth, type|
-            if contact.send("subscribed_#{meth}?")
-              doc = Document.new
-              doc.create_element('presence',
-                'from' => stream.user.jid.bare.to_s,
-                'to'   => contact.jid.to_s,
-                'type' => type)
+          if router.local_jid?(contact.jid)
+            send_unavailable(stream.user.jid, contact.jid) if contact.subscribed_from?
+            send_unsubscribe(contact)
+            if user.contact(stream.user.jid)
+              push_roster_updates(contact.jid, user.contact(stream.user.jid))
             end
+          else
+            send_unsubscribe(contact)
+          end
+        end
+
+        # Notify the contact that it's been removed from the user's roster
+        # and no longer has any presence relationship with the user.
+        def send_unsubscribe(contact)
+          presence = [%w[to unsubscribe], %w[from unsubscribed]].map do |meth, type|
+            presence(contact.jid, type) if contact.send("subscribed_#{meth}?")
           end.compact
 
           if router.local_jid?(contact.jid)
             router.interested_resources(contact.jid).each do |recipient|
               presence.each {|el| recipient.write(el) }
-              doc = Document.new
-              el = doc.create_element('presence',
-                'from' => stream.user.jid.bare.to_s,
-                'to'   => recipient.user.jid.to_s,
-                'type' => 'unavailable')
-              recipient.write(el)
             end
-            push_roster_updates(contact.jid, Contact.new(
-              :jid => stream.user.jid,
-              :subscription => 'none'))
           else
             presence.each {|el| router.route(el) }
           end
         end
 
+        def presence(to, type)
+          doc = Document.new
+          doc.create_element('presence',
+            'from' => stream.user.jid.bare.to_s,
+            'id'   => Kit.uuid,
+            'to'   => to.to_s,
+            'type' => type)
+        end
+
         # Send an iq set stanza to the user's interested resources, letting them
         # know their roster has been updated.
         def push_roster_updates(to, contact)
-          doc = Document.new
-          el = doc.create_element('iq', 'type' => 'set') do |node|
-            node << doc.create_element('query', 'xmlns' => NAMESPACES[:roster]) do |query|
-              query << contact.to_roster_xml
-            end
-          end
           router.interested_resources(to).each do |recipient|
-            el['id'] = Kit.uuid
-            el['to'] = recipient.user.jid.to_s
-            recipient.write(el)
+            contact.send_roster_push(recipient)
           end
         end
 

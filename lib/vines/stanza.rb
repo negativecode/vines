@@ -55,6 +55,32 @@ module Vines
       raise 'subclass must implement'
     end
 
+    # Broadcast unavailable presence from the user's available resources to the
+    # recipient's available resources. Route the stanza to a remote server if
+    # the recipient isn't hosted locally.
+    def send_unavailable(from, to)
+      router.available_resources(from).each do |stream|
+        el = unavailable(stream.user.jid, to)
+        if router.local_jid?(to)
+          router.available_resources(to).each do |recipient|
+            recipient.write(el)
+          end
+        else
+          router.route(el)
+        end
+      end
+    end
+
+    # Return an unavailable presence stanza addressed to the given JID.
+    def unavailable(from, to)
+      doc = Document.new
+      doc.create_element('presence',
+        'from' => from.to_s,
+        'id'   => Kit.uuid,
+        'to'   => to.to_s,
+        'type' => 'unavailable')
+    end
+
     def method_missing(method, *args, &block)
       @node.send(method, *args, &block)
     end

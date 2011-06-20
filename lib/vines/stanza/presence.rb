@@ -81,18 +81,6 @@ module Vines
         router.route(probe)
       end
 
-      def send_subscribed_roster_push(recipient, jid, state)
-        doc = Document.new
-        node = doc.create_element('iq',
-          'id'  => Kit.uuid,
-          'to'  => recipient.user.jid.to_s,
-          'type' => 'set')
-        node << doc.create_element('query', 'xmlns' => NAMESPACES[:roster]) do |query|
-          query << doc.create_element('item', 'jid' => jid.to_s, 'subscription' => state)
-        end
-        recipient.write(node)
-      end
-
       def auto_reply_to_subscription_request(from, type)
         doc = Document.new
         node = doc.create_element('presence') do |el|
