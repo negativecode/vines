@@ -144,6 +144,9 @@ class ChatPage
         else
           node.removeClass 'offline'
 
+    if presence.offline
+      this.chat(from).jid = from
+
     if presence.type == 'subscribe'
       node = $("""
         <li data-jid="#{presence.from}" style="display:none;">
