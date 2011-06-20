@@ -59,8 +59,13 @@ class ChatPage
       jid = $(node).attr('data-jid')
       $(node).remove() unless @session.roster[jid]
 
+    setName = (node, contact) ->
+      $('.text', node).text contact.name || contact.jid
+      node.attr 'data-name', contact.name || ''
+
     for jid, contact of @session.roster
-      found = $("li[data-jid='#{jid}'] .text").text contact.name || jid
+      found = $("li[data-jid='#{jid}']")
+      setName(found, contact)
       if found.length == 0
         node = $("""
           <li data-jid="#{jid}" data-name="" class="offline">
@@ -70,9 +75,7 @@ class ChatPage
             <img class="vcard-img" alt="#{jid}" src="#{@session.avatar jid}"/>
           </li>
         """).appendTo roster
-
-        node.attr 'data-name', contact.name || ''
-        $('.text', node).text contact.name || jid
+        setName(node, contact)
         node.click (event) => this.selectContact(event)
 
   message: (message) ->
@@ -133,14 +136,10 @@ class ChatPage
     from = presence.from.split('/')[0]
     return if from == @session.bareJid()
     if !presence.type || presence.offline
-      status =
-        if presence.status       then presence.status
-        else if presence.offline then 'Offline'
-        else if presence.away    then 'Away'
-        else 'Available'
+      contact = @session.roster[from]
       this.eachContact from, (node) ->
-        $('.status-msg', node).text status
-        if presence.offline
+        $('.status-msg', node).text contact.status()
+        if contact.offline()
           node.addClass 'offline'
         else
           node.removeClass 'offline'
@@ -259,10 +258,8 @@ class ChatPage
     contact =
       jid: @currentContact
       name: $('#edit-contact-name').val()
-      groups: []
+      groups: @session.roster[@currentContact].groups
     @session.updateContact contact
-    this.eachContact @currentContact, (node) ->
-      node.attr 'data-name', contact.name || ''
     false
 
   toggleForm: (form, fn) ->

@@ -92,14 +92,7 @@ class Session
     @xmpp.sendIQ iq, handler, handler, 5000
 
   parseRoster: (node) ->
-    $('item', node).map(->
-      el = $(this)
-      jid: el.attr('jid')
-      name: el.attr('name')
-      subscription: el.attr('subscription')
-      ask: el.attr('ask')
-      groups: $('group', this).map(-> $(this).text()).get()
-    ).get()
+    $('item', node).map(-> new Contact this ).get()
 
   findRoster: (callback) ->
     handler = (result) =>
@@ -142,13 +135,25 @@ class Session
     @xmpp.send iq.tree()
 
   sendSubscribe: (jid) ->
-    @xmpp.send $pres(type: 'subscribe', to: jid).tree()
+    @xmpp.send $pres(
+      type: 'subscribe'
+      to: jid
+      id: @xmpp.getUniqueId()
+    ).tree()
 
   sendSubscribed: (jid) ->
-    @xmpp.send $pres(type: 'subscribed', to: jid).tree()
+    @xmpp.send $pres(
+      type: 'subscribed'
+      to: jid
+      id: @xmpp.getUniqueId()
+    ).tree()
 
   sendUnsubscribed: (jid) ->
-    @xmpp.send $pres(type: 'unsubscribed', to: jid).tree()
+    @xmpp.send $pres(
+      type: 'unsubscribed'
+      to: jid
+      id: @xmpp.getUniqueId()
+    ).tree()
 
   handleIq: (node) ->
     node = $(node)
@@ -160,6 +165,8 @@ class Session
         if contact.subscription == 'remove'
           delete @roster[contact.jid]
         else
+          old = @roster[contact.jid]
+          contact.presence = old.presence if old
           @roster[contact.jid] = contact
       this.notify('roster')
     true # keep handler alive
@@ -180,13 +187,13 @@ class Session
     true # keep handler alive
 
   handlePresence: (node) ->
-    node = $(node)
+    node   = $(node)
     to     = node.attr 'to'
     from   = node.attr 'from'
     type   = node.attr 'type'
     show   = node.find('show').first()
     status = node.find('status').first()
-    this.notify 'presence',
+    presence =
       to:      to
       from:    from
       status:  status.text()
@@ -195,6 +202,9 @@ class Session
       offline: type == 'unavailable' || type == 'error'
       away:    show.text() == 'away' || show.text() == 'xa'
       dnd:     show.text() == 'dnd'
+    contact = @roster[from.split('/')[0]]
+    contact.update presence if contact
+    this.notify 'presence', presence
     true # keep handler alive
 
   notify: (type, obj) ->
