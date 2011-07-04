@@ -55,13 +55,23 @@ input[type="submit"] {
   border: 1px solid #448ccd;
   border-top: 1px solid #5da8db;
   color: #0d4078;
-  text-shadow: 0 1px 1px #a2d8f8;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.4);
 }
 input[type="button"]:active,
 input[type="submit"]:active {
   -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8);
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8);
   text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
+}
+input[type="button"].cancel,
+input[type="submit"].cancel {
+  background: #ff3137;
+  background: -moz-linear-gradient(#ff3137, #dd2828);
+  background: -o-linear-gradient(#ff3137, #dd2828);
+  background: -webkit-gradient(linear, left top, left bottom, from(#ff3137), to(#dd2828));
+  border: 1px solid #981a1a;
+  border-top: 1px solid #ac1f23;
+  color: #4a0f11;
 }
 fieldset {
   border: none;
