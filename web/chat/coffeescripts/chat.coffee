@@ -266,12 +266,12 @@ class ChatPage
     $('body').attr 'id', 'chat-page'
     $('#container').hide().empty()
     $("""
-      <div id="alpha">
+      <div id="alpha" class="y-fill">
         <h2>Buddies <div id="search-roster"></div></h2>
         <form id="search-roster-form" style="display:none;">
           <input id="search-roster-text" type="search" placeholder="Filter" results="5"/>
         </form>
-        <ul id="roster"></ul>
+        <ul id="roster" class="y-fill"></ul>
         <div id="roster-controls">
           <div id="add-contact"></div>
           <div id="remove-contact"></div>
@@ -304,16 +304,16 @@ class ChatPage
           </fieldset>
         </form>
       </div>
-      <div id="beta">
+      <div id="beta" class="x-fill y-fill">
         <h2 id="chat-title">Select a buddy to chat</h2>
-        <ul id="messages"></ul>
+        <ul id="messages" class="y-fill"></ul>
         <form id="message-form">
           <input id="message" name="message" type="text" maxlength="1024" placeholder="Type a message and press enter to send"/>
         </form>
       </div>
-      <div id="charlie">
+      <div id="charlie" class="y-fill">
         <h2>Notifications</h2>
-        <ul id="notifications"></ul>
+        <ul id="notifications" class="y-fill"></ul>
         <div id="notification-controls">
           <div id="clear-notices"></div>
         </div>
@@ -358,47 +358,14 @@ class ChatPage
     this.resize()
 
   resize: ->
-    win    = $ window
-    header = $ '#navbar'
-    nav    = $ '#app-nav'
-    page   = $ '#container'
-    a      = $ '#alpha'
-    b      = $ '#beta'
-    c      = $ '#charlie'
-    atitle = $ '#alpha > h2'
-    btitle = $ '#beta > h2'
-    ctitle = $ '#charlie > h2'
-    rctrls = $ '#roster-controls'
-    nctrls = $ '#notification-controls'
-    msg    = $ '#message'
-    msgs   = $ '#messages'
-    form   = $ '#message-form'
-    roster = $ '#roster'
-    notify = $ '#notifications'
-    sizer = ->
-      height = win.height() - header.height() - 1
-      page.height height
-      a.height height
-      b.height height
-      c.height height
-
-      roster.height a.height() - rctrls.height() - atitle.height()
-      msgs.height   b.height() - form.height() - btitle.height()
-      notify.height c.height() - nctrls.height() - ctitle.height()
-
-      b.width win.width() - a.width() - c.width()
-      nav.width b.width()
+    a    = $ '#alpha'
+    b    = $ '#beta'
+    c    = $ '#charlie'
+    msg  = $ '#message'
+    form = $ '#message-form'
+    new Layout ->
       c.css 'left', a.width() + b.width()
       msg.width form.width() - 32
-
-    id = null
-    win.resize ->
-      clearTimeout id
-      id = setTimeout sizer, 10
-      sizer()
-
-    sizer()
-    setTimeout sizer, 500
 
   button: (id, path, options) ->
     options ||= {}

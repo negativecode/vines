@@ -6,7 +6,7 @@ class NavBar
 
   draw: ->
     $("""
-      <header id="navbar">
+      <header id="navbar" class="x-fill">
         <h1 id="logo">vines&gt;</h1>
         <div id="current-user">
           <img id="current-user-avatar" alt="#{@session.bareJid()}" src="#{@session.avatar(@session.jid())}"/>
@@ -32,12 +32,12 @@ class NavBar
             </form>
           </div>
         </div>
-        <nav id="app-nav">
+        <nav id="app-nav" class="x-fill">
           <ul id="nav-links"></ul>
         </nav>
       </header>
     """).appendTo 'body'
-    $('<div id="container"></div>').appendTo 'body'
+    $('<div id="container" class="x-fill y-fill"></div>').appendTo 'body'
 
     $('#current-user-presence').change (event) =>
       selected = $ 'option:selected', event.currentTarget
