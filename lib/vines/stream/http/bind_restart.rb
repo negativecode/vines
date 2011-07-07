@@ -9,7 +9,7 @@ module Vines
         end
 
         def node(node)
-          raise StreamErrors::NotAuthorized unless body?(node) && restart?(node)
+          raise StreamErrors::NotAuthorized unless restart?(node)
 
           doc = Document.new
           body = doc.create_element('body') do |el|
@@ -26,9 +26,10 @@ module Vines
         private
 
         def restart?(node)
+          session = stream.valid_session?(node['sid'])
           restart = node.attribute_with_ns('restart', NAMESPACES[:bosh]).value rescue nil
-          domain = node['to'] == stream.domain
-          domain && restart == 'true' && node['rid'] && stream.valid_session?(node['sid'])
+          domain  = node['to'] == stream.domain
+          session && body?(node) && domain && restart == 'true' && node['rid']
         end
       end
     end

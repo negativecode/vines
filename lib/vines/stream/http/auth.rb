@@ -9,7 +9,7 @@ module Vines
         end
 
         def node(node)
-          unless body?(node) && node['rid'] && stream.valid_session?(node['sid'])
+          unless stream.valid_session?(node['sid']) && body?(node) && node['rid']
             raise StreamErrors::NotAuthorized
           end
           nodes = stream.parse_body(node)

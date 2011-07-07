@@ -72,8 +72,10 @@ module Vines
         # Send an HTTP 200 OK response wrapping the XMPP node content back
         # to the client.
         def reply(node)
-          @requests.shift.reply(node, @content_type)
-          @replied = Time.now
+          if request = @requests.shift
+            request.reply(node, @content_type)
+            @replied = Time.now
+          end
         end
 
         # Write the XMPP node to the client stream after wrapping it in a BOSH

@@ -23,11 +23,14 @@ module Vines
         end
       end
 
-      # Return true if this session ID matches the stream's session ID. Clients
-      # are only allowed one session per stream so they must send the same
-      # session ID on each request.
+      # If the session ID is valid, switch this stream's session to the new
+      # ID and return true. Some clients, like Google Chrome, reuse one stream
+      # for multiple sessions.
       def valid_session?(sid)
-        @session.id == sid
+        if session = Sessions[sid]
+          @session = session
+        end
+        !!session
       end
 
       %w[max_stanza_size max_resources_per_account private_storage? bind root].each do |name|
@@ -39,7 +42,12 @@ module Vines
       def process_request(request)
         if request.path == self.bind
           body = Nokogiri::XML(request.body).root
-          @session.request(request)
+          if session = Sessions[body['sid']]
+            session.request(request)
+          else
+            @session = Http::Session.new(self)
+            @session.request(request)
+          end
           @nodes.push(body)
         else
           request.reply_with_file(self.root)

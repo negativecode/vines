@@ -7,7 +7,7 @@ module Vines
         RID, SID, TYPE, TERMINATE = %w[rid sid type terminate].map {|s| s.freeze }
 
         def node(node)
-          unless body?(node) && node[RID] && stream.valid_session?(node[SID])
+          unless stream.valid_session?(node[SID]) && body?(node) && node[RID]
             raise StreamErrors::NotAuthorized
           end
           stream.parse_body(node).each do |child|
