@@ -32,7 +32,7 @@ class ChatPage
       node.attr 'data-name', contact.name || ''
 
     for jid, contact of @session.roster
-      found = $("li[data-jid='#{jid}']")
+      found = $("#roster li[data-jid='#{jid}']")
       setName(found, contact)
       if found.length == 0
         node = $("""
