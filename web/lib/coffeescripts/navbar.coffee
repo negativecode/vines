@@ -57,9 +57,10 @@ class NavBar
     node.click (event) => this.select(event.currentTarget)
 
   select: (button) ->
+    button = $(button)
     $('#nav-links li').removeClass('selected')
     $('#nav-links li a').removeClass('selected')
-    $(button).addClass('selected')
+    button.addClass('selected')
     $('a', button).addClass('selected')
     dark = $('#nav-links svg path')
     dark.attr 'opacity', '0.6'
