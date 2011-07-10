@@ -19,7 +19,7 @@ Vines::Config.configure do
   # Shared storage example:
   # host 'verona.lit', 'wonderland.lit' do
   #   storage 'fs' do
-  #     dir 'conf/users'
+  #     dir 'data/users'
   #   end
   # end
 
