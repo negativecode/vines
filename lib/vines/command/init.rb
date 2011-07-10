@@ -13,8 +13,8 @@ module Vines
         %w[conf web].each do |sub|
           FileUtils.cp_r(File.expand_path("../../../../#{sub}", __FILE__), dir)
         end
-        users, log, pid = %w[conf/users log pid].map do |sub|
-          File.join(dir, sub).tap {|subdir| Dir.mkdir(subdir) }
+        users, log, pid = %w[data/users log pid].map do |sub|
+          File.join(dir, sub).tap {|subdir| FileUtils.makedirs(subdir) }
         end
 
         create_users(domain, users)

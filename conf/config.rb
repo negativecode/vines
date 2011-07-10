@@ -25,7 +25,7 @@ Vines::Config.configure do
 
   host 'wonderland.lit' do
     storage 'fs' do
-      dir 'conf/users'
+      dir 'data/users'
     end
   end
 
@@ -36,7 +36,7 @@ Vines::Config.configure do
   #
   # host 'wonderland.lit' do
   #   storage 'fs' do
-  #     dir 'conf/users'
+  #     dir 'data/users'
   #   end
   #   ldap 'ldap.wonderland.lit', 636 do
   #     dn 'cn=Directory Manager'
@@ -94,7 +94,7 @@ end
 # Available storage implementations:
 
 #storage 'fs' do
-#  dir 'conf/users'
+#  dir 'data/users'
 #end
 
 #storage 'couchdb' do

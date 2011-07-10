@@ -55,6 +55,7 @@ end
   em-redis
   eventmachine
   fiber
+  fileutils
   http/parser
   logger
   net/ldap
