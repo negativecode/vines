@@ -17,7 +17,7 @@ database. SSL encryption is mandatory on all client and server connections.
 == Dependencies
 
 * bcrypt-ruby >= 2.1.4
-* eventmachine >= 1.0.0
+* eventmachine >= 0.12.6
 * nokogiri >= 1.4.4
 * ruby >= 1.9.2
 
