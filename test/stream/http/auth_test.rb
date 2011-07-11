@@ -11,16 +11,19 @@ class HttpAuthTest < MiniTest::Unit::TestCase
 
   def test_missing_body_raises_error
     node = node('<presence type="unavailable"/>')
+    @stream.expect(:valid_session?, true, [nil])
     assert_raises(Vines::StreamErrors::NotAuthorized) { @state.node(node) }
   end
 
   def test_body_with_missing_namespace_raises_error
     node = node('<body rid="42" sid="12"/>')
+    @stream.expect(:valid_session?, true, ['12'])
     assert_raises(Vines::StreamErrors::NotAuthorized) { @state.node(node) }
   end
 
   def test_missing_rid_raises_error
     node = node('<body xmlns="http://jabber.org/protocol/httpbind" sid="12"/>')
+    @stream.expect(:valid_session?, true, ['12'])
     assert_raises(Vines::StreamErrors::NotAuthorized) { @state.node(node) }
   end
 
