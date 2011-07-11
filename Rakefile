@@ -1,7 +1,7 @@
 require 'rake'
 require 'rake/clean'
-require 'rake/gempackagetask'
 require 'rake/testtask'
+require 'rubygems/package_task'
 require 'nokogiri'
 require_relative 'lib/vines/version'
 
@@ -29,21 +29,21 @@ all client and server connections."
 
   s.add_dependency "activerecord", "~> 3.0"
   s.add_dependency "bcrypt-ruby", "~> 2.1"
-  s.add_dependency 'em-http-request', '>= 1.0.0.beta.3'
+  s.add_dependency "em-http-request", "~> 0.3"
   s.add_dependency "em-redis", "~> 0.3"
   s.add_dependency "eventmachine", "~> 0.12"
   s.add_dependency "http_parser.rb", "~> 0.5"
   s.add_dependency "net-ldap", "~> 0.2"
   s.add_dependency "nokogiri", "~> 1.4"
 
-  s.add_development_dependency "minitest"
+  s.add_development_dependency "minitest", "= 2.2.2"
   s.add_development_dependency "rake"
   s.add_development_dependency "sqlite3"
 
   s.required_ruby_version = '>= 1.9.2'
 end
 
-Rake::GemPackageTask.new(spec) do |pkg|
+Gem::PackageTask.new(spec) do |pkg|
   pkg.need_tar = true
 end
 
