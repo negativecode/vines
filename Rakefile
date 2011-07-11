@@ -31,7 +31,7 @@ all client and server connections."
   s.add_dependency "bcrypt-ruby", "~> 2.1"
   s.add_dependency 'em-http-request', '>= 1.0.0.beta.3'
   s.add_dependency "em-redis", "~> 0.3"
-  s.add_dependency "eventmachine", ">= 1.0.0.beta.3"
+  s.add_dependency "eventmachine", "~> 0.12"
   s.add_dependency "http_parser.rb", "~> 0.5"
   s.add_dependency "net-ldap", "~> 0.2"
   s.add_dependency "nokogiri", "~> 1.4"
