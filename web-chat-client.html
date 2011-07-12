@@ -1,0 +1,64 @@
+---
+layout: site
+title: Vines - Web Chat Client
+---
+<h2>Web Chat Client</h2>
+<p>
+The Vines XMPP server includes a web chat client built entirely with
+<a href="http://www.coffeescript.org">CoffeeScript</a>. There's no application
+server to configure (e.g. Rails) as the app connects directly to the chat server
+using HTTP.  The web application is available immediately after starting the chat
+server at http://localhost:5280/chat/.
+</p>
+
+<figure class="screenshot">
+<a href="/images/vines-web.png"><img src="/images/vines-web.png" alt="Vines Web Chat"/></a>
+<figcaption>Vines Web. <a href="/images/vines-web.png">Click for larger image</a>.</figcaption>
+</figure>
+
+<p>
+The web application is a standard XMPP client that can communicate with other
+clients like iChat, Adium, and Pidgin.  It's a standard chat application that
+happens to be hosted inside a web browser.
+</p>
+
+<h2>Configuration</h2>
+<p>
+  The web client is enabled by default in Vines server installs. It depends
+  on the built-in HTTP server to host its JavaScript and CSS files. Here's a
+  snippet of the conf/config.rb file:
+</p>
+<pre>
+http '0.0.0.0', 5280 do
+  bind '/xmpp'
+  private_storage true
+  max_stanza_size 65536
+  max_resources_per_account 5
+  root 'web'
+end
+</pre>
+<p>
+  This section enables the HTTP connector on port 5280. If this section is
+  missing, the HTTP server and Vines Web application will be disabled.
+</p>
+<p>
+  The built-in HTTP server supports the Last-Modified and If-Modified-Since
+  caching headers, but that's the extent of performance tuning to be
+  expected. In production deployments, we'll want to proxy web requests to the
+  chat server through nginx, Apache mod_proxy, or HAProxy to get great performance
+  as well as TLS encryption.
+</p>
+<p>
+  The <em>root</em> attribute defines the web server's document root. This
+  directory must be readable by the user running the vines server process. If the
+  directory is not absolute, like /var/www, it's treated as relative to the vines
+  instance directory.
+</p>
+<p>
+  The <em>bind</em> attribute defines the URL to which
+  <a href="http://en.wikipedia.org/wiki/BOSH">BOSH</a> clients must POST
+  their XMPP requests. Requests to this URL will not be served from
+  the document root. BOSH is the protocol that tunnels XMPP inside HTTP requests.
+  Vines Web uses the <a href="http://strophe.im/">Strophe</a> JavaScript library
+  for this tunneling.
+</p>
