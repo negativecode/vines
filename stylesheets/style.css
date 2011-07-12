@@ -86,3 +86,21 @@ pre::-webkit-scrollbar-thumb:horizontal {
 #logo span {
   color: #981a1a;
 }
+figure, figcaption {
+  display: block;
+  margin-left: 0;
+  margin-right: 0;
+}
+figure.screenshot {
+  margin-bottom: 20px;
+}
+figure.screenshot img {
+  box-shadow: 0px 0px 10px #888;
+  -webkit-box-shadow: 0px 0px 10px #888;
+  padding: 5px;
+  width: 100%;
+}
+figure.screenshot figcaption {
+  font-size: 12px;
+  text-align: right;
+}
