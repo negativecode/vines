@@ -269,22 +269,3 @@
   color: #444;
   margin-top: -5px;
 }
-#chat-page #search-roster {
-  cursor: pointer;
-  display: inline-block;
-  line-height: 1;
-  position: absolute;
-  right: 10px;
-  top: 6px;
-}
-#chat-page #search-roster svg {
-  height: 16px;
-  width: 16px;
-}
-#chat-page #search-roster-form {
-  border-bottom: 1px solid #ddd;
-  padding: 5px 10px;
-}
-#chat-page #search-roster-text {
-  width: 100%;
-}

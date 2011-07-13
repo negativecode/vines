@@ -245,19 +245,6 @@ class ChatPage
         form[0].reset()
         fn() if fn
 
-  filterRoster: ->
-    text = $('#search-roster-text').val().toLowerCase()
-    if text == ''
-      $('#roster li').show()
-      return
-
-    $('#roster li').each ->
-      node  = $(this)
-      jid   = (node.attr('data-jid') || '').toLowerCase()
-      name  = (node.attr('data-name') || '').toLowerCase()
-      match = jid.indexOf(text) != -1 || name.indexOf(text) != -1
-      if match then node.show() else node.hide()
-
   draw: ->
     unless @session.connected()
       window.location.hash = ''
@@ -267,10 +254,8 @@ class ChatPage
     $('#container').hide().empty()
     $("""
       <div id="alpha" class="y-fill">
-        <h2>Buddies <div id="search-roster"></div></h2>
-        <form id="search-roster-form" style="display:none;">
-          <input id="search-roster-text" type="search" placeholder="Filter" results="5"/>
-        </form>
+        <h2>Buddies <div id="search-roster-icon"></div></h2>
+        <div id="search-roster-form"></div>
         <ul id="roster" class="y-fill"></ul>
         <div id="roster-controls">
           <div id="add-contact"></div>
@@ -321,11 +306,11 @@ class ChatPage
     """).appendTo '#container'
 
     this.roster()
-    this.button 'clear-notices', ICONS.no
-    this.button 'add-contact', ICONS.plus
-    this.button 'remove-contact', ICONS.minus
-    this.button 'edit-contact', ICONS.user
-    this.button 'search-roster', ICONS.search, scale: 0.5, translation: '-8 -8'
+
+    new Button '#clear-notices',  ICONS.no
+    new Button '#add-contact',    ICONS.plus
+    new Button '#remove-contact', ICONS.minus
+    new Button '#edit-contact',   ICONS.user
 
     $('#message').focus -> $('.contact-form').fadeOut()
     $('#message-form').submit  => this.send()
@@ -346,13 +331,12 @@ class ChatPage
     $('#add-contact-form').submit    => this.addContact()
     $('#remove-contact-form').submit => this.removeContact()
     $('#edit-contact-form').submit   => this.updateContact()
-    $('#search-roster-form').submit  -> false
 
-    $('#search-roster-text').keyup  => this.filterRoster()
-    $('#search-roster-text').change => this.filterRoster()
-    $('#search-roster-text').click  => this.filterRoster()
-    $('#search-roster').click =>
-      this.toggleForm '#search-roster-form', => this.filterRoster()
+    new Filter
+      list: '#roster'
+      icon: '#search-roster-icon'
+      form: '#search-roster-form'
+      attrs: ['data-jid', 'data-name']
 
     $('#container').fadeIn 200
     this.resize()
@@ -366,20 +350,3 @@ class ChatPage
     new Layout ->
       c.css 'left', a.width() + b.width()
       msg.width form.width() - 32
-
-  button: (id, path, options) ->
-    options ||= {}
-    paper = Raphael(id)
-    icon = paper.path(path).attr
-      fill: '#000'
-      stroke: '#fff'
-      'stroke-width': 0.3
-      opacity: 0.6
-      scale: options.scale || 0.85
-      translation: options.translation || ''
-
-    node = $('#' + id)
-    node.hover(
-      -> icon.animate(opacity: 1.0, 200),
-      -> icon.animate(opacity: 0.6, 200))
-    node.get 0

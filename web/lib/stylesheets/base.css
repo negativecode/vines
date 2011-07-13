@@ -221,3 +221,22 @@ optgroup option {
   left: 0;
   right: 0;
 }
+.filter-button {
+  cursor: pointer;
+  display: inline-block;
+  line-height: 1;
+  position: absolute;
+  right: 10px;
+  top: 6px;
+}
+.filter-button svg {
+  height: 16px;
+  width: 16px;
+}
+.filter-form {
+  border-bottom: 1px solid #ddd;
+  padding: 5px 10px;
+}
+.filter-text {
+  width: 100%;
+}

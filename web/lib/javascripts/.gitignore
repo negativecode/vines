@@ -1,5 +1,7 @@
 base.js
+button.js
 contact.js
+filter.js
 layout.js
 login.js
 navbar.js
