@@ -256,7 +256,7 @@ class ChatPage
       <div id="alpha" class="y-fill">
         <h2>Buddies <div id="search-roster-icon"></div></h2>
         <div id="search-roster-form"></div>
-        <ul id="roster" class="y-fill"></ul>
+        <ul id="roster" class="scroll y-fill"></ul>
         <div id="roster-controls">
           <div id="add-contact"></div>
           <div id="remove-contact"></div>
@@ -291,14 +291,14 @@ class ChatPage
       </div>
       <div id="beta" class="x-fill y-fill">
         <h2 id="chat-title">Select a buddy to chat</h2>
-        <ul id="messages" class="y-fill"></ul>
+        <ul id="messages" class="scroll y-fill"></ul>
         <form id="message-form">
           <input id="message" name="message" type="text" maxlength="1024" placeholder="Type a message and press enter to send"/>
         </form>
       </div>
       <div id="charlie" class="y-fill">
         <h2>Notifications</h2>
-        <ul id="notifications" class="y-fill"></ul>
+        <ul id="notifications" class="scroll y-fill"></ul>
         <div id="notification-controls">
           <div id="clear-notices"></div>
         </div>

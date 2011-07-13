@@ -43,24 +43,8 @@
   background: #fff;
   height: 100%;
   list-style: none;
-  overflow-y: auto;
   text-shadow: 0 1px 1px #ddd;
   width: 100%;
-}
-#chat-page #messages::-webkit-scrollbar,
-#chat-page #roster::-webkit-scrollbar,
-#chat-page #notifications::-webkit-scrollbar {
-  width: 6px;
-}
-#chat-page #messages::-webkit-scrollbar-thumb,
-#chat-page #roster::-webkit-scrollbar-thumb,
-#chat-page #notifications::-webkit-scrollbar-thumb {
-  border-radius: 10px;
-}
-#chat-page #messages::-webkit-scrollbar-thumb:vertical,
-#chat-page #roster::-webkit-scrollbar-thumb:vertical,
-#chat-page #notifications::-webkit-scrollbar-thumb:vertical {
-  background: rgba(0, 0, 0, .2);
 }
 #chat-page #messages li {
   border-bottom: 1px solid #f0f0f0;
@@ -122,7 +106,6 @@
 #chat-page #notifications {
   height: 100%;
   list-style: none;
-  overflow-y: auto;
   text-shadow: 0 1px 1px #fff;
   width: 260px;
 }

@@ -240,3 +240,15 @@ optgroup option {
 .filter-text {
   width: 100%;
 }
+.scroll {
+  overflow-y: auto;
+}
+.scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.scroll::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+}
+.scroll::-webkit-scrollbar-thumb:vertical {
+  background: rgba(0, 0, 0, .2);
+}
