@@ -332,14 +332,20 @@ class ChatPage
     $('#remove-contact-form').submit => this.removeContact()
     $('#edit-contact-form').submit   => this.updateContact()
 
+    $('#container').fadeIn 200
+    layout = this.resize()
+
+    fn = ->
+      layout.resize()
+      layout.resize() # not sure why two are needed
+
     new Filter
       list: '#roster'
       icon: '#search-roster-icon'
       form: '#search-roster-form'
       attrs: ['data-jid', 'data-name']
-
-    $('#container').fadeIn 200
-    this.resize()
+      open:  fn
+      close: fn
 
   resize: ->
     a    = $ '#alpha'

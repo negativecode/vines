@@ -4,6 +4,8 @@ class Filter
     @icon  = options.icon
     @form  = options.form
     @attrs = options.attrs
+    @open  = options.open
+    @close = options.close
     this.draw()
 
   draw: ->
@@ -23,10 +25,12 @@ class Filter
       if form.is ':hidden'
         this.filter(text)
         form.show()
+        this.open() if this.open
       else
         form.hide()
         form[0].reset()
         this.filter(text)
+        this.close() if this.close
 
   filter: (input) ->
     text = input.val().toLowerCase()
