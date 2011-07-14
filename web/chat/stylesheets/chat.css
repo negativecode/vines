@@ -1,41 +1,6 @@
 #chat-page #container {
   height: 100%;
 }
-#chat-page #alpha,
-#chat-page #beta,
-#chat-page #charlie {
-  height: 100%;
-  position: absolute;
-}
-#chat-page #alpha {
-  background: #f8f8f8;
-  -webkit-box-shadow: 0 0 40px rgba(0, 0, 0, 0.1) inset;
-  box-shadow: 0 0 40px rgba(0, 0, 0, 0.1) inset;
-  width: 260px;
-}
-#chat-page #alpha h2,
-#chat-page #beta h2,
-#chat-page #charlie h2 {
-  border-bottom: 1px solid #ddd;
-  font-size: 10pt;
-  padding-left: 10px;
-  position: relative;
-  text-shadow: 0 -1px 1px #fff;
-}
-#chat-page #beta {
-  -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, 0.5), 0 0 40px rgba(0, 0, 0, 0.1) inset;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5), 0 0 40px rgba(0, 0, 0, 0.1) inset;
-  width: 460px;
-  left: 260px;
-  z-index: 1;
-}
-#chat-page #charlie {
-  background: #f8f8f8;
-  -webkit-box-shadow: 0 0 40px rgba(0, 0, 0, 0.1) inset;
-  box-shadow: 0 0 40px rgba(0, 0, 0, 0.1) inset;
-  width: 260px;
-  left: 720px;
-}
 #chat-page #chat-title {
   background: #f8f8f8;
 }
@@ -173,71 +138,8 @@
   top: 4px;
   right: 10px;
 }
-#chat-page #roster-controls,
-#chat-page #notification-controls {
-  background: rgba(255, 255, 255, 0.05);
-  border-top: 1px solid #ddd;
-  height: 50px;
-  position: absolute;
-  bottom: 0;
-  width: 260px;
-}
-#chat-page #notification-controls {
+#chat-page #charlie-controls {
   text-align: right;
-}
-#chat-page #roster-controls > div,
-#chat-page #notification-controls > div {
-  cursor: pointer;
-  display: inline-block;
-  height: 27px;
-  margin: 0 10px;
-  position: relative;
-  top: 10px;
-  width: 27px;
-}
-#chat-page #roster-controls > div > svg,
-#chat-page #notification-controls > div > svg {
-  height: 27px;
-  width: 27px;
-}
-#chat-page .contact-form {
-  background: inherit;
-  border-bottom: 1px solid #ddd;
-  border-top: 1px solid #fff;
-  -webkit-box-shadow: 0px -3px 5px rgba(0, 0, 0, 0.1);
-  box-shadow: 0px -3px 5px rgba(0, 0, 0, 0.1);
-  padding-top: 10px;
-  position: absolute;
-  bottom: 50px;
-  left: 0;
-  width: 260px;
-}
-#chat-page .contact-form h2,
-#chat-page .notify-form h2 {
-  border: none !important;
-  line-height: 1;
-  margin-bottom: 10px;
-}
-#chat-page .contact-form p,
-#chat-page .notify-form p {
-  line-height: 1.5;
-  margin: 0 10px 10px 10px;
-  text-shadow: 0 1px 1px #fff;
-}
-#chat-page .notify-form p {
-  margin-top: -5px;
-}
-#chat-page .contact-form .buttons,
-#chat-page .notify-form .buttons {
-  padding-right: 10px;
-  text-align: right;
-}
-#chat-page .contact-form input[type="text"],
-#chat-page .contact-form input[type="email"] {
-  margin-bottom: 10px;
-  width: 228px;
-  position: relative;
-  left: 10px;
 }
 #chat-page #edit-contact-jid {
   color: #444;

@@ -118,7 +118,7 @@ class ChatPage
     if presence.type == 'subscribe'
       node = $("""
         <li data-jid="#{presence.from}" style="display:none;">
-          <form class="notify-form">
+          <form class="inset">
             <h2>Buddy Approval</h2>
             <p>#{presence.from} wants to add you as a buddy.</p>
             <fieldset class="buttons">
@@ -235,7 +235,7 @@ class ChatPage
 
   toggleForm: (form, fn) ->
     form = $(form)
-    $('.contact-form').each ->
+    $('form.overlay').each ->
       $(this).hide() unless this.id == form.attr 'id'
     if form.is ':hidden'
       fn() if fn
@@ -253,16 +253,16 @@ class ChatPage
     $('body').attr 'id', 'chat-page'
     $('#container').hide().empty()
     $("""
-      <div id="alpha" class="y-fill">
+      <div id="alpha" class="sidebar column y-fill">
         <h2>Buddies <div id="search-roster-icon"></div></h2>
         <div id="search-roster-form"></div>
         <ul id="roster" class="selectable scroll y-fill"></ul>
-        <div id="roster-controls">
+        <div id="alpha-controls" class="controls">
           <div id="add-contact"></div>
           <div id="remove-contact"></div>
           <div id="edit-contact"></div>
         </div>
-        <form id="add-contact-form" class="contact-form" style="display:none;">
+        <form id="add-contact-form" class="overlay" style="display:none;">
           <h2>Add Buddy</h2>
           <input id="add-contact-jid" type="email" maxlength="1024" placeholder="Account name"/>
           <input id="add-contact-name" type="text" maxlength="1024" placeholder="Real name"/>
@@ -271,7 +271,7 @@ class ChatPage
             <input id="add-contact-ok" type="submit" value="Add"/>
           </fieldset>
         </form>
-        <form id="remove-contact-form" class="contact-form" style="display:none;">
+        <form id="remove-contact-form" class="overlay" style="display:none;">
           <h2>Remove Buddy</h2>
           <p id="remove-contact-msg">Select a buddy in the list above to remove.</p>
           <fieldset class="buttons" style="display:none;">
@@ -279,7 +279,7 @@ class ChatPage
             <input id="remove-contact-ok" type="submit" value="Remove"/>
           </fieldset>
         </form>
-        <form id="edit-contact-form" class="contact-form" style="display:none;">
+        <form id="edit-contact-form" class="overlay" style="display:none;">
           <h2>Update Profile</h2>
           <p id="edit-contact-jid">Select a buddy in the list above to update.</p>
           <input id="edit-contact-name" type="text" maxlength="1024" placeholder="Real name" style="display:none;"/>
@@ -289,17 +289,17 @@ class ChatPage
           </fieldset>
         </form>
       </div>
-      <div id="beta" class="x-fill y-fill">
+      <div id="beta" class="primary column x-fill y-fill">
         <h2 id="chat-title">Select a buddy to chat</h2>
         <ul id="messages" class="scroll y-fill"></ul>
         <form id="message-form">
           <input id="message" name="message" type="text" maxlength="1024" placeholder="Type a message and press enter to send"/>
         </form>
       </div>
-      <div id="charlie" class="y-fill">
+      <div id="charlie" class="sidebar column y-fill">
         <h2>Notifications</h2>
         <ul id="notifications" class="scroll y-fill"></ul>
-        <div id="notification-controls">
+        <div id="charlie-controls" class="controls">
           <div id="clear-notices"></div>
         </div>
       </div>
@@ -312,7 +312,7 @@ class ChatPage
     new Button '#remove-contact', ICONS.minus
     new Button '#edit-contact',   ICONS.user
 
-    $('#message').focus -> $('.contact-form').fadeOut()
+    $('#message').focus -> $('form.overlay').fadeOut()
     $('#message-form').submit  => this.send()
 
     $('#clear-notices').click  -> $('#notifications li').fadeOut 200

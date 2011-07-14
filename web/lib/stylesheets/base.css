@@ -261,3 +261,87 @@ ul.selectable li.selected {
   color: #fff;
   text-shadow: 0 -1px 1px #1b3a65;
 }
+.column {
+  height: 100%;
+  position: absolute;
+}
+.column h2 {
+  border-bottom: 1px solid #ddd;
+  font-size: 10pt;
+  padding-left: 10px;
+  position: relative;
+  text-shadow: 0 -1px 1px #fff;
+}
+.column .controls {
+  background: rgba(255, 255, 255, 0.05);
+  border-top: 1px solid #ddd;
+  height: 50px;
+  position: absolute;
+  bottom: 0;
+  width: 260px;
+}
+.column .controls > div {
+  cursor: pointer;
+  display: inline-block;
+  height: 27px;
+  margin: 0 10px;
+  position: relative;
+  top: 10px;
+  width: 27px;
+}
+.column .controls > div > svg {
+  height: 27px;
+  width: 27px;
+}
+.primary {
+  -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, 0.5), 0 0 40px rgba(0, 0, 0, 0.1) inset;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5), 0 0 40px rgba(0, 0, 0, 0.1) inset;
+  width: 460px;
+  left: 260px;
+  z-index: 1;
+}
+.sidebar {
+  background: #f8f8f8;
+  -webkit-box-shadow: 0 0 40px rgba(0, 0, 0, 0.1) inset;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.1) inset;
+  width: 260px;
+}
+form.overlay {
+  background: inherit;
+  border-bottom: 1px solid #ddd;
+  border-top: 1px solid #fff;
+  -webkit-box-shadow: 0px -3px 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px -3px 5px rgba(0, 0, 0, 0.1);
+  padding-top: 10px;
+  position: absolute;
+  bottom: 50px;
+  left: 0;
+  width: 260px;
+}
+form.overlay h2,
+form.inset h2 {
+  border: none !important;
+  line-height: 1;
+  margin-bottom: 10px;
+}
+form.overlay p,
+form.inset p {
+  line-height: 1.5;
+  margin: 0 10px 10px 10px;
+  text-shadow: 0 1px 1px #fff;
+}
+form.inset p {
+  margin-top: -5px;
+}
+form.overlay .buttons,
+form.inset .buttons {
+  padding-right: 10px;
+  text-align: right;
+}
+form.overlay input[type="text"],
+form.overlay input[type="email"] {
+  margin-bottom: 10px;
+  width: 228px;
+  position: relative;
+  left: 10px;
+}
