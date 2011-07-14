@@ -126,7 +126,7 @@
   font-weight: normal;
   padding: 10px 0 0 0;
 }
-#chat-page #roster li:hover,
+#chat-page #roster li:hover:not(.selected),
 #chat-page #notifications li:hover {
   background: rgba(255, 255, 255, 1.0);
 }
@@ -135,15 +135,6 @@
 }
 #chat-page #roster li.selected > * {
   opacity: 1.0;
-}
-#chat-page #roster li.selected {
-  background: #4693FF;
-  background: -moz-linear-gradient(#4693FF, #015de6);
-  background: -o-linear-gradient(#4693FF, #015de6);
-  background: -webkit-gradient(linear, left top, left bottom, from(#4693FF), to(#015de6));
-  border-bottom: 1px solid #fff;
-  color: #fff;
-  text-shadow: 0 -1px 1px #1b3a65;
 }
 #chat-page #roster li.selected .status-msg {
   color: rgba(255, 255, 255, 0.85);

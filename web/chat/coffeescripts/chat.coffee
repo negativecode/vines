@@ -256,7 +256,7 @@ class ChatPage
       <div id="alpha" class="y-fill">
         <h2>Buddies <div id="search-roster-icon"></div></h2>
         <div id="search-roster-form"></div>
-        <ul id="roster" class="scroll y-fill"></ul>
+        <ul id="roster" class="selectable scroll y-fill"></ul>
         <div id="roster-controls">
           <div id="add-contact"></div>
           <div id="remove-contact"></div>
