@@ -44,6 +44,8 @@ class Session
 
   bareJid: -> @xmpp.jid.split('/')[0]
 
+  uniqueId: -> @xmpp.getUniqueId()
+
   avatar: (jid) ->
     card = this.loadCard(jid)
     if card && card.photo
@@ -89,7 +91,7 @@ class Session
     iq = $iq(type: 'get', to: jid, id: @xmpp.getUniqueId())
       .c('vCard', xmlns: 'vcard-temp').up()
 
-    @xmpp.sendIQ iq, handler, handler, 5000
+    this.sendIQ iq, handler
 
   parseRoster: (node) ->
     $('item', node).map(-> new Contact this ).get()
@@ -103,7 +105,7 @@ class Session
     iq = $iq(type: 'get', id: @xmpp.getUniqueId())
       .c('query', xmlns: 'jabber:iq:roster').up()
 
-    @xmpp.sendIQ iq, handler, handler, 5000
+    this.sendIQ iq, handler
 
   sendMessage: (jid, message) ->
     stanza = $msg(to: jid, from: @xmpp.jid, type: 'chat')
@@ -118,6 +120,9 @@ class Session
     else
       stanza.c('status').t status if status != 'Available'
     @xmpp.send stanza.tree()
+
+  sendIQ: (node, callback) ->
+    @xmpp.sendIQ node, callback, callback, 5000
 
   updateContact: (contact, add) ->
     iq = $iq(type: 'set', id: @xmpp.getUniqueId())
