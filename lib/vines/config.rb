@@ -5,7 +5,7 @@ module Vines
   # A Config object is passed to the stream handlers to give them access
   # to server configuration information like virtual host names, storage
   # systems, etc. This class provides the DSL methods used in the
-  # config/vines.rb file.
+  # conf/config.rb file.
   class Config
     LOG_LEVELS = %w[debug info warn error fatal].freeze
 
