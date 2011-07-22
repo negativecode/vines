@@ -189,11 +189,11 @@ optgroup option {
   width: 100%;
 }
 #navbar #nav-links li a svg {
-  height: 30px;
-  width: 30px;
+  height: 32px;
+  width: 32px;
   position: absolute;
-  left: 32px;
-  top: 3px;
+  left: 33px;
+  top: 4px;
 }
 #navbar #nav-links li a span {
   position: relative;
