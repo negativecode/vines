@@ -6,6 +6,11 @@ CouchDB, Redis, the file system, or a custom storage implementation that you pro
 LDAP authentication can be used so user names and passwords aren't stored in the chat
 database. SSL encryption is mandatory on all client and server connections.
 
+The Vines XMPP server includes a web chat client. The web application is available 
+immediately after starting the chat server at http://localhost:5280/chat/
+
+Additional documentation can be found at www.getvines.com.
+
 == Usage
 
 1. gem install vines
