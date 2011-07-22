@@ -20,7 +20,7 @@ class Session
           callback true
           this.findRoster =>
             this.notify('roster')
-            @xmpp.send $pres().tree()
+            @xmpp.send $('<presence/>').get 0
             this.findCards()
 
   disconnect: -> @xmpp.disconnect()
@@ -75,8 +75,12 @@ class Session
 
   findCard: (jid, callback) ->
     return unless jid
-
-    handler = (result) ->
+    node = this.xml """
+      <iq id="#{this.uniqueId()}" to="#{jid}" type="get">
+        <vCard xmlns="vcard-temp"/>
+      </iq>
+    """
+    this.sendIQ node, (result) ->
       card  = $('vCard', result)
       photo = $('PHOTO', card)
       type  = $('TYPE', photo).text()
@@ -88,77 +92,81 @@ class Session
       vcard = jid: jid, photo: photo, retrieved: new Date()
       callback if card.size() > 0 then vcard else null
 
-    iq = $iq(type: 'get', to: jid, id: @xmpp.getUniqueId())
-      .c('vCard', xmlns: 'vcard-temp').up()
-
-    this.sendIQ iq, handler
-
   parseRoster: (node) ->
     $('item', node).map(-> new Contact this ).get()
 
   findRoster: (callback) ->
-    handler = (result) =>
+    node = $("""
+      <iq id='#{this.uniqueId()}' type="get">
+        <query xmlns="jabber:iq:roster"/>
+      </iq>
+    """)
+    this.sendIQ node.get(0), (result) =>
       contacts = this.parseRoster(result)
       @roster[contact.jid] = contact for contact in contacts
       callback()
 
-    iq = $iq(type: 'get', id: @xmpp.getUniqueId())
-      .c('query', xmlns: 'jabber:iq:roster').up()
-
-    this.sendIQ iq, handler
-
   sendMessage: (jid, message) ->
-    stanza = $msg(to: jid, from: @xmpp.jid, type: 'chat')
-      .c('body').t(message).up()
-    @xmpp.send stanza.tree()
+    node = this.xml """
+      <message id="#{this.uniqueId()}" to="#{jid}" type="chat">
+        <body></body>
+      </message>
+    """
+    $('body', node).text message
+    @xmpp.send node
 
   sendPresence: (away, status) ->
-    stanza = $pres()
+    node = $ '<presence/>'
     if away
-      stanza.c('show').t('xa').up()
-      stanza.c('status').t status if status != 'Away'
+      node.append $('<show>xa</show>')
+      node.append $('<status/>').text status if status != 'Away'
     else
-      stanza.c('status').t status if status != 'Available'
-    @xmpp.send stanza.tree()
+      node.append $('<status/>').text status if status != 'Available'
+    @xmpp.send node.get 0
 
   sendIQ: (node, callback) ->
     @xmpp.sendIQ node, callback, callback, 5000
 
   updateContact: (contact, add) ->
-    iq = $iq(type: 'set', id: @xmpp.getUniqueId())
-      .c('query', xmlns: 'jabber:iq:roster')
-      .c('item', jid: contact.jid, name: contact.name)
-    iq.c('group', group).up() for group in contact.groups
-    @xmpp.send iq.up().tree()
-    @xmpp.send $pres(type: 'subscribe', to: contact.jid).tree() if add
+    node = $("""
+      <iq id="#{this.uniqueId()}" type="set">
+        <query xmlns="jabber:iq:roster">
+          <item name="" jid="#{contact.jid}"/>
+        </query>
+      </iq>
+    """)
+    $('item', node).attr 'name', contact.name
+    for group in contact.groups
+      $('item', node).append $('<group></group>').text group
+    @xmpp.send node.get 0
+    this.sendSubscribe(contact.jid) if add
 
   removeContact: (jid) ->
-    iq = $iq(type: 'set', id: @xmpp.getUniqueId())
-      .c('query', xmlns: 'jabber:iq:roster')
-      .c('item', jid: jid, subscription: 'remove')
-      .up().up()
-    @xmpp.send iq.tree()
+    node = $("""
+      <iq id="#{this.uniqueId()}" type="set">
+        <query xmlns="jabber:iq:roster">
+          <item jid="#{jid}" subscription="remove"/>
+        </query>
+      </iq>
+    """)
+    @xmpp.send node.get 0
 
   sendSubscribe: (jid) ->
-    @xmpp.send $pres(
-      type: 'subscribe'
-      to: jid
-      id: @xmpp.getUniqueId()
-    ).tree()
+    @xmpp.send this.presence jid, 'subscribe'
 
   sendSubscribed: (jid) ->
-    @xmpp.send $pres(
-      type: 'subscribed'
-      to: jid
-      id: @xmpp.getUniqueId()
-    ).tree()
+    @xmpp.send this.presence jid, 'subscribed'
 
   sendUnsubscribed: (jid) ->
-    @xmpp.send $pres(
-      type: 'unsubscribed'
-      to: jid
-      id: @xmpp.getUniqueId()
-    ).tree()
+    @xmpp.send this.presence jid, 'unsubscribed'
+
+  presence: (to, type) ->
+    $("""
+      <presence
+        id="#{this.uniqueId()}"
+        to="#{to}"
+        type="#{type}"/>
+    """).get 0
 
   handleIq: (node) ->
     node = $(node)
@@ -214,3 +222,5 @@ class Session
 
   notify: (type, obj) ->
     callback(obj) for callback in (@listeners[type] || [])
+
+  xml: (xml) -> $.parseXML(xml).documentElement
