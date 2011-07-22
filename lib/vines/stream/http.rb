@@ -43,11 +43,11 @@ module Vines
         if request.path == self.bind
           body = Nokogiri::XML(request.body).root
           if session = Sessions[body['sid']]
-            session.request(request)
+            @session = session
           else
             @session = Http::Session.new(self)
-            @session.request(request)
           end
+          @session.request(request)
           @nodes.push(body)
         else
           request.reply_with_file(self.root)
