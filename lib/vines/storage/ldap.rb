@@ -9,8 +9,8 @@ module Vines
     # information.
     class Ldap
       @@required = [:host, :port]
-      %w[tls dn password basedn object_class user_attr name_attr].each do |name|
-        @@required << name.to_sym
+      %w[tls dn password basedn object_class user_attr name_attr groupdn].each do |name|
+        @@required << name.to_sym unless name == 'groupdn'
         define_method name do |*args|
           @config[name.to_sym] = args.first
         end
@@ -28,13 +28,10 @@ module Vines
       def authenticate(username, password)
         return if [username, password].any? {|arg| (arg || '').strip.empty? }
 
-        clas = Net::LDAP::Filter.eq('objectClass', @config[:object_class])
-        uid = Net::LDAP::Filter.eq(@config[:user_attr], username)
-        filter = clas & uid
-        attrs = [@config[:name_attr], 'mail']
-
         ldap = connect(@config[:dn], @config[:password])
-        entries = ldap.search(:attributes => attrs, :filter => filter)
+        entries = ldap.search(
+          :attributes => [@config[:name_attr], 'mail'],
+          :filter => filter(username))
         return unless entries && entries.size == 1
 
         user = if connect(entries.first.dn, password).bind
@@ -42,6 +39,20 @@ module Vines
           User.new(:jid => username, :name => name.to_s, :roster => [])
         end
         user
+      end
+
+      # Return an LDAP search filter for a user optionally belonging to the
+      # group defined by the groupdn config attribute.
+      def filter(username)
+        clas = Net::LDAP::Filter.eq('objectClass', @config[:object_class])
+        uid = Net::LDAP::Filter.eq(@config[:user_attr], username)
+        filter = clas & uid
+        if group = @config[:groupdn]
+          memberOf = Net::LDAP::Filter.eq('memberOf', group)
+          isMemberOf = Net::LDAP::Filter.eq('isMemberOf', group)
+          filter = filter & (memberOf | isMemberOf)
+        end
+        filter
       end
 
       private

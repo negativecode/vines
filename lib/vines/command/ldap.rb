@@ -27,8 +27,11 @@ module Vines
         rescue Exception => e
           raise "LDAP connection failed: #{e.message}"
         end
-        raise "User not found" unless user
-        puts "Found #{user.jid} with name: #{user.name}"
+
+        filter = storage.ldap.filter(jid)
+        raise "User not found with filter:\n  #{filter}" unless user
+        name = user.name.empty? ? '<name missing>' : user.name
+        puts "Found user #{name} with filter:\n  #{filter}"
       end
     end
   end

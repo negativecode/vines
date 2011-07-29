@@ -42,6 +42,7 @@ Vines::Config.configure do
   #     dn 'cn=Directory Manager'
   #     password 'secr3t'
   #     basedn 'dc=wonderland,dc=lit'
+  #     groupdn 'cn=chatters,dc=wonderland,dc=lit' # optional
   #     object_class 'person'
   #     user_attr 'uid'
   #     name_attr 'cn'
