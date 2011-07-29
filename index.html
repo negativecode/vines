@@ -149,6 +149,7 @@ host 'wonderland.lit' do
     dn 'cn=Directory Manager'
     password 'secr3t'
     basedn 'dc=wonderland,dc=lit'
+    groupdn 'cn=chatters,dc=wonderland,dc=lit' # optional
     object_class 'person'
     user_attr 'uid'
     name_attr 'cn'
@@ -168,6 +169,13 @@ end
     full chat ID. In our example, the value of Alice's <em>uid</em> field in our
     LDAP directory is alice@wonderland.lit. The LDAP <em>mail</em> attribute is
     also popular because the user's email address generally matches their chat ID.
+  </p>
+  <p>
+    The optional <em>groupdn</em> value limits which users are allowed to login
+    to the chat server. If not set, all LDAP users that authenticate successfully
+    are allowed to chat. However, if a group is set, only users belonging to that
+    LDAP group are allowed to access the chat server. See the
+    <a href="/commands">vines ldap</a> command line tool for more information.
   </p>
 
   <h2>Client Connections</h2>

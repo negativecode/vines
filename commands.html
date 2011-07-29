@@ -131,7 +131,8 @@ LDAP connection failed: No such address or other socket error.
 $ vines ldap wonderland.lit
 JID: alice@wonderland.lit
 Password: 
-User not found
+User not found with filter:
+  (&(objectClass=person)(uid=alice@wonderland.lit))
 </pre>
 <p>
   We connected to the LDAP server, but the user ID and password weren't found.
@@ -139,12 +140,21 @@ User not found
   contains the full JID of the user. The <em>mail</em> attribute is usually a
   good choice because chat ID's and email addresses typically match.
 </p>
-
+<p>
+  If we're using the optional <em>groupdn</em> setting to limit the users allowed
+  to login to the chat server, make sure Alice belongs to that group in the LDAP
+  directory.
+</p>
+<p>
+  The LDAP search filter is displayed so we can use it in other LDAP debugging
+  tools if needed.
+</p>
 <pre>
 $ vines ldap wonderland.lit
 JID: alice@wonderland.lit
 Password: 
-Found alice@wonderland.lit with name: Alice
+Found user Alice with filter:
+  (&(objectClass=person)(uid=alice@wonderland.lit))
 </pre>
 <p>
   Success! Users can now login to the chat server using their LDAP user ID
