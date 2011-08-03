@@ -34,6 +34,10 @@ module Vines
       @resource.nil?
     end
 
+    def empty?
+      to_s == ''
+    end
+
     def <=>(jid)
       self.to_s <=> jid.to_s
     end

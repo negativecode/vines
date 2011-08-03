@@ -13,6 +13,7 @@ class JidTest < MiniTest::Unit::TestCase
       assert_equal '', jid.domain
       assert_equal '', jid.to_s
       assert_equal '', jid.bare.to_s
+      assert jid.empty?
     end
   end
 
@@ -31,6 +32,7 @@ class JidTest < MiniTest::Unit::TestCase
     assert_nil jid.node
     assert_nil jid.resource
     assert_equal jid, jid.bare
+    refute jid.empty?
   end
 
   def test_bare_jid
@@ -40,6 +42,7 @@ class JidTest < MiniTest::Unit::TestCase
     assert_equal 'alice', jid.node
     assert_nil jid.resource
     assert_equal jid, jid.bare
+    refute jid.empty?
   end
 
   def test_parsed_bare_jid
@@ -49,6 +52,7 @@ class JidTest < MiniTest::Unit::TestCase
     assert_equal 'alice', jid.node
     assert_nil jid.resource
     assert_equal jid, jid.bare
+    refute jid.empty?
   end
 
   def test_full_jid
@@ -58,6 +62,7 @@ class JidTest < MiniTest::Unit::TestCase
     assert_equal 'alice', jid.node
     assert_equal 'tea', jid.resource
     refute_equal jid, jid.bare
+    refute jid.empty?
   end
 
   def test_parsed_full_jid
@@ -67,5 +72,6 @@ class JidTest < MiniTest::Unit::TestCase
     assert_equal 'alice', jid.node
     assert_equal 'tea', jid.resource
     refute_equal jid, jid.bare
+    refute jid.empty?
   end
 end
