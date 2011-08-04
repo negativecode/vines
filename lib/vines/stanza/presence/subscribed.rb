@@ -20,11 +20,11 @@ module Vines
           stream.update_user_streams(stream.user)
 
           contact = stream.user.contact(to)
-          router.interested_resources(stream.user.jid).each do |recipient|
+          stream.interested_resources(stream.user.jid).each do |recipient|
             contact.send_roster_push(recipient)
           end
 
-          presences = router.available_resources(stream.user.jid).map do |c|
+          presences = stream.available_resources(stream.user.jid).map do |c|
             c.last_broadcast_presence.clone.tap do |node|
               node['from'] = c.user.jid.to_s
               node['id'] = Kit.uuid
@@ -33,7 +33,7 @@ module Vines
           end
 
           if local?
-            router.available_resources(to).each do |recipient|
+            stream.available_resources(to).each do |recipient|
               presences.each {|el| recipient.write(el) }
             end
           else
@@ -52,7 +52,7 @@ module Vines
           storage(to.domain).save_user(user)
           stream.update_user_streams(user)
 
-          router.interested_resources(to).each do |recipient|
+          stream.interested_resources(to).each do |recipient|
             recipient.write(@node)
             contact.send_roster_push(recipient)
           end

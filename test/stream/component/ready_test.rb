@@ -85,7 +85,7 @@ class ComponentReadyTest < MiniTest::Unit::TestCase
     @recipient.expect(:write, nil, [node])
 
     @router = MiniTest::Mock.new
-    @router.expect(:connected_resources, [@recipient], ['hatter@wonderland.lit'])
+    @router.expect(:connected_resources, [@recipient], ['hatter@wonderland.lit', 'alice@tea.wonderland.lit'])
     @stream.expect(:router, @router)
 
     @state.node(node)

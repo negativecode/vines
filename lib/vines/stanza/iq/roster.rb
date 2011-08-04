@@ -113,7 +113,7 @@ module Vines
           end.compact
 
           if router.local_jid?(contact.jid)
-            router.interested_resources(contact.jid).each do |recipient|
+            stream.interested_resources(contact.jid).each do |recipient|
               presence.each {|el| recipient.write(el) }
             end
           else
@@ -133,7 +133,7 @@ module Vines
         # Send an iq set stanza to the user's interested resources, letting them
         # know their roster has been updated.
         def push_roster_updates(to, contact)
-          router.interested_resources(to).each do |recipient|
+          stream.interested_resources(to).each do |recipient|
             contact.send_roster_push(recipient)
           end
         end

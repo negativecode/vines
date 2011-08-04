@@ -25,10 +25,10 @@ class MessageTest < MiniTest::Unit::TestCase
 
     router = MiniTest::Mock.new
     router.expect(:local?, true, [node])
-    router.expect(:connected_resources, [recipient], [alice.jid.bare])
 
     @stream.expect(:router, router)
     @stream.expect(:user, alice)
+    @stream.expect(:connected_resources, [recipient], [alice.jid.bare])
 
     stanza = Vines::Stanza::Message.new(node, @stream)
     stanza.process
@@ -43,13 +43,13 @@ class MessageTest < MiniTest::Unit::TestCase
 
     router = MiniTest::Mock.new
     router.expect(:local?, true, [node])
-    router.expect(:connected_resources, [], [bogus])
 
     storage = MiniTest::Mock.new
     storage.expect(:find_user, nil, [bogus])
 
     @stream.expect(:router, router)
     @stream.expect(:storage, storage, [bogus.domain])
+    @stream.expect(:connected_resources, [], [bogus])
 
     stanza = Vines::Stanza::Message.new(node, @stream)
     stanza.process
@@ -64,13 +64,13 @@ class MessageTest < MiniTest::Unit::TestCase
 
     router = MiniTest::Mock.new
     router.expect(:local?, true, [node])
-    router.expect(:connected_resources, [], [hatter.jid])
 
     storage = MiniTest::Mock.new
     storage.expect(:find_user, hatter, [hatter.jid])
 
     @stream.expect(:router, router)
     @stream.expect(:storage, storage, [hatter.jid.domain])
+    @stream.expect(:connected_resources, [], [hatter.jid])
 
     stanza = Vines::Stanza::Message.new(node, @stream)
     assert_raises(Vines::StanzaErrors::ServiceUnavailable) { stanza.process }
@@ -91,10 +91,10 @@ class MessageTest < MiniTest::Unit::TestCase
 
     router = MiniTest::Mock.new
     router.expect(:local?, true, [node])
-    router.expect(:connected_resources, [recipient], [romeo.jid])
 
     @stream.expect(:router, router)
     @stream.expect(:user, alice)
+    @stream.expect(:connected_resources, [recipient], [romeo.jid])
 
     stanza = Vines::Stanza::Message.new(node, @stream)
     stanza.process

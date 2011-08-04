@@ -31,13 +31,13 @@ module Vines
       def start(node)
         @remote_domain = node['to']
         send_stream_header
-        raise StreamErrors::HostUnknown unless @config[:component].password(@remote_domain)
+        raise StreamErrors::HostUnknown unless @config.component?(@remote_domain)
         raise StreamErrors::InvalidNamespace unless node.namespaces['xmlns'] == NAMESPACES[:component]
         raise StreamErrors::InvalidNamespace unless node.namespaces['xmlns:stream'] == NAMESPACES[:stream]
       end
 
       def secret
-        password = @config[:component].password(@remote_domain)
+        password = @config.component_password(@remote_domain)
         Digest::SHA1.hexdigest(@stream_id + password)
       end
 

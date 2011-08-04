@@ -29,30 +29,32 @@ module Vines
     # Returns streams for all connected resources for this JID. A
     # resource is considered connected after it has completed authentication
     # and resource binding.
-    def connected_resources(jid)
-      jid = JID.new(jid)
+    def connected_resources(jid, from)
+      jid, from = JID.new(jid), JID.new(from)
       clients.select do |stream|
-        stream.connected? && jid == (jid.bare? ? stream.user.jid.bare : stream.user.jid)
+        stream.connected? &&
+          jid == (jid.bare? ? stream.user.jid.bare : stream.user.jid) &&
+          @config.allowed?(jid, from)
       end
     end
 
     # Returns streams for all available resources for this JID. A
     # resource is marked available after it sends initial presence.
     # This method accepts a single JID or a list of JIDs.
-    def available_resources(*jid)
-      ids = jid.flatten.map {|jid| JID.new(jid).bare }
+    def available_resources(*jids, from)
+      jids = filter_allowed(jids, from)
       clients.select do |stream|
-        stream.available? && ids.include?(stream.user.jid.bare)
+        stream.available? && jids.include?(stream.user.jid.bare)
       end
     end
 
     # Returns streams for all interested resources for this JID. A
     # resource is marked interested after it requests the roster.
     # This method accepts a single JID or a list of JIDs.
-    def interested_resources(*jid)
-      ids = jid.flatten.map {|jid| JID.new(jid).bare }
+    def interested_resources(*jids, from)
+      jids = filter_allowed(jids, from)
       clients.select do |stream|
-        stream.interested? && ids.include?(stream.user.jid.bare)
+        stream.interested? && jids.include?(stream.user.jid.bare)
       end
     end
 
@@ -75,6 +77,8 @@ module Vines
     # or an external component stream.
     def route(stanza)
       to, from = %w[to from].map {|attr| JID.new(stanza[attr]) }
+      return unless @config.allowed?(to, from)
+
       if stream = connection_to(to.domain)
         stream.write(stanza)
       elsif @pending.key?(to.domain)
@@ -105,8 +109,8 @@ module Vines
       to.empty? || local_jid?(to)
     end
 
-    def local_jid?(jid)
-      @config.vhost?(JID.new(jid).domain)
+    def local_jid?(*jids)
+      @config.local_jid?(*jids)
     end
 
     # Returns the total number of streams connected to the server.
@@ -115,6 +119,18 @@ module Vines
     end
 
     private
+
+    # Return the bare JID's from the list that are allowed to talk to
+    # the +from+ JID. Store them in a Hash for fast +include?+ checks.
+    def filter_allowed(jids, from)
+      from = JID.new(from)
+      {}.tap do |ids|
+        jids.flatten.each do |jid|
+          jid = JID.new(jid).bare
+          ids[jid] = nil if @config.allowed?(jid, from)
+        end
+      end
+    end
 
     def connection_to(domain)
       (components + servers).find do |stream|

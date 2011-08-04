@@ -22,7 +22,7 @@ module Vines
         if local?
           to = (self[TO] || '').strip
           to = to.empty? ? stream.user.jid.bare : JID.new(to)
-          recipients = router.connected_resources(to)
+          recipients = stream.connected_resources(to)
           if recipients.empty?
             if user = storage(to.domain).find_user(to)
               # TODO Implement offline messaging storage

@@ -11,7 +11,7 @@ module Vines
           from = JID.new(node['from'] || '')
           raise StreamErrors::ImproperAddressing if to.empty? || from.domain != stream.remote_domain
           if stanza.local?
-            stream.router.connected_resources(to).each do |recipient|
+            stream.router.connected_resources(to, from).each do |recipient|
               recipient.write(node)
             end
           else

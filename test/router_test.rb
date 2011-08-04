@@ -25,7 +25,7 @@ class RouterTest < MiniTest::Unit::TestCase
 
   def test_stanza_with_local_jid_is_local
     config = MiniTest::Mock.new
-    config.expect(:vhost?, true, ['wonderland.lit'])
+    config.expect(:local_jid?, true, ['alice@wonderland.lit'])
     stream = MiniTest::Mock.new
     stream.expect(:config, config)
     stream.expect(:stream_type, :client)
@@ -43,7 +43,7 @@ class RouterTest < MiniTest::Unit::TestCase
 
   def test_stanza_with_remote_jid_is_not_local
     config = MiniTest::Mock.new
-    config.expect(:vhost?, false, ['wonderland.lit'])
+    config.expect(:local_jid?, false, ['alice@wonderland.lit'])
     stream = MiniTest::Mock.new
     stream.expect(:config, config)
     stream.expect(:stream_type, :client)

@@ -91,14 +91,14 @@ module Vines
         # has successfully subscribed.
         def available_subscribed_to_resources
           subscribed = @user.subscribed_to_contacts.map {|c| c.jid }
-          router.available_resources(subscribed)
+          router.available_resources(subscribed, @user.jid)
         end
 
         # Returns streams for available resources that are subscribed
         # to this user's presence updates.
         def available_subscribers
           subscribed = @user.subscribed_from_contacts.map {|c| c.jid }
-          router.available_resources(subscribed)
+          router.available_resources(subscribed, @user.jid)
         end
 
         # Returns contacts hosted at remote servers that are subscribed
@@ -121,7 +121,7 @@ module Vines
             'type' => 'unavailable')
 
           broadcast(el, available_subscribers)
-          broadcast(el, router.available_resources(@user.jid))
+          broadcast(el, router.available_resources(@user.jid, @user.jid))
 
           remote_subscribers.each do |contact|
             node = el.clone

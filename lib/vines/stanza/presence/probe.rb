@@ -24,7 +24,7 @@ module Vines
           unless user && user.subscribed_from?(stream.user.jid)
             auto_reply_to_subscription_request(to.bare, 'unsubscribed')
           else
-            router.available_resources(to).each do |recipient|
+            stream.available_resources(to).each do |recipient|
               el = recipient.last_broadcast_presence.clone
               el['from'] = recipient.user.jid.to_s
               el['to'] = stream.user.jid.to_s

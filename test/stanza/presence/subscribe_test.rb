@@ -28,14 +28,11 @@ class SubscribeTest < MiniTest::Unit::TestCase
       @nodes << node
     end
 
-    router = MiniTest::Mock.new
-    router.expect(:interested_resources, [recipient], [alice])
-
     stream = MiniTest::Mock.new
     stream.expect(:domain, 'wonderland.lit')
     stream.expect(:storage, storage, ['wonderland.lit'])
     stream.expect(:user, user)
-    stream.expect(:router, router)
+    stream.expect(:interested_resources, [recipient], [alice])
     stream.expect(:update_user_streams, nil, [user])
     def stream.nodes; @nodes; end
     def stream.write(node)
@@ -53,7 +50,6 @@ class SubscribeTest < MiniTest::Unit::TestCase
     assert stream.verify
     assert user.verify
     assert storage.verify
-    assert router.verify
     assert_equal 1, stream.nodes.size
     assert_equal 1, recipient.nodes.size
 

@@ -37,7 +37,7 @@ module Vines
         return false if to.empty? || to == stream.domain
         self['from'] = stream.user.jid.to_s
         if local?
-          router.available_resources(to).each do |recipient|
+          stream.available_resources(to).each do |recipient|
             recipient.write(@node)
           end
         else

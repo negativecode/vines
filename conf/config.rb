@@ -18,15 +18,21 @@ Vines::Config.configure do
   #
   # Shared storage example:
   # host 'verona.lit', 'wonderland.lit' do
+  #   cross_domain_messages false
   #   storage 'fs' do
   #     dir 'data/users'
   #   end
+  #   components 'tea'  => 'secr3t',
+  #              'cake' => 'passw0rd'
   # end
 
   host 'wonderland.lit' do
+    cross_domain_messages false
     storage 'fs' do
       dir 'data/users'
     end
+    # components 'tea'  => 'secr3t',
+    #            'cake' => 'passw0rd'
   end
 
   # Hosts can use LDAP authentication that overrides the authentication
@@ -35,6 +41,7 @@ Vines::Config.configure do
   # information, like rosters, is still saved in the storage database.
   #
   # host 'wonderland.lit' do
+  #   cross_domain_messages false
   #   storage 'fs' do
   #     dir 'data/users'
   #   end
@@ -48,6 +55,8 @@ Vines::Config.configure do
   #     name_attr 'cn'
   #     tls true
   #   end
+  #   components 'tea'  => 'secr3t',
+  #              'cake' => 'passw0rd'
   # end
 
   # Configure the client-to-server port. The max_resources_per_account attribute
@@ -82,13 +91,10 @@ Vines::Config.configure do
     root 'web'
   end
 
-  # Configure the XEP-0114 external component port. Add entries for each
-  # component sub-domain allowed to connect to this server. Components must
-  # authenticate with a password.
+  # Configure the XEP-0114 external component port. Component sub-domains and
+  # their passwords are defined with their virtual host entries above.
   component '0.0.0.0', 5347 do
     max_stanza_size 131072
-    #components 'tea.wonderland.lit'  => 'secr3t',
-    #           'cake.wonderland.lit' => 'passw0rd'
   end
 end
 

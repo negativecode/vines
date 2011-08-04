@@ -38,11 +38,11 @@ module Vines
         recipients = if to.empty?
           stream.available_subscribers
         else
-          stream.user.subscribed_from?(to) ? router.available_resources(to) : []
+          stream.user.subscribed_from?(to) ? stream.available_resources(to) : []
         end
 
         broadcast(recipients)
-        broadcast(router.available_resources(stream.user.jid))
+        broadcast(stream.available_resources(stream.user.jid))
 
         if initial
           stream.available_subscribed_to_resources.each do |recipient|
@@ -65,7 +65,7 @@ module Vines
       end
 
       def inbound_broadcast_presence
-        broadcast(router.available_resources(self['to']))
+        broadcast(stream.available_resources(self['to']))
       end
 
       private

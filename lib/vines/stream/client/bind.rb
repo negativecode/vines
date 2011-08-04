@@ -51,12 +51,12 @@ module Vines
         end
 
         def resource_limit_reached?
-          used = stream.router.connected_resources(stream.user.jid.bare).size
+          used = stream.connected_resources(stream.user.jid.bare).size
           used >= stream.max_resources_per_account
         end
 
         def resource_used?(resource)
-          stream.router.available_resources(stream.user.jid).any? do |c|
+          stream.available_resources(stream.user.jid).any? do |c|
             c.user.jid.resource == resource
           end
         end

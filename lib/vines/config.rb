@@ -31,7 +31,7 @@ module Vines
       dupes = names.uniq.size != names.size || (@vhosts.keys & names).any?
       raise "one host definition per domain allowed" if dupes
       names.each do |name|
-        @vhosts.merge! Host.new(name, &block).to_hash
+        @vhosts[name] = Host.new(name, &block)
       end
     end
 
@@ -57,8 +57,29 @@ module Vines
       @ports.values
     end
 
+    # Return true if the domain is virtual hosted by this server.
     def vhost?(domain)
       @vhosts.key?(domain)
+    end
+
+    # Return true if all JID's belong to components hosted by this server.
+    def component?(*jids)
+      !jids.flatten.index do |jid|
+        !component_password(JID.new(jid).domain)
+      end
+    end
+
+    # Return the password for the component or nil if it's not hosted here.
+    def component_password(domain)
+      host = @vhosts.values.find {|host| host.component?(domain) }
+      host.password(domain) if host
+    end
+
+    # Return true if all of the JID's are hosted by this server.
+    def local_jid?(*jids)
+      !jids.flatten.index do |jid|
+        !vhost?(JID.new(jid).domain)
+      end
     end
 
     # Returns true if server-to-server connections are allowed with the
@@ -73,16 +94,69 @@ module Vines
       @ports[name] or raise ArgumentError.new("no port named #{name}")
     end
 
+    # Return true if the two JID's are allowed to send messages to each other.
+    # Both domains must have enabled cross_domain_messages in their config files.
+    def allowed?(to, from)
+      to, from = JID.new(to), JID.new(from)
+      return false                      if to.empty? || from.empty?
+      return true                       if to.domain == from.domain # same domain always allowed
+      return cross_domain?(to, from)    if local_jid?(to, from)     # both virtual hosted here
+      return check_components(to, from) if component?(to, from)     # component to component
+      return check_component(to, from)  if component?(to)           # to component
+      return check_component(from, to)  if component?(from)         # from component
+      return cross_domain?(to)          if local_jid?(to)           # from is remote
+      return cross_domain?(from)        if local_jid?(from)         # to is remote
+      return false
+    end
+
+    private
+
+    def check_components(to, from)
+      comp1, comp2 = strip_domain(to), strip_domain(from)
+      (comp1 == comp2) || cross_domain?(comp1, comp2)
+    end
+
+    def check_component(component_jid, jid)
+      comp = strip_domain(component_jid)
+      return true if comp.domain == jid.domain
+      local_jid?(jid) ? cross_domain?(comp, jid) : cross_domain?(comp)
+    end
+
+    # Return the JID's domain with the first subdomain stripped off. For example,
+    # alice@tea.wonderland.lit returns wonderland.lit.
+    def strip_domain(jid)
+      domain = jid.domain.split('.').drop(1).join('.')
+      JID.new(domain)
+    end
+
+    # Return true if all JID's are allowed to exchange cross domain messages.
+    def cross_domain?(*jids)
+      !jids.flatten.index do |jid|
+        !@vhosts[jid.domain].cross_domain_messages?
+      end
+    end
+  end
+end
+
+module Vines
+  class Config
     class Host
       def initialize(name, &block)
         @name, @storage, @ldap = name, nil, nil
+        @cross_domain_messages = false
+        @components = {}
         instance_eval(&block)
+        raise "storage required for #{@name}" unless @storage
       end
 
-      def storage(name, &block)
-        raise "one storage mechanism per host allowed" if @storage
-        @storage = Storage.from_name(name, &block)
-        @storage.ldap = @ldap
+      def storage(name=nil, &block)
+        if name
+          raise "one storage mechanism per host allowed" if @storage
+          @storage = Storage.from_name(name, &block)
+          @storage.ldap = @ldap
+        else
+          @storage
+        end
       end
 
       def ldap(host='localhost', port=636, &block)
@@ -90,9 +164,32 @@ module Vines
         @storage.ldap = @ldap if @storage
       end
 
-      def to_hash
-        raise "storage required for #{@name}" unless @storage
-        {@name => @storage}
+      def cross_domain_messages(enabled)
+        @cross_domain_messages = !!enabled
+      end
+
+      def cross_domain_messages?
+        @cross_domain_messages
+      end
+
+      def components(options=nil)
+        if options
+          options.each do |domain, password|
+            raise 'component domain required' if (domain || '').to_s.strip.empty?
+            raise 'component password required' if (password || '').strip.empty?
+            @components["#{domain}.#{@name}"] = password
+          end
+        else
+          @components
+        end
+      end
+
+      def component?(domain)
+        !!@components[domain]
+      end
+
+      def password(domain)
+        @components[domain]
       end
     end
 
@@ -213,20 +310,8 @@ module Vines
 
     class ComponentPort < Port
       def initialize(config, host='0.0.0.0', port=5347, &block)
-        @components, @stream = {}, Vines::Stream::Component
+        @stream = Vines::Stream::Component
         super(config, host, port, &block)
-      end
-
-      def components(options=nil)
-        if options
-          @components = options
-        else
-          @components
-        end
-      end
-
-      def password(component)
-        @components[component]
       end
     end
   end

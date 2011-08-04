@@ -59,12 +59,12 @@ module Vines
     # recipient's available resources. Route the stanza to a remote server if
     # the recipient isn't hosted locally.
     def send_unavailable(from, to)
-      router.available_resources(from).each do |stream|
+      recipients = router.available_resources(to, from) if router.local_jid?(to)
+
+      router.available_resources(from, to).each do |stream|
         el = unavailable(stream.user.jid, to)
         if router.local_jid?(to)
-          router.available_resources(to).each do |recipient|
-            recipient.write(el)
-          end
+          recipients.each {|recipient| recipient.write(el) }
         else
           router.route(el)
         end

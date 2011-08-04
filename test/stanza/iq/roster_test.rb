@@ -150,12 +150,9 @@ class RosterTest < MiniTest::Unit::TestCase
       @nodes << node
     end
 
-    router = MiniTest::Mock.new
-    router.expect(:interested_resources, [recipient], [alice.jid])
-
     @stream.expect(:user, alice)
+    @stream.expect(:interested_resources, [recipient], [alice.jid])
     @stream.expect(:update_user_streams, nil, [alice])
-    @stream.expect(:router, router)
     @stream.expect(:domain, 'wonderland.lit')
     @stream.expect(:storage, storage, ['wonderland.lit'])
     expected = node(%q{<iq id="42" type="result"/>})
@@ -174,7 +171,6 @@ class RosterTest < MiniTest::Unit::TestCase
     stanza.process
     assert @stream.verify
     assert storage.verify
-    assert router.verify
 
     expected = node(%q{
       <iq to="alice@wonderland.lit/tea" type="set">

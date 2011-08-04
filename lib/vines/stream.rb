@@ -51,16 +51,29 @@ module Vines
     # Returns the storage system for the domain. If no domain is given,
     # the stream's storage mechanism is returned.
     def storage(domain=nil)
-      @config.vhosts[domain || self.domain]
+      host = @config.vhosts[domain || self.domain]
+      host.storage if host
     end
 
     # Reload the user's information into their active connections. Call this
     # after storage.save_user() to sync the new user state with their other
     # connections.
     def update_user_streams(user)
-      router.connected_resources(user.jid.bare).each do |stream|
+      connected_resources(user.jid.bare).each do |stream|
         stream.user.update_from(user)
       end
+    end
+
+    def connected_resources(jid)
+      router.connected_resources(jid, user.jid)
+    end
+
+    def available_resources(*jid)
+      router.available_resources(*jid, user.jid)
+    end
+
+    def interested_resources(*jid)
+      router.interested_resources(*jid, user.jid)
     end
 
     def ssl_verify_peer(pem)

@@ -20,7 +20,7 @@ module Vines
           stream.update_user_streams(stream.user)
 
           contact = stream.user.contact(to)
-          router.interested_resources(stream.user.jid).each do |recipient|
+          stream.interested_resources(stream.user.jid).each do |recipient|
             contact.send_roster_push(recipient)
           end
         end
@@ -35,7 +35,7 @@ module Vines
           elsif contact.subscribed_from?(stream.user.jid)
             auto_reply_to_subscription_request(to, 'subscribed')
           else
-            recipients = router.available_resources(to)
+            recipients = stream.available_resources(to)
             if recipients.empty?
               # TODO store subscription request per RFC 6121 3.1.3 #4
             else
