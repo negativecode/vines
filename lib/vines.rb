@@ -96,9 +96,12 @@ end
   vines/storage/redis
   vines/storage/sql
 
+  vines/config
+  vines/config/host
+  vines/config/port
+
   vines/store
   vines/contact
-  vines/config
   vines/daemon
   vines/error
   vines/kit
