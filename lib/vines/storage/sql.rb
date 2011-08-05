@@ -151,7 +151,7 @@ module Vines
 
         ActiveRecord::Schema.define do
           create_table :users, :force => args[:force] do |t|
-            t.string :jid,      :limit => 1000, :null => false
+            t.string :jid,      :limit => 2048, :null => false
             t.string :name,     :limit => 1000, :null => true
             t.string :password, :limit => 1000, :null => true
             t.text   :vcard,    :null => true
@@ -160,7 +160,7 @@ module Vines
 
           create_table :contacts, :force => args[:force] do |t|
             t.integer :user_id,      :null => false
-            t.string  :jid,          :limit => 1000, :null => false
+            t.string  :jid,          :limit => 2048, :null => false
             t.string  :name,         :limit => 1000, :null => true
             t.string  :ask,          :limit => 1000, :null => true
             t.string  :subscription, :limit => 1000, :null => false
