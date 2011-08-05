@@ -19,6 +19,7 @@ module Vines
 
         create_users(domain, users)
         update_config(domain, File.join(dir, 'conf', 'config.rb'))
+        fix_perms(dir)
         Command::Cert.new.create_cert(domain, File.join(dir, 'conf/certs'))
 
         puts "Initialized server directory: #{domain}"
@@ -26,6 +27,16 @@ module Vines
       end
 
       private
+
+      # Limit file system database directory access so the server is the only
+      # process managing the data. The config.rb file contains component and
+      # database passwords, so restrict access to just the server user as well.
+      def fix_perms(dir)
+        %w[data data/users].each do |f|
+          File.chmod(0700, File.join(dir, f))
+        end
+        File.chmod(0600, File.join(dir, 'conf/config.rb'))
+      end
 
       def update_config(domain, config)
         text = File.read(config)

@@ -42,9 +42,7 @@ module Vines
           record['roster'][contact.jid.bare.to_s] = contact.to_h
         end
         file = File.join(@dir, "#{user.jid.bare.to_s}.user")
-        File.open(file, 'w') do |f|
-          YAML.dump(record, f)
-        end
+        save(file) {|f| YAML.dump(record, f) }
       end
 
       def find_vcard(jid)
@@ -57,9 +55,7 @@ module Vines
       def save_vcard(jid, card)
         jid = JID.new(jid).bare.to_s
         file = File.join(@dir, "#{jid}.vcard")
-        File.open(file, 'w') do |f|
-          f.write(card.to_xml)
-        end
+        save(file) {|f| f.write(card.to_xml) }
       end
 
       def find_fragment(jid, node)
@@ -72,12 +68,15 @@ module Vines
       def save_fragment(jid, node)
         jid = JID.new(jid).bare.to_s
         file = File.join(@dir, fragment_id(jid, node))
-        File.open(file, 'w') do |f|
-          f.write(node.to_xml)
-        end
+        save(file) {|f| f.write(node.to_xml) }
       end
 
       private
+
+      def save(file)
+        File.open(file, 'w') {|f| yield f }
+        File.chmod(0600, file)
+      end
 
       def fragment_id(jid, node)
         id = Digest::SHA1.hexdigest("#{node.name}:#{node.namespace.href}")
