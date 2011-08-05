@@ -91,7 +91,7 @@ module Vines
           else
             @pending[to.domain].each do |s|
               xml = StanzaErrors::RemoteServerNotFound.new(s, 'cancel').to_xml
-              connected_resources(s['from']).each {|c| c.write(xml) }
+              connected_resources(s['from'], s['to']).each {|c| c.write(xml) }
             end
           end
           @pending.delete(to.domain)
