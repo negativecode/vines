@@ -164,6 +164,20 @@ class HostTest < MiniTest::Unit::TestCase
     end
   end
 
+  def test_case_insensitive_component_name
+    config = Vines::Config.new do
+      host 'WONDERLAND.LIT' do
+        storage(:fs) { dir '.' }
+        components 'TEA' => 'secr3t', CAKE: 'Passw0rd'
+      end
+    end
+    host = config.vhosts['wonderland.lit']
+    refute_nil host
+    assert_equal 2, host.components.size
+    assert_equal host.components['tea.wonderland.lit'], 'secr3t'
+    assert_equal host.components['cake.wonderland.lit'], 'Passw0rd'
+  end
+
   def test_component?
     config = Vines::Config.new do
       host 'wonderland.lit' do
