@@ -13,6 +13,9 @@ module Vines
           result = to_result.tap do |el|
             el << el.document.create_element('query') do |query|
               query.default_namespace = NS
+              stream.config.vhosts[stream.domain].components.keys.sort.each do |domain|
+                query << el.document.create_element('item', 'jid' => domain)
+              end
             end
           end
           stream.write(result)
