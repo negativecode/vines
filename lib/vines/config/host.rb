@@ -8,7 +8,7 @@ module Vines
     # the +Config#vhosts+ method.
     class Host
       def initialize(name, &block)
-        @name, @storage, @ldap = name, nil, nil
+        @name, @storage, @ldap = name.downcase, nil, nil
         @cross_domain_messages = false
         @components = {}
         instance_eval(&block)
@@ -39,14 +39,16 @@ module Vines
       end
 
       def components(options=nil)
-        if options
-          options.each do |domain, password|
-            raise 'component domain required' if (domain || '').to_s.strip.empty?
-            raise 'component password required' if (password || '').strip.empty?
-            @components["#{domain}.#{@name}"] = password
-          end
-        else
-          @components
+        return @components unless options
+
+        names = options.keys.map {|domain| "#{domain}.#{@name}".downcase }
+        dupes = names.uniq.size != names.size || (@components.keys & names).any?
+        raise "duplicate component domains not allowed" if dupes
+
+        options.each do |domain, password|
+          raise 'component domain required' if (domain || '').to_s.strip.empty?
+          raise 'component password required' if (password || '').strip.empty?
+          @components["#{domain}.#{@name}".downcase] = password
         end
       end
 

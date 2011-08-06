@@ -129,6 +129,41 @@ class HostTest < MiniTest::Unit::TestCase
     end
   end
 
+  def test_duplicate_component_raises
+    assert_raises(RuntimeError) do
+      Vines::Config.new do
+        host 'wonderland.lit' do
+          storage(:fs) { dir '.' }
+          components 'tea' => 'one'
+          components 'TEA' => 'two'
+        end
+      end
+    end
+  end
+
+  def test_duplicate_component_in_one_call_raises
+    assert_raises(RuntimeError) do
+      Vines::Config.new do
+        host 'wonderland.lit' do
+          storage(:fs) { dir '.' }
+          components 'tea' => 'one', 'TEA' => 'two'
+        end
+      end
+    end
+  end
+
+  def test_duplicate_component_symbol_raises
+    assert_raises(RuntimeError) do
+      Vines::Config.new do
+        host 'wonderland.lit' do
+          storage(:fs) { dir '.' }
+          components 'tea' => 'one'
+          components :TEA => 'two'
+        end
+      end
+    end
+  end
+
   def test_component?
     config = Vines::Config.new do
       host 'wonderland.lit' do

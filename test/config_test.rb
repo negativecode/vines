@@ -20,7 +20,7 @@ class ConfigTest < MiniTest::Unit::TestCase
             dir '.'
           end
         end
-        host 'wonderland.lit' do
+        host 'WONDERLAND.LIT' do
           storage 'fs' do
             dir '.'
           end
