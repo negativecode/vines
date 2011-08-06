@@ -13,6 +13,9 @@ module Vines
           result = to_result.tap do |el|
             el << el.document.create_element('query') do |query|
               query.default_namespace = NS
+              query << el.document.create_element('identity', 'category' => 'server', 'type' => 'im')
+              query << el.document.create_element('feature', 'var' => NAMESPACES[:disco_info])
+              query << el.document.create_element('feature', 'var' => NAMESPACES[:disco_items])
               query << el.document.create_element('feature', 'var' => NAMESPACES[:ping])
               query << el.document.create_element('feature', 'var' => NAMESPACES[:vcard])
               if stream.private_storage?
