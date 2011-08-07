@@ -6,6 +6,12 @@ module Vines
 
     PATTERN = /^(?:([^@]*)@)??([^@\/]*)(?:\/(.*?))?$/.freeze
 
+    # http://tools.ietf.org/html/rfc6122#appendix-A
+    NODE_PREP = /[[:space:][:cntrl:]"&'\/:<>@]/.freeze
+
+    # http://tools.ietf.org/html/rfc3454#appendix-C
+    NAME_PREP = /[[:space:][:cntrl:]]/.freeze
+
     attr_reader :node, :domain, :resource
     attr_writer :resource
 
@@ -19,11 +25,9 @@ module Vines
       if @domain.nil? && @resource.nil?
         @node, @domain, @resource = @node.to_s.scan(PATTERN).first
       end
-      [@node, @domain].each {|piece| piece.downcase! if piece }
+      [@node, @domain].each {|part| part.downcase! if part }
 
-      [@node, @domain, @resource].each do |piece|
-        raise ArgumentError, 'jid too long' if (piece || '').size > 1023
-      end
+      validate
     end
 
     def bare
@@ -55,6 +59,20 @@ module Vines
       s = "#{@node}@#{s}" if @node
       s = "#{s}/#{@resource}" if @resource
       s
+    end
+
+    private
+
+    def validate
+      [@node, @domain, @resource].each do |part|
+        raise ArgumentError, 'jid too long' if (part || '').size > 1023
+      end
+      raise ArgumentError, 'empty node' if @node && @node.strip.empty?
+      raise ArgumentError, 'node contains invalid characters' if @node && @node =~ NODE_PREP
+      raise ArgumentError, 'empty resource' if @resource && @resource.strip.empty?
+      raise ArgumentError, 'resource contains invalid characters' if @resource && @resource =~ NAME_PREP
+      raise ArgumentError, 'empty domain' if @domain == '' && (@node || @resource)
+      raise ArgumentError, 'domain contains invalid characters' if @domain && @domain =~ NAME_PREP
     end
   end
 end

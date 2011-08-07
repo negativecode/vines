@@ -74,4 +74,46 @@ class JidTest < MiniTest::Unit::TestCase
     refute_equal jid, jid.bare
     refute jid.empty?
   end
+
+  def test_node_with_separators_in_resource
+    jid = Vines::JID.new('alice@wonderland.lit/foo/bar@blarg')
+    assert_equal 'alice', jid.node
+    assert_equal 'wonderland.lit', jid.domain
+    assert_equal 'foo/bar@blarg', jid.resource
+  end
+
+  def test_missing_node_with_separators_in_resource
+    jid = Vines::JID.new('wonderland.lit/foo/bar@blarg')
+    assert_nil jid.node
+    assert_equal 'wonderland.lit', jid.domain
+    assert_equal 'foo/bar@blarg', jid.resource
+  end
+
+  def test_empty_part_raises
+    assert_raises(ArgumentError) { Vines::JID.new('@wonderland.lit') }
+    assert_raises(ArgumentError) { Vines::JID.new('wonderland.lit/') }
+    assert_raises(ArgumentError) { Vines::JID.new('@') }
+    assert_raises(ArgumentError) { Vines::JID.new('alice@') }
+    assert_raises(ArgumentError) { Vines::JID.new('/') }
+    assert_raises(ArgumentError) { Vines::JID.new('/res') }
+    assert_raises(ArgumentError) { Vines::JID.new('@/') }
+  end
+
+  def test_invalid_characters
+    assert_raises(ArgumentError) { Vines::JID.new(%q{alice"s@wonderland.lit}) }
+    assert_raises(ArgumentError) { Vines::JID.new(%q{alice&s@wonderland.lit}) }
+    assert_raises(ArgumentError) { Vines::JID.new(%q{alice's@wonderland.lit}) }
+    assert_raises(ArgumentError) { Vines::JID.new(%q{alice:s@wonderland.lit}) }
+    assert_raises(ArgumentError) { Vines::JID.new(%q{alice<s@wonderland.lit}) }
+    assert_raises(ArgumentError) { Vines::JID.new(%q{alice>s@wonderland.lit}) }
+    assert_raises(ArgumentError) { Vines::JID.new("alice\u0000s@wonderland.lit") }
+    assert_raises(ArgumentError) { Vines::JID.new("alice\ts@wonderland.lit") }
+    assert_raises(ArgumentError) { Vines::JID.new(" alice@wonderland.lit") }
+    assert_raises(ArgumentError) { Vines::JID.new("alice@wonderland.lit ") }
+    assert_raises(ArgumentError) { Vines::JID.new("alice s@wonderland.lit") }
+    assert_raises(ArgumentError) { Vines::JID.new("alice@w onderland.lit") }
+    assert_raises(ArgumentError) { Vines::JID.new("alice@wonderland.lit/ res") }
+    assert_raises(ArgumentError) { Vines::JID.new("alice@w\u0000onderland.lit") }
+    assert_raises(ArgumentError) { Vines::JID.new("alice@wonderland.lit/\u0000res") }
+  end
 end
