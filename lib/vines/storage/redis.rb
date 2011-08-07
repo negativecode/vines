@@ -22,7 +22,7 @@ module Vines
       end
 
       def find_user(jid)
-        jid = JID.new(jid || '').bare.to_s
+        jid = JID.new(jid).bare.to_s
         if jid.empty? then yield; return end
         find_roster(jid) do |contacts|
           redis.get("user:#{jid}") do |response|
@@ -53,7 +53,7 @@ module Vines
       fiber :save_user
 
       def find_vcard(jid)
-        jid = JID.new(jid || '').bare.to_s
+        jid = JID.new(jid).bare.to_s
         if jid.empty? then yield; return end
         redis.get("vcard:#{jid}") do |response|
           card = if response
@@ -75,7 +75,7 @@ module Vines
       fiber :save_vcard
 
       def find_fragment(jid, node)
-        jid = JID.new(jid || '').bare.to_s
+        jid = JID.new(jid).bare.to_s
         if jid.empty? then yield; return end
         redis.hget("fragments:#{jid}", fragment_id(node)) do |response|
           fragment = if response

@@ -40,7 +40,7 @@ module Vines
       def find_user(jid)
         ActiveRecord::Base.clear_reloadable_connections!
 
-        jid = JID.new(jid || '').bare.to_s
+        jid = JID.new(jid).bare.to_s
         return if jid.empty?
         xuser = user_by_jid(jid)
         return Vines::User.new(:jid => jid).tap do |user|
@@ -99,7 +99,7 @@ module Vines
       def find_vcard(jid)
         ActiveRecord::Base.clear_reloadable_connections!
 
-        jid = JID.new(jid || '').bare.to_s
+        jid = JID.new(jid).bare.to_s
         return if jid.empty?
         if xuser = user_by_jid(jid)
           Nokogiri::XML(xuser.vcard).root rescue nil
@@ -121,7 +121,7 @@ module Vines
       def find_fragment(jid, node)
         ActiveRecord::Base.clear_reloadable_connections!
 
-        jid = JID.new(jid || '').bare.to_s
+        jid = JID.new(jid).bare.to_s
         return if jid.empty?
         if fragment = fragment_by_jid(jid, node)
           Nokogiri::XML(fragment.xml).root rescue nil

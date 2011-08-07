@@ -23,7 +23,7 @@ module Vines
       end
 
       def find_user(jid)
-        jid = JID.new(jid || '').bare.to_s
+        jid = JID.new(jid).bare.to_s
         if jid.empty? then yield; return end
         get("user:#{jid}") do |doc|
           user = if doc && doc['type'] == 'User'
@@ -61,7 +61,7 @@ module Vines
       fiber :save_user
 
       def find_vcard(jid)
-        jid = JID.new(jid || '').bare.to_s
+        jid = JID.new(jid).bare.to_s
         if jid.empty? then yield; return end
         get("vcard:#{jid}") do |doc|
           card = if doc && doc['type'] == 'Vcard'
@@ -85,7 +85,7 @@ module Vines
       fiber :save_vcard
 
       def find_fragment(jid, node)
-        jid = JID.new(jid || '').bare.to_s
+        jid = JID.new(jid).bare.to_s
         if jid.empty? then yield; return end
         get(fragment_id(jid, node)) do |doc|
           fragment = if doc && doc['type'] == 'Fragment'
