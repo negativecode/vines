@@ -20,8 +20,8 @@ module Vines
       end
 
       def find_user(jid)
-        jid = JID.new(jid || '').bare.to_s
-        file = File.join(@dir, "#{jid}.user") unless jid.empty?
+        jid = JID.new(jid).bare.to_s
+        file = absolute_path("#{jid}.user") unless jid.empty?
         record = YAML.load_file(file) rescue nil
         return User.new(:jid => jid).tap do |user|
           user.name, user.password = record.values_at('name', 'password')
@@ -41,39 +41,51 @@ module Vines
         user.roster.each do |contact|
           record['roster'][contact.jid.bare.to_s] = contact.to_h
         end
-        file = File.join(@dir, "#{user.jid.bare.to_s}.user")
-        save(file) {|f| YAML.dump(record, f) }
+        save("#{user.jid.bare.to_s}.user") do |f|
+          YAML.dump(record, f)
+        end
       end
 
       def find_vcard(jid)
-        jid = JID.new(jid || '').bare.to_s
+        jid = JID.new(jid).bare.to_s
         return if jid.empty?
-        file = File.join(@dir, "#{jid}.vcard")
+        file = absolute_path("#{jid}.vcard")
         Nokogiri::XML(File.read(file)).root rescue nil
       end
 
       def save_vcard(jid, card)
         jid = JID.new(jid).bare.to_s
-        file = File.join(@dir, "#{jid}.vcard")
-        save(file) {|f| f.write(card.to_xml) }
+        return if jid.empty?
+        save("#{jid}.vcard") do |f|
+          f.write(card.to_xml)
+        end
       end
 
       def find_fragment(jid, node)
-        jid = JID.new(jid || '').bare.to_s
+        jid = JID.new(jid).bare.to_s
         return if jid.empty?
-        file = File.join(@dir, fragment_id(jid, node))
+        file = absolute_path(fragment_id(jid, node))
         Nokogiri::XML(File.read(file)).root rescue nil
       end
 
       def save_fragment(jid, node)
         jid = JID.new(jid).bare.to_s
-        file = File.join(@dir, fragment_id(jid, node))
-        save(file) {|f| f.write(node.to_xml) }
+        return if jid.empty?
+        save(fragment_id(jid, node)) do |f|
+          f.write(node.to_xml)
+        end
       end
 
       private
 
+      def absolute_path(file)
+        File.expand_path(file, @dir).tap do |absolute|
+          raise 'path traversal' unless File.dirname(absolute) == @dir
+        end
+      end
+
       def save(file)
+        file = absolute_path(file)
         File.open(file, 'w') {|f| yield f }
         File.chmod(0600, file)
       end
