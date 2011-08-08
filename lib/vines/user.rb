@@ -9,7 +9,8 @@ module Vines
 
     def initialize(args={})
       @jid = JID.new(args[:jid])
-      raise ArgumentError, 'invalid jid' unless @jid.node && !@jid.domain.empty?
+      raise ArgumentError, 'invalid jid' if @jid.empty?
+
       @name = args[:name]
       @password = args[:password]
       @roster = args[:roster] || []
