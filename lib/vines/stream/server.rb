@@ -23,7 +23,7 @@ module Vines
         end
         cb = proc do |srv|
           if srv.empty?
-            srv << {:target => to, :port => 5269}
+            srv << {target: to, port: 5269}
             class << srv.first
               def method_missing(name); self[name]; end
             end
@@ -39,7 +39,7 @@ module Vines
         else
           begin
             rr = srv.shift
-            opts = {:to => to, :from => from, :srv => srv, :callback => callback}
+            opts = {to: to, from: from, srv: srv, callback: callback}
             EM.connect(rr.target.to_s, rr.port, Server, config, opts)
           rescue Exception => e
             connect(config, to, from, srv, callback)
@@ -52,6 +52,7 @@ module Vines
 
       def initialize(config, options={})
         @config = config
+        @connected = false
         @remote_domain = options[:to]
         @domain = options[:from]
         @srv = options[:srv]
@@ -80,7 +81,7 @@ module Vines
 
       def unbind
         super
-        if @outbound && !ready?
+        if @outbound && !@connected
           Server.connect(@config, @remote_domain, @domain, @srv, @callback)
         end
       end
@@ -90,6 +91,7 @@ module Vines
       end
 
       def notify_connected
+        @connected = true
         if @callback
           @callback.call(self)
           @callback = nil
