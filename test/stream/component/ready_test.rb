@@ -5,51 +5,26 @@ require 'ext/nokogiri'
 require 'minitest/autorun'
 
 class ComponentReadyTest < MiniTest::Unit::TestCase
-  STANZAS = []
-
   def setup
     @stream = MiniTest::Mock.new
     @state = Vines::Stream::Component::Ready.new(@stream, nil)
-    def @state.to_stanza(node)
-      if node.name == 'bogus'
-        nil
-      else
-        MiniTest::Mock.new.tap do |stanza|
-          if node['to'] == 'hatter@wonderland.lit'
-            stanza.expect(:local?, true)
-          else
-            stanza.expect(:local?, false)
-            stanza.expect(:route, nil)
-          end
-          ComponentReadyTest::STANZAS << stanza
-        end
-      end
-    end
-  end
-
-  def teardown
-    STANZAS.clear
   end
 
   def test_missing_to_and_from_addresses
     node = node('<message/>')
     assert_raises(Vines::StreamErrors::ImproperAddressing) { @state.node(node) }
-    assert_equal 1, STANZAS.size
     assert @stream.verify
   end
 
   def test_missing_from_address
-    @stream.expect(:remote_domain, 'tea.wonderland.lit')
     node = node(%q{<message to="hatter@wonderland.lit"/>})
     assert_raises(Vines::StreamErrors::ImproperAddressing) { @state.node(node) }
-    assert_equal 1, STANZAS.size
     assert @stream.verify
   end
 
   def test_missing_to_address
     node = node(%q{<message from="alice@tea.wonderland.lit"/>})
     assert_raises(Vines::StreamErrors::ImproperAddressing) { @state.node(node) }
-    assert_equal 1, STANZAS.size
     assert @stream.verify
   end
 
@@ -57,24 +32,27 @@ class ComponentReadyTest < MiniTest::Unit::TestCase
     @stream.expect(:remote_domain, 'tea.wonderland.lit')
     node = node(%q{<message from="alice@bogus.wonderland.lit" to="hatter@wonderland.lit"/>})
     assert_raises(Vines::StreamErrors::ImproperAddressing) { @state.node(node) }
-    assert_equal 1, STANZAS.size
     assert @stream.verify
   end
 
   def test_unsupported_stanza_type
     node = node('<bogus/>')
     assert_raises(Vines::StreamErrors::UnsupportedStanzaType) { @state.node(node) }
-    assert STANZAS.empty?
     assert @stream.verify
   end
 
   def test_remote_message_routes
     @stream.expect(:remote_domain, 'tea.wonderland.lit')
     node = node(%q{<message from="alice@tea.wonderland.lit" to="romeo@verona.lit"/>})
+
+    @router = MiniTest::Mock.new
+    @router.expect(:local?, false, [node])
+    @router.expect(:route, nil, [node])
+    @stream.expect(:router, @router)
+
     @state.node(node)
-    assert_equal 1, STANZAS.size
-    assert STANZAS.map {|s| s.verify }.all?
     assert @stream.verify
+    assert @router.verify
   end
 
   def test_local_message_processes
@@ -85,12 +63,11 @@ class ComponentReadyTest < MiniTest::Unit::TestCase
     @recipient.expect(:write, nil, [node])
 
     @router = MiniTest::Mock.new
+    @router.expect(:local?, true, [node])
     @router.expect(:connected_resources, [@recipient], ['hatter@wonderland.lit', 'alice@tea.wonderland.lit'])
     @stream.expect(:router, @router)
 
     @state.node(node)
-    assert_equal 1, STANZAS.size
-    assert STANZAS.map {|s| s.verify }.all?
     assert @stream.verify
     assert @router.verify
     assert @recipient.verify

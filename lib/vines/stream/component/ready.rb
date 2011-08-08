@@ -7,9 +7,8 @@ module Vines
         def node(node)
           stanza = to_stanza(node)
           raise StreamErrors::UnsupportedStanzaType unless stanza
-          to = (node['to'] || '').strip
-          from = JID.new(node['from'] || '')
-          raise StreamErrors::ImproperAddressing if to.empty? || from.domain != stream.remote_domain
+          to, from = stanza.validate_to, stanza.validate_from
+          raise StreamErrors::ImproperAddressing unless to && from && from.domain == stream.remote_domain
           if stanza.local?
             stream.router.connected_resources(to, from).each do |recipient|
               recipient.write(node)

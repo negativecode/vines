@@ -10,16 +10,10 @@ class ServerReadyTest < MiniTest::Unit::TestCase
     @stream = MiniTest::Mock.new
     @state = Vines::Stream::Server::Ready.new(@stream, nil)
     def @state.to_stanza(node)
-      if node.name == 'bogus'
-        nil
-      else
-        MiniTest::Mock.new.tap do |stanza|
-          stanza.expect(:process, nil)
-          stanza.class.send(:define_method, :[]) do |a|
-            node[a]
-          end
-          ServerReadyTest::STANZAS << stanza
-        end
+      Vines::Stanza.from_node(node, @stream).tap do |stanza|
+        def stanza.process
+          ServerReadyTest::STANZAS << self
+        end if stanza
       end
     end
   end
@@ -35,7 +29,6 @@ class ServerReadyTest < MiniTest::Unit::TestCase
     node = node(%Q{<message from="alice@wonderland.lit" to="romeo@verona.lit"/>})
     @state.node(node)
     assert_equal 1, STANZAS.size
-    assert STANZAS.map {|s| s.verify }.all?
     assert @stream.verify
   end
 
@@ -49,28 +42,28 @@ class ServerReadyTest < MiniTest::Unit::TestCase
   def test_improper_addressing_missing_to
     node = node(%Q{<message from="alice@wonderland.lit"/>})
     assert_raises(Vines::StreamErrors::ImproperAddressing) { @state.node(node) }
-    assert_equal 1, STANZAS.size
+    assert STANZAS.empty?
     assert @stream.verify
   end
 
-  def test_improper_addressing_empty_to
+  def test_improper_addressing_invalid_to
     node = node(%Q{<message from="alice@wonderland.lit" to=" "/>})
-    assert_raises(Vines::StreamErrors::ImproperAddressing) { @state.node(node) }
-    assert_equal 1, STANZAS.size
+    assert_raises(Vines::StanzaErrors::JidMalformed) { @state.node(node) }
+    assert STANZAS.empty?
     assert @stream.verify
   end
 
   def test_improper_addressing_missing_from
     node = node(%Q{<message to="romeo@verona.lit"/>})
     assert_raises(Vines::StreamErrors::ImproperAddressing) { @state.node(node) }
-    assert_equal 1, STANZAS.size
+    assert STANZAS.empty?
     assert @stream.verify
   end
 
-  def test_improper_addressing_empty_from
+  def test_improper_addressing_invalid_from
     node = node(%Q{<message from=" " to="romeo@verona.lit"/>})
-    assert_raises(Vines::StreamErrors::ImproperAddressing) { @state.node(node) }
-    assert_equal 1, STANZAS.size
+    assert_raises(Vines::StanzaErrors::JidMalformed) { @state.node(node) }
+    assert STANZAS.empty?
     assert @stream.verify
   end
 
@@ -78,7 +71,7 @@ class ServerReadyTest < MiniTest::Unit::TestCase
     @stream.expect(:remote_domain, 'wonderland.lit')
     node = node(%Q{<message from="alice@bogus.lit" to="romeo@verona.lit"/>})
     assert_raises(Vines::StreamErrors::InvalidFrom) { @state.node(node) }
-    assert_equal 1, STANZAS.size
+    assert STANZAS.empty?
     assert @stream.verify
   end
 
@@ -87,7 +80,7 @@ class ServerReadyTest < MiniTest::Unit::TestCase
     @stream.expect(:domain, 'verona.lit')
     node = node(%Q{<message from="alice@wonderland.lit" to="romeo@bogus.lit"/>})
     assert_raises(Vines::StreamErrors::HostUnknown) { @state.node(node) }
-    assert_equal 1, STANZAS.size
+    assert STANZAS.empty?
     assert @stream.verify
   end
 

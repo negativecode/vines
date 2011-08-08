@@ -15,6 +15,8 @@ class ClientReadyTest < MiniTest::Unit::TestCase
       else
         MiniTest::Mock.new.tap do |stanza|
           stanza.expect(:process, nil)
+          stanza.expect(:validate_to, nil)
+          stanza.expect(:validate_from, nil)
           ClientReadyTest::STANZAS << stanza
         end
       end

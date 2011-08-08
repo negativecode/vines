@@ -6,7 +6,11 @@ module Vines
 
     attr_reader :stream
 
+    EMPTY   = ''.freeze
+    FROM    = 'from'.freeze
     MESSAGE = 'message'.freeze
+    TO      = 'to'.freeze
+
     @@types = {}
 
     def self.register(xpath, ns={})
@@ -28,9 +32,9 @@ module Vines
     # Send the stanza to all recipients, stamping it with from and
     # to addresses first.
     def broadcast(recipients)
-      @node['from'] = stream.user.jid.to_s
+      @node[FROM] = stream.user.jid.to_s
       recipients.each do |recipient|
-        @node['to'] = recipient.user.jid.to_s
+        @node[TO] = recipient.user.jid.to_s
         recipient.write(@node)
       end
     end
@@ -81,8 +85,31 @@ module Vines
         'type' => 'unavailable')
     end
 
+    # Return nil if this stanza has no 'to' attribute. Return a Vines::JID
+    # if it contains a valid 'to' attribute.  Raise a JidMalformed error if
+    # the JID is invalid.
+    def validate_to
+      validate_address(TO)
+    end
+
+    # Return nil if this stanza has no 'from' attribute. Return a Vines::JID
+    # if it contains a valid 'from' attribute.  Raise a JidMalformed error if
+    # the JID is invalid.
+    def validate_from
+      validate_address(FROM)
+    end
+
     def method_missing(method, *args, &block)
       @node.send(method, *args, &block)
+    end
+
+    private
+
+    def validate_address(attr)
+      jid = (self[attr] || EMPTY)
+      return if jid.empty?
+      JID.new(jid) rescue
+        raise StanzaErrors::JidMalformed.new(self, 'modify')
     end
   end
 end
