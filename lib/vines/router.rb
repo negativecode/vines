@@ -78,23 +78,17 @@ module Vines
     def route(stanza)
       to, from = %w[to from].map {|attr| JID.new(stanza[attr]) }
       return unless @config.allowed?(to, from)
+      key = [to.domain, from.domain]
 
-      if stream = connection_to(to.domain)
+      if stream = connection_to(to, from)
         stream.write(stanza)
-      elsif @pending.key?(to.domain)
-        @pending[to.domain] << stanza
+      elsif @pending.key?(key)
+        @pending[key] << stanza
       elsif @config.s2s?(to.domain)
-        @pending[to.domain] << stanza
+        @pending[key] << stanza
         Vines::Stream::Server.start(@config, to.domain, from.domain) do |stream|
-          if stream
-            @pending[to.domain].each {|s| stream.write(s) }
-          else
-            @pending[to.domain].each do |s|
-              xml = StanzaErrors::RemoteServerNotFound.new(s, 'cancel').to_xml
-              connected_resources(s['from'], s['to']).each {|c| c.write(xml) }
-            end
-          end
-          @pending.delete(to.domain)
+          stream ? send_pending(key, stream) : return_pending(key)
+          @pending.delete(key)
         end
       else
         raise StanzaErrors::RemoteServerNotFound.new(stanza, 'cancel')
@@ -120,6 +114,29 @@ module Vines
 
     private
 
+    # Write all pending stanzas for this domain to the stream. Called after a
+    # s2s stream has successfully connected and we need to dequeue all stanzas
+    # we received while waiting for the connection to finish.
+    def send_pending(key, stream)
+      @pending[key].each do |stanza|
+        stream.write(stanza)
+      end
+    end
+
+    # Return all pending stanzas to their senders as remote-server-not-found
+    # errors. Called after a s2s stream has failed to connect.
+    def return_pending(key)
+      @pending[key].each do |stanza|
+        to, from = JID.new(stanza['to']), JID.new(stanza['from'])
+        xml = StanzaErrors::RemoteServerNotFound.new(stanza, 'cancel').to_xml
+        if @config.component?(from)
+          connection_to(from, to).write(xml) rescue nil
+        else
+          connected_resources(from, to).each {|c| c.write(xml) }
+        end
+      end
+    end
+
     # Return the bare JID's from the list that are allowed to talk to
     # the +from+ JID. Store them in a Hash for fast +include?+ checks.
     def filter_allowed(jids, from)
@@ -132,9 +149,21 @@ module Vines
       end
     end
 
-    def connection_to(domain)
-      (components + servers).find do |stream|
-        stream.ready? && stream.remote_domain == domain
+    def connection_to(to, from)
+      component_stream(to) || server_stream(to, from)
+    end
+
+    def component_stream(to)
+      components.find do |stream|
+        stream.ready? && stream.remote_domain == to.domain
+      end
+    end
+
+    def server_stream(to, from)
+      servers.find do |stream|
+        stream.ready? &&
+          stream.remote_domain == to.domain &&
+            stream.domain == from.domain
       end
     end
 
