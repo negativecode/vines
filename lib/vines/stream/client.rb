@@ -46,6 +46,7 @@ module Vines
         @session.domain = to
         send_stream_header(from)
         raise StreamErrors::UnsupportedVersion unless node['version'] == '1.0'
+        raise StreamErrors::ImproperAddressing unless valid_address?(@session.domain)
         raise StreamErrors::HostUnknown unless @config.vhost?(@session.domain)
         raise StreamErrors::InvalidNamespace unless node.namespaces['xmlns'] == NAMESPACES[:client]
         raise StreamErrors::InvalidNamespace unless node.namespaces['xmlns:stream'] == NAMESPACES[:stream]

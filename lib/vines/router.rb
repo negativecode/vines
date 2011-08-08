@@ -105,7 +105,7 @@ module Vines
     # if it's destined for a remote domain or external component.
     def local?(stanza)
       return true unless ROUTABLE_STANZAS.include?(stanza.name)
-      to = (stanza['to'] || '').strip
+      to = JID.new(stanza['to'])
       to.empty? || local_jid?(to)
     end
 

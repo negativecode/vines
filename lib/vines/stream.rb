@@ -219,5 +219,10 @@ module Vines
     def tls_files
       %w[crt key].map {|ext| File.join(VINES_ROOT, 'conf', 'certs', "#{domain}.#{ext}") }
     end
+
+    def valid_address?(jid)
+      jid = JID.new(jid) rescue nil
+      jid && !jid.empty?
+    end
   end
 end

@@ -31,6 +31,7 @@ module Vines
       def start(node)
         @remote_domain = node['to']
         send_stream_header
+        raise StreamErrors::ImproperAddressing unless valid_address?(@remote_domain)
         raise StreamErrors::HostUnknown unless @config.component?(@remote_domain)
         raise StreamErrors::InvalidNamespace unless node.namespaces['xmlns'] == NAMESPACES[:component]
         raise StreamErrors::InvalidNamespace unless node.namespaces['xmlns:stream'] == NAMESPACES[:stream]

@@ -105,7 +105,7 @@ module Vines
         @domain, @remote_domain = %w[to from].map {|a| node[a] }
         send_stream_header
         raise StreamErrors::UnsupportedVersion unless node['version'] == '1.0'
-        raise StreamErrors::ImproperAddressing if [@domain, @remote_domain].any? {|addr| (addr || '').strip.empty? }
+        raise StreamErrors::ImproperAddressing unless valid_address?(@domain) && valid_address?(@remote_domain)
         raise StreamErrors::HostUnknown unless @config.vhost?(@domain)
         raise StreamErrors::NotAuthorized unless @config.s2s?(@remote_domain)
         raise StreamErrors::InvalidNamespace unless node.namespaces['xmlns'] == NAMESPACES[:server]

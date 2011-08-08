@@ -9,7 +9,7 @@ module Vines
         SUCCESS = %Q{<success xmlns="#{NS}"/>}.freeze
         MAX_AUTH_ATTEMPTS = 3
         AUTH_MECHANISMS = {'PLAIN' => :plain_auth, 'EXTERNAL' => :external_auth}.freeze
-  
+
         def initialize(stream, success=BindRestart)
           super
           @attempts, @outstanding = 0, false
@@ -49,7 +49,7 @@ module Vines
 
         # Authenticate c2s streams using a username and password. Call the
         # authentication module in a separate thread to avoid blocking stanza
-        # processing for other users. 
+        # processing for other users.
         def plain_auth(stanza)
           jid, node, password = Base64.decode64(stanza.text).split("\000")
           jid = [node, stream.domain].join('@') if jid.nil? || jid.empty?

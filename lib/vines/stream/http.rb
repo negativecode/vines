@@ -86,6 +86,7 @@ module Vines
 
         raise StreamErrors::UndefinedCondition.new('rid required') if rid.empty?
         raise StreamErrors::UnsupportedVersion unless version == '1.0'
+        raise StreamErrors::ImproperAddressing unless valid_address?(domain)
         raise StreamErrors::HostUnknown unless @config.vhost?(domain)
         raise StreamErrors::InvalidNamespace unless node.namespaces['xmlns'] == NAMESPACES[:http_bind]
 

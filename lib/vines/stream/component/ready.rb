@@ -8,7 +8,8 @@ module Vines
           stanza = to_stanza(node)
           raise StreamErrors::UnsupportedStanzaType unless stanza
           to, from = stanza.validate_to, stanza.validate_from
-          raise StreamErrors::ImproperAddressing unless to && from && from.domain == stream.remote_domain
+          raise StreamErrors::ImproperAddressing unless to && from
+          raise StreamErrors::InvalidFrom unless from.domain == stream.remote_domain
           if stanza.local?
             stream.router.connected_resources(to, from).each do |recipient|
               recipient.write(node)

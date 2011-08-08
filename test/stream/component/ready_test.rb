@@ -31,7 +31,7 @@ class ComponentReadyTest < MiniTest::Unit::TestCase
   def test_invalid_from_address
     @stream.expect(:remote_domain, 'tea.wonderland.lit')
     node = node(%q{<message from="alice@bogus.wonderland.lit" to="hatter@wonderland.lit"/>})
-    assert_raises(Vines::StreamErrors::ImproperAddressing) { @state.node(node) }
+    assert_raises(Vines::StreamErrors::InvalidFrom) { @state.node(node) }
     assert @stream.verify
   end
 
