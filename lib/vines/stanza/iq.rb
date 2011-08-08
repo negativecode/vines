@@ -33,8 +33,8 @@ module Vines
       private
 
       def route_iq
-        to = (self['to'] || '').strip
-        return false if to.empty? || to == stream.domain
+        to = validate_to
+        return false if to.nil? || to.to_s == stream.domain
         self['from'] = stream.user.jid.to_s
         if local?
           stream.available_resources(to).each do |recipient|

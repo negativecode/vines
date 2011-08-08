@@ -14,7 +14,7 @@ module Vines
       end
 
       def process
-        stream.last_broadcast_presence = @node.clone unless self['to']
+        stream.last_broadcast_presence = @node.clone unless validate_to
         unless self['type'].nil?
           raise StanzaErrors::BadRequest.new(self, 'modify')
         end
@@ -32,10 +32,11 @@ module Vines
 
       def outbound_broadcast_presence
         self['from'] = stream.user.jid.to_s
-        to, type = %w[to type].map {|a| (self[a] || '').strip }
-        initial = to.empty? && type.empty? && !stream.available?
+        to = validate_to
+        type = (self['type'] || '').strip
+        initial = to.nil? && type.empty? && !stream.available?
 
-        recipients = if to.empty?
+        recipients = if to.nil?
           stream.available_subscribers
         else
           stream.user.subscribed_from?(to) ? stream.available_resources(to) : []
@@ -65,7 +66,7 @@ module Vines
       end
 
       def inbound_broadcast_presence
-        broadcast(stream.available_resources(self['to']))
+        broadcast(stream.available_resources(validate_to))
       end
 
       private
@@ -96,13 +97,11 @@ module Vines
       # resource part from it so it's a bare jid. Return the bare JID object
       # that was stamped.
       def stamp_to
-        to = (self['to'] || '').strip
-        raise StanzaErrors::BadRequest.new(self, 'modify') if to.empty?
-        to = JID.new(to).bare
-        malformed = [to.node, to.domain].any? {|part| (part || '').strip.empty? }
-        raise StanzaErrors::JidMalformed.new(self, 'modify') if malformed
-        self['to'] = to.to_s
-        to
+        to = validate_to
+        raise StanzaErrors::BadRequest.new(self, 'modify') unless to
+        to.bare.tap do |bare|
+          self['to'] = bare.to_s
+        end
       end
     end
   end

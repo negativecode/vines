@@ -26,8 +26,8 @@ module Vines
         # Roster sets must have no 'to' address or be addressed to the same
         # JID that sent the stanza. RFC 6121 sections 2.1.5 and 2.3.3.
         def validate_to_address
-          to = (self['to'] || '').strip
-          unless to.empty? || JID.new(to).bare == stream.user.jid.bare
+          to = validate_to
+          unless to.nil? || to.bare == stream.user.jid.bare
             raise StanzaErrors::Forbidden.new(self, 'auth')
           end
         end
@@ -41,8 +41,8 @@ module Vines
           raise StanzaErrors::BadRequest.new(self, 'modify') if items.size != 1
           item = items.first
 
-          jid = (item['jid'] || '').strip.empty? ? nil : JID.new(item['jid'].strip)
-          raise StanzaErrors::BadRequest.new(self, 'modify') unless jid && jid.bare?
+          jid = JID.new(item['jid'])
+          raise StanzaErrors::BadRequest.new(self, 'modify') if jid.empty? || !jid.bare?
 
           if item['subscription'] == 'remove'
             remove_contact(jid)

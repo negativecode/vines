@@ -16,9 +16,8 @@ module Vines
         end
 
         def process_inbound
-          to = (self['to'] || '').strip
-          raise StanzaErrors::BadRequest.new(self, 'modify') if to.empty?
-          to = JID.new(to)
+          to = validate_to
+          raise StanzaErrors::BadRequest.new(self, 'modify') unless to
 
           user = storage(to.domain).find_user(to)
           unless user && user.subscribed_from?(stream.user.jid)

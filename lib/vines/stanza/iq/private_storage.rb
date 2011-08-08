@@ -64,8 +64,8 @@ module Vines
         end
 
         def validate_to_address
-          to = (self['to'] || '').strip
-          unless to.empty? || to == stream.user.jid.bare.to_s
+          to = validate_to
+          unless to.nil? || to == stream.user.jid.bare
             raise StanzaErrors::Forbidden.new(self, 'cancel')
           end
         end

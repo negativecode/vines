@@ -5,8 +5,8 @@ module Vines
     class Message < Stanza
       register "/message"
 
-      TYPE, TO, FROM = %w[type to from].map {|s| s.freeze }
-      VALID_TYPES    = %w[chat error groupchat headline normal].freeze
+      TYPE, FROM  = %w[type from].map {|s| s.freeze }
+      VALID_TYPES = %w[chat error groupchat headline normal].freeze
 
       VALID_TYPES.each do |type|
         define_method "#{type}?" do
@@ -20,8 +20,7 @@ module Vines
         end
 
         if local?
-          to = (self[TO] || '').strip
-          to = to.empty? ? stream.user.jid.bare : JID.new(to)
+          to = validate_to || stream.user.jid.bare
           recipients = stream.connected_resources(to)
           if recipients.empty?
             if user = storage(to.domain).find_user(to)

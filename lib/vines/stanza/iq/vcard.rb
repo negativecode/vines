@@ -20,8 +20,8 @@ module Vines
         private
 
         def vcard_query
-          jid = (self['to'] || '').strip
-          jid = jid.empty? ? stream.user.jid.bare : JID.new(jid).bare
+          to = validate_to
+          jid = to ? to.bare : stream.user.jid.bare
           card = storage.find_vcard(jid)
 
           raise StanzaErrors::ItemNotFound.new(self, 'cancel') unless card
@@ -38,8 +38,8 @@ module Vines
         end
 
         def vcard_update
-          to = (self['to'] || '').strip
-          unless to.empty? || to == stream.user.jid.bare.to_s
+          to = validate_to
+          unless to.nil? || to == stream.user.jid.bare
             raise StanzaErrors::Forbidden.new(self, 'auth')
           end
 
