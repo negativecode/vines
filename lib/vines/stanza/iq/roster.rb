@@ -9,6 +9,7 @@ module Vines
         register "/iq[@id and (@type='get' or @type='set')]/ns:query", 'ns' => NS
 
         def process
+          validate_to_address
           get? ? roster_query : update_roster
         end
 
@@ -35,8 +36,6 @@ module Vines
         # Add, update, or delete the roster item contained in the iq set
         # stanza received from the client. RFC 6121 sections 2.3, 2.4, 2.5.
         def update_roster
-          validate_to_address
-
           items = self.xpath('ns:query/ns:item', 'ns' => NS)
           raise StanzaErrors::BadRequest.new(self, 'modify') if items.size != 1
           item = items.first

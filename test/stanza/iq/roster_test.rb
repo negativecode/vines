@@ -48,6 +48,20 @@ class RosterTest < MiniTest::Unit::TestCase
     assert @stream.verify
   end
 
+  def test_roster_get_with_invalid_to_address
+    alice = Vines::User.new(:jid => 'alice@wonderland.lit/tea')
+    @stream.expect(:user, alice)
+
+    node = node(%q{
+      <iq id="42" type="get" to="romeo@verona.lit">
+        <query xmlns="jabber:iq:roster"/>
+      </iq>}.strip.gsub(/\n|\s{2,}/, ''))
+
+    stanza = Vines::Stanza::Iq::Roster.new(node, @stream)
+    assert_raises(Vines::StanzaErrors::Forbidden) { stanza.process }
+    assert @stream.verify
+  end
+
   def test_roster_set_with_invalid_to_address
     alice = Vines::User.new(:jid => 'alice@wonderland.lit/tea')
     @stream.expect(:user, alice)
