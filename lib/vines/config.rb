@@ -82,6 +82,11 @@ module Vines
       end
     end
 
+    # Return true if private XML fragment storage is enabled for this domain.
+    def private_storage?(domain)
+      @vhosts[domain].private_storage?
+    end
+
     # Returns true if server-to-server connections are allowed with the
     # given domain.
     def s2s?(domain)

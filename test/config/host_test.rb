@@ -212,4 +212,28 @@ class HostTest < MiniTest::Unit::TestCase
     assert_equal 'secr3t', config.component_password('tea.wonderland.lit')
     assert_equal 'passw0rd', config.component_password('cake.wonderland.lit')
   end
+
+  def test_default_private_storage_is_off
+    config = Vines::Config.new do
+      host 'wonderland.lit' do
+        storage(:fs) { dir '.' }
+      end
+    end
+    host = config.vhosts['wonderland.lit']
+    refute_nil host
+    refute host.private_storage?
+  end
+
+  def test_enable_private_storage
+    config = Vines::Config.new do
+      host 'wonderland.lit' do
+        private_storage true
+        storage(:fs) { dir '.' }
+      end
+    end
+    host = config.vhosts['wonderland.lit']
+    refute_nil host
+    assert host.private_storage?
+    assert config.private_storage?('wonderland.lit')
+  end
 end

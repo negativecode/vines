@@ -16,8 +16,12 @@ Vines::Config.configure do
   # command. Change the example, 'wonderland.lit', domain name to your actual
   # domain.
   #
+  # The private_storage attribute allows clients to store XML fragments
+  # on the server, using the XEP-0049 Private XML Storage feature.
+  #
   # Shared storage example:
   # host 'verona.lit', 'wonderland.lit' do
+  #   private_storage false
   #   cross_domain_messages false
   #   storage 'fs' do
   #     dir 'data/users'
@@ -28,6 +32,7 @@ Vines::Config.configure do
 
   host 'wonderland.lit' do
     cross_domain_messages false
+    private_storage false
     storage 'fs' do
       dir 'data/users'
     end
@@ -42,6 +47,7 @@ Vines::Config.configure do
   #
   # host 'wonderland.lit' do
   #   cross_domain_messages false
+  #   private_storage false
   #   storage 'fs' do
   #     dir 'data/users'
   #   end
@@ -61,10 +67,7 @@ Vines::Config.configure do
 
   # Configure the client-to-server port. The max_resources_per_account attribute
   # limits how many concurrent connections one user can have to the server.
-  # The private_storage attribute allows clients to store XML fragments
-  # on the server, using the XEP-0049 Private XML Storage feature.
   client '0.0.0.0', 5222 do
-    private_storage true
     max_stanza_size 65536
     max_resources_per_account 5
   end
@@ -85,7 +88,6 @@ Vines::Config.configure do
   # the URL to which BOSH clients must POST their XMPP stanza requests.
   http '0.0.0.0', 5280 do
     bind '/xmpp'
-    private_storage true
     max_stanza_size 65536
     max_resources_per_account 5
     root 'web'

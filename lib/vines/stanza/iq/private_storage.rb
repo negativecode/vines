@@ -12,10 +12,8 @@ module Vines
         register "/iq[@id and (@type='get' or @type='set')]/ns:query", 'ns' => NS
 
         def process
-          unless stream.private_storage?
-            raise StanzaErrors::ServiceUnavailable.new(self, 'cancel')
-          end
           validate_to_address
+          validate_storage_enabled
           validate_children_size
           validate_namespaces
           get? ? retrieve_fragment : update_fragment
@@ -67,6 +65,12 @@ module Vines
           to = validate_to
           unless to.nil? || to == stream.user.jid.bare
             raise StanzaErrors::Forbidden.new(self, 'cancel')
+          end
+        end
+
+        def validate_storage_enabled
+          unless stream.config.private_storage?(stream.domain)
+            raise StanzaErrors::ServiceUnavailable.new(self, 'cancel')
           end
         end
 

@@ -10,8 +10,12 @@ module Vines
     ERROR = 'error'.freeze
     PAD   = 20
 
-    attr_reader   :domain
+    attr_reader   :config, :domain
     attr_accessor :user
+
+    def initialize(config)
+      @config = config
+    end
 
     def post_init
       router << self

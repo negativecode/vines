@@ -47,11 +47,11 @@ module Vines
         end
       end
 
-      attr_reader :config, :domain
+      attr_reader   :domain
       attr_accessor :remote_domain
 
       def initialize(config, options={})
-        @config = config
+        super(config)
         @connected = false
         @remote_domain = options[:to]
         @domain = options[:from]
@@ -68,7 +68,7 @@ module Vines
       end
 
       def max_stanza_size
-        @config[:server].max_stanza_size
+        config[:server].max_stanza_size
       end
 
       def ssl_handshake_completed
@@ -82,12 +82,12 @@ module Vines
       def unbind
         super
         if @outbound && !@connected
-          Server.connect(@config, @remote_domain, @domain, @srv, @callback)
+          Server.connect(config, @remote_domain, @domain, @srv, @callback)
         end
       end
 
       def vhost?(domain)
-        @config.vhost?(domain)
+        config.vhost?(domain)
       end
 
       def notify_connected
@@ -108,8 +108,8 @@ module Vines
         send_stream_header
         raise StreamErrors::UnsupportedVersion unless node['version'] == '1.0'
         raise StreamErrors::ImproperAddressing unless valid_address?(@domain) && valid_address?(@remote_domain)
-        raise StreamErrors::HostUnknown unless @config.vhost?(@domain)
-        raise StreamErrors::NotAuthorized unless @config.s2s?(@remote_domain)
+        raise StreamErrors::HostUnknown unless config.vhost?(@domain)
+        raise StreamErrors::NotAuthorized unless config.s2s?(@remote_domain)
         raise StreamErrors::InvalidNamespace unless node.namespaces['xmlns'] == NAMESPACES[:server]
         raise StreamErrors::InvalidNamespace unless node.namespaces['xmlns:stream'] == NAMESPACES[:stream]
       end

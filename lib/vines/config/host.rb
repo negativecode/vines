@@ -10,6 +10,7 @@ module Vines
       def initialize(name, &block)
         @name, @storage, @ldap = name.downcase, nil, nil
         @cross_domain_messages = false
+        @private_storage = false
         @components = {}
         instance_eval(&block)
         raise "storage required for #{@name}" unless @storage
@@ -58,6 +59,14 @@ module Vines
 
       def password(domain)
         @components[domain]
+      end
+
+      def private_storage(enabled)
+        @private_storage = !!enabled
+      end
+
+      def private_storage?
+        @private_storage
       end
     end
   end

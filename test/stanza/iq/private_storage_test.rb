@@ -6,6 +6,7 @@ require 'minitest/autorun'
 
 class PrivateStorageTest < MiniTest::Unit::TestCase
   def setup
+    @config = MiniTest::Mock.new
     @stream = MiniTest::Mock.new
   end
 
@@ -13,11 +14,14 @@ class PrivateStorageTest < MiniTest::Unit::TestCase
     query = %q{<query xmlns="jabber:iq:private"><one xmlns="a"/></query>}
     node = node(%Q{<iq id="42" type="get">#{query}</iq>})
 
-    @stream.expect(:private_storage?, false)
+    @config.expect(:private_storage?, false, ['wonderland.lit'])
+    @stream.expect(:domain, 'wonderland.lit')
+    @stream.expect(:config, @config)
 
     stanza = Vines::Stanza::Iq::PrivateStorage.new(node, @stream)
     assert_raises(Vines::StanzaErrors::ServiceUnavailable) { stanza.process }
     assert @stream.verify
+    assert @config.verify
   end
 
   def test_get_another_user_fragment_raises_error
@@ -25,7 +29,6 @@ class PrivateStorageTest < MiniTest::Unit::TestCase
     query = %q{<query xmlns="jabber:iq:private"><one xmlns="a"/></query>}
     node = node(%Q{<iq id="42" to="hatter@wonderland.lit" type="get">#{query}</iq>})
 
-    @stream.expect(:private_storage?, true)
     @stream.expect(:user, alice)
 
     stanza = Vines::Stanza::Iq::PrivateStorage.new(node, @stream)
@@ -38,11 +41,14 @@ class PrivateStorageTest < MiniTest::Unit::TestCase
     query = %q{<query xmlns="jabber:iq:private"></query>}
     node = node(%Q{<iq id="42" type="get">#{query}</iq>})
 
-    @stream.expect(:private_storage?, true)
+    @config.expect(:private_storage?, true, ['wonderland.lit'])
+    @stream.expect(:domain, 'wonderland.lit')
+    @stream.expect(:config, @config)
 
     stanza = Vines::Stanza::Iq::PrivateStorage.new(node, @stream)
     assert_raises(Vines::StanzaErrors::NotAcceptable) { stanza.process }
     assert @stream.verify
+    assert @config.verify
   end
 
   def test_get_with_two_children_raises_error
@@ -50,11 +56,14 @@ class PrivateStorageTest < MiniTest::Unit::TestCase
     query = %q{<query xmlns="jabber:iq:private"><one xmlns="a"/><two xmlns="b"/></query>}
     node = node(%Q{<iq id="42" type="get">#{query}</iq>})
 
-    @stream.expect(:private_storage?, true)
+    @config.expect(:private_storage?, true, ['wonderland.lit'])
+    @stream.expect(:domain, 'wonderland.lit')
+    @stream.expect(:config, @config)
 
     stanza = Vines::Stanza::Iq::PrivateStorage.new(node, @stream)
     assert_raises(Vines::StanzaErrors::NotAcceptable) { stanza.process }
     assert @stream.verify
+    assert @config.verify
   end
 
   def test_set_with_zero_children_raises_error
@@ -62,11 +71,14 @@ class PrivateStorageTest < MiniTest::Unit::TestCase
     query = %q{<query xmlns="jabber:iq:private"></query>}
     node = node(%Q{<iq id="42" type="set">#{query}</iq>})
 
-    @stream.expect(:private_storage?, true)
+    @config.expect(:private_storage?, true, ['wonderland.lit'])
+    @stream.expect(:domain, 'wonderland.lit')
+    @stream.expect(:config, @config)
 
     stanza = Vines::Stanza::Iq::PrivateStorage.new(node, @stream)
     assert_raises(Vines::StanzaErrors::NotAcceptable) { stanza.process }
     assert @stream.verify
+    assert @config.verify
   end
 
   def test_get_without_namespace_raises_error
@@ -74,11 +86,14 @@ class PrivateStorageTest < MiniTest::Unit::TestCase
     query = %q{<query xmlns="jabber:iq:private"><one/></query>}
     node = node(%Q{<iq id="42" type="get">#{query}</iq>})
 
-    @stream.expect(:private_storage?, true)
+    @config.expect(:private_storage?, true, ['wonderland.lit'])
+    @stream.expect(:domain, 'wonderland.lit')
+    @stream.expect(:config, @config)
 
     stanza = Vines::Stanza::Iq::PrivateStorage.new(node, @stream)
     assert_raises(Vines::StanzaErrors::NotAcceptable) { stanza.process }
     assert @stream.verify
+    assert @config.verify
   end
 
   def test_get_missing_fragment_raises_error
@@ -89,14 +104,16 @@ class PrivateStorageTest < MiniTest::Unit::TestCase
     storage = MiniTest::Mock.new
     storage.expect(:find_fragment, nil, [alice.jid, node.elements[0].elements[0]])
 
-    @stream.expect(:private_storage?, true)
+    @config.expect(:private_storage?, true, ['wonderland.lit'])
     @stream.expect(:domain, 'wonderland.lit')
+    @stream.expect(:config, @config)
     @stream.expect(:storage, storage, ['wonderland.lit'])
     @stream.expect(:user, alice)
 
     stanza = Vines::Stanza::Iq::PrivateStorage.new(node, @stream)
     assert_raises(Vines::StanzaErrors::ItemNotFound) { stanza.process }
     assert @stream.verify
+    assert @config.verify
     assert storage.verify
   end
 
@@ -112,8 +129,9 @@ class PrivateStorageTest < MiniTest::Unit::TestCase
     storage = MiniTest::Mock.new
     storage.expect(:find_fragment, node(data), [alice.jid, node.elements[0].elements[0]])
 
-    @stream.expect(:private_storage?, true)
+    @config.expect(:private_storage?, true, ['wonderland.lit'])
     @stream.expect(:domain, 'wonderland.lit')
+    @stream.expect(:config, @config)
     @stream.expect(:storage, storage, ['wonderland.lit'])
     @stream.expect(:user, alice)
     @stream.expect(:write, nil, [expected])
@@ -121,6 +139,7 @@ class PrivateStorageTest < MiniTest::Unit::TestCase
     stanza = Vines::Stanza::Iq::PrivateStorage.new(node, @stream)
     stanza.process
     assert @stream.verify
+    assert @config.verify
     assert storage.verify
   end
 
@@ -134,8 +153,9 @@ class PrivateStorageTest < MiniTest::Unit::TestCase
 
     expected = node(%Q{<iq from="#{alice.jid}" id="42" to="#{alice.jid}" type="result"/>})
 
-    @stream.expect(:private_storage?, true)
+    @config.expect(:private_storage?, true, ['wonderland.lit'])
     @stream.expect(:domain, 'wonderland.lit')
+    @stream.expect(:config, @config)
     @stream.expect(:storage, storage, ['wonderland.lit'])
     @stream.expect(:user, alice)
     @stream.expect(:write, nil, [expected])
@@ -143,6 +163,7 @@ class PrivateStorageTest < MiniTest::Unit::TestCase
     stanza = Vines::Stanza::Iq::PrivateStorage.new(node, @stream)
     stanza.process
     assert @stream.verify
+    assert @config.verify
     assert storage.verify
   end
 
@@ -157,8 +178,9 @@ class PrivateStorageTest < MiniTest::Unit::TestCase
 
     expected = node(%Q{<iq from="#{alice.jid}" id="42" to="#{alice.jid}" type="result"/>})
 
-    @stream.expect(:private_storage?, true)
+    @config.expect(:private_storage?, true, ['wonderland.lit'])
     @stream.expect(:domain, 'wonderland.lit')
+    @stream.expect(:config, @config)
     @stream.expect(:storage, storage, ['wonderland.lit'])
     @stream.expect(:user, alice)
     @stream.expect(:write, nil, [expected])
@@ -166,6 +188,7 @@ class PrivateStorageTest < MiniTest::Unit::TestCase
     stanza = Vines::Stanza::Iq::PrivateStorage.new(node, @stream)
     stanza.process
     assert @stream.verify
+    assert @config.verify
     assert storage.verify
   end
 
