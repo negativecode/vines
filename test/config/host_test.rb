@@ -164,6 +164,59 @@ class HostTest < MiniTest::Unit::TestCase
     end
   end
 
+  def test_invalid_host_domain_raises
+    assert_raises(ArgumentError) do
+      Vines::Config.new do
+        host 'wonderland.lit ' do
+          storage(:fs) { dir '.' }
+        end
+      end
+    end
+  end
+
+  def test_invalid_jid_host_domain_raises
+    assert_raises(RuntimeError) do
+      Vines::Config.new do
+        host 'alice@wonderland.lit' do
+          storage(:fs) { dir '.' }
+        end
+      end
+    end
+  end
+
+  def test_invalid_component_domain_raises
+    assert_raises(ArgumentError) do
+      Vines::Config.new do
+        host 'wonderland.lit' do
+          storage(:fs) { dir '.' }
+          components 'exam ple' => 'one'
+        end
+      end
+    end
+  end
+
+  def test_invalid_jid_component_domain_raises
+    assert_raises(RuntimeError) do
+      Vines::Config.new do
+        host 'wonderland.lit' do
+          storage(:fs) { dir '.' }
+          components 'alice@example' => 'one'
+        end
+      end
+    end
+  end
+
+  def test_multi_subdomain_component_raises
+    assert_raises(RuntimeError) do
+      Vines::Config.new do
+        host 'wonderland.lit' do
+          storage(:fs) { dir '.' }
+          components 'exam.ple' => 'one'
+        end
+      end
+    end
+  end
+
   def test_case_insensitive_component_name
     config = Vines::Config.new do
       host 'WONDERLAND.LIT' do

@@ -12,6 +12,7 @@ module Vines
         @cross_domain_messages = false
         @private_storage = false
         @components = {}
+        validate_domain(@name)
         instance_eval(&block)
         raise "storage required for #{@name}" unless @storage
       end
@@ -49,7 +50,10 @@ module Vines
         options.each do |domain, password|
           raise 'component domain required' if (domain || '').to_s.strip.empty?
           raise 'component password required' if (password || '').strip.empty?
-          @components["#{domain}.#{@name}".downcase] = password
+          name = "#{domain}.#{@name}".downcase
+          raise "components must be one level below their host: #{name}" if domain.to_s.include?('.')
+          validate_domain(name)
+          @components[name] = password
         end
       end
 
@@ -67,6 +71,14 @@ module Vines
 
       def private_storage?
         @private_storage
+      end
+
+      private
+
+      # Prevent domains in config files that won't form valid JID's.
+      def validate_domain(name)
+        jid = JID.new(name)
+        raise "incorrect domain: #{name}" if jid.node || jid.resource
       end
     end
   end
