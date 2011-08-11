@@ -9,6 +9,7 @@ module Vines
     :roster       => 'jabber:iq:roster'.freeze,
     :non_sasl     => 'jabber:iq:auth'.freeze,
     :storage      => 'jabber:iq:private'.freeze,
+    :version      => 'jabber:iq:version'.freeze,
     :sasl         => 'urn:ietf:params:xml:ns:xmpp-sasl'.freeze,
     :tls          => 'urn:ietf:params:xml:ns:xmpp-tls'.freeze,
     :bind         => 'urn:ietf:params:xml:ns:xmpp-bind'.freeze,
@@ -79,6 +80,7 @@ end
   vines/stanza/iq/roster
   vines/stanza/iq/session
   vines/stanza/iq/vcard
+  vines/stanza/iq/version
   vines/stanza/message
   vines/stanza/presence
   vines/stanza/presence/error

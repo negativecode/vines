@@ -18,6 +18,7 @@ module Vines
               query << el.document.create_element('feature', 'var' => NAMESPACES[:disco_items])
               query << el.document.create_element('feature', 'var' => NAMESPACES[:ping])
               query << el.document.create_element('feature', 'var' => NAMESPACES[:vcard])
+              query << el.document.create_element('feature', 'var' => NAMESPACES[:version])
               if stream.config.private_storage?(stream.domain)
                 query << el.document.create_element('feature', 'var' => NAMESPACES[:storage])
               end

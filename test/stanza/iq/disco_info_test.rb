@@ -27,6 +27,7 @@ class DiscoInfoTest < MiniTest::Unit::TestCase
           <feature var="http://jabber.org/protocol/disco#items"/>
           <feature var="urn:xmpp:ping"/>
           <feature var="vcard-temp"/>
+          <feature var="jabber:iq:version"/>
         </query>
       </iq>
     }.strip.gsub(/\n|\s{2,}/, ''))
@@ -52,6 +53,7 @@ class DiscoInfoTest < MiniTest::Unit::TestCase
           <feature var="http://jabber.org/protocol/disco#items"/>
           <feature var="urn:xmpp:ping"/>
           <feature var="vcard-temp"/>
+          <feature var="jabber:iq:version"/>
           <feature var="jabber:iq:private"/>
         </query>
       </iq>
