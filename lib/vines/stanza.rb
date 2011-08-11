@@ -11,6 +11,8 @@ module Vines
     MESSAGE = 'message'.freeze
     TO      = 'to'.freeze
 
+    ROUTABLE_STANZAS = %w[message iq presence].freeze
+
     @@types = {}
 
     def self.register(xpath, ns={})
@@ -39,8 +41,12 @@ module Vines
       end
     end
 
+    # Returns true if this stanza should be processed locally. Returns false
+    # if it's destined for a remote domain or external component.
     def local?
-      stream.router.local?(@node)
+      return true unless ROUTABLE_STANZAS.include?(@node.name)
+      to = JID.new(@node['to'])
+      to.empty? || stream.config.local_jid?(to)
     end
 
     def route

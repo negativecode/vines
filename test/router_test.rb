@@ -5,57 +5,26 @@ require 'minitest/autorun'
 
 class RouterTest < MiniTest::Unit::TestCase
   def setup
+    @alice = Vines::JID.new('alice@wonderland.lit/tea')
+    @stream = MiniTest::Mock.new
     @router = Vines::Router.new
+    @config = Vines::Config.new do
+      host 'wonderland.lit' do
+        storage(:fs) { dir '.' }
+      end
+    end
   end
 
-  def test_non_routable_stanza_is_local
-    stanza = MiniTest::Mock.new
-    stanza.expect(:name, 'auth')
-    assert @router.local?(stanza)
-    assert stanza.verify
-  end
+  def test_connected_resources
+    assert_equal 0, @router.connected_resources(@alice, @alice).size
 
-  def test_stanza_missing_to_is_local
-    stanza = MiniTest::Mock.new
-    stanza.expect(:name, 'message')
-    stanza.expect(:[], nil, ['to'])
-    assert @router.local?(stanza)
-    assert stanza.verify
-  end
+    @stream.expect(:config, @config)
+    @stream.expect(:stream_type, :client)
+    @stream.expect(:connected?, true)
+    @stream.expect(:user, Vines::User.new(jid: @alice))
+    @router << @stream
 
-  def test_stanza_with_local_jid_is_local
-    config = MiniTest::Mock.new
-    config.expect(:local_jid?, true, ['alice@wonderland.lit'])
-    stream = MiniTest::Mock.new
-    stream.expect(:config, config)
-    stream.expect(:stream_type, :client)
-    @router << stream
-
-    stanza = MiniTest::Mock.new
-    stanza.expect(:name, 'message')
-    stanza.expect(:[], 'alice@wonderland.lit', ['to'])
-    assert @router.local?(stanza)
-
-    assert stanza.verify
-    assert stream.verify
-    assert config.verify
-  end
-
-  def test_stanza_with_remote_jid_is_not_local
-    config = MiniTest::Mock.new
-    config.expect(:local_jid?, false, ['alice@wonderland.lit'])
-    stream = MiniTest::Mock.new
-    stream.expect(:config, config)
-    stream.expect(:stream_type, :client)
-    @router << stream
-
-    stanza = MiniTest::Mock.new
-    stanza.expect(:name, 'message')
-    stanza.expect(:[], 'alice@wonderland.lit', ['to'])
-    assert !@router.local?(stanza)
-
-    assert stanza.verify
-    assert stream.verify
-    assert config.verify
+    assert_equal 1, @router.connected_resources(@alice, @alice).size
+    assert @stream.verify
   end
 end

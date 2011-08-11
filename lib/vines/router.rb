@@ -6,7 +6,6 @@ module Vines
   # the 'to' attribute. Router is a singleton, shared by all streams, that must
   # be accessed with +Router.instance+, not +Router.new+.
   class Router
-    ROUTABLE_STANZAS = %w[message iq presence].freeze
 
     STREAM_TYPES = [:client, :server, :component].freeze
     STREAM_TYPES.each do |name|
@@ -93,14 +92,6 @@ module Vines
       else
         raise StanzaErrors::RemoteServerNotFound.new(stanza, 'cancel')
       end
-    end
-
-    # Returns true if this stanza should be processed locally. Returns false
-    # if it's destined for a remote domain or external component.
-    def local?(stanza)
-      return true unless ROUTABLE_STANZAS.include?(stanza.name)
-      to = JID.new(stanza['to'])
-      to.empty? || local_jid?(to)
     end
 
     def local_jid?(*jids)

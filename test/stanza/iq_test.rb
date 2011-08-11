@@ -8,6 +8,11 @@ class IqTest < MiniTest::Unit::TestCase
   def setup
     @stream = MiniTest::Mock.new
     @stream.expect(:domain, 'wonderland.lit')
+     @config = Vines::Config.new do
+      host 'wonderland.lit' do
+        storage(:fs) { dir '.' }
+      end
+    end
   end
 
   def test_allow_other_iq_to_route
@@ -36,11 +41,8 @@ class IqTest < MiniTest::Unit::TestCase
     recipient = MiniTest::Mock.new
     recipient.expect(:write, nil, [node])
 
-    router = MiniTest::Mock.new
-    router.expect(:local?, true, [node])
-
+    @stream.expect(:config, @config)
     @stream.expect(:user, hatter)
-    @stream.expect(:router, router)
     @stream.expect(:domain, 'wonderland.lit')
     @stream.expect(:available_resources, [recipient], [alice.jid.to_s])
 

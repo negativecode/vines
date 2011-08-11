@@ -7,7 +7,12 @@ require 'minitest/autorun'
 class ComponentReadyTest < MiniTest::Unit::TestCase
   def setup
     @stream = MiniTest::Mock.new
-    @state = Vines::Stream::Component::Ready.new(@stream, nil)
+    @state  = Vines::Stream::Component::Ready.new(@stream, nil)
+    @config = Vines::Config.new do
+      host 'wonderland.lit' do
+        storage(:fs) { dir '.' }
+      end
+    end
   end
 
   def test_missing_to_and_from_addresses
@@ -42,11 +47,11 @@ class ComponentReadyTest < MiniTest::Unit::TestCase
   end
 
   def test_remote_message_routes
-    @stream.expect(:remote_domain, 'tea.wonderland.lit')
     node = node(%q{<message from="alice@tea.wonderland.lit" to="romeo@verona.lit"/>})
+    @stream.expect(:remote_domain, 'tea.wonderland.lit')
+    @stream.expect(:config, @config)
 
     @router = MiniTest::Mock.new
-    @router.expect(:local?, false, [node])
     @router.expect(:route, nil, [node])
     @stream.expect(:router, @router)
 
@@ -58,12 +63,12 @@ class ComponentReadyTest < MiniTest::Unit::TestCase
   def test_local_message_processes
     node = node(%q{<message from="alice@tea.wonderland.lit" to="hatter@wonderland.lit"/>})
     @stream.expect(:remote_domain, 'tea.wonderland.lit')
+    @stream.expect(:config, @config)
 
     @recipient = MiniTest::Mock.new
     @recipient.expect(:write, nil, [node])
 
     @router = MiniTest::Mock.new
-    @router.expect(:local?, true, [node])
     @router.expect(:connected_resources, [@recipient], ['hatter@wonderland.lit', 'alice@tea.wonderland.lit'])
     @stream.expect(:router, @router)
 

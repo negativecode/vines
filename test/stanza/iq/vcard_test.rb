@@ -7,6 +7,11 @@ require 'minitest/autorun'
 class VcardTest < MiniTest::Unit::TestCase
   def setup
     @stream = MiniTest::Mock.new
+    @config = Vines::Config.new do
+      host 'wonderland.lit' do
+        storage(:fs) { dir '.' }
+      end
+    end
   end
 
   def test_vcard_get_on_remote_jid_routes
@@ -14,9 +19,9 @@ class VcardTest < MiniTest::Unit::TestCase
     node = node(%q{<iq id="42" to="romeo@verona.lit" type="get"><vCard xmlns="vcard-temp"/></iq>})
 
     router = MiniTest::Mock.new
-    router.expect(:local?, false, [node])
     router.expect(:route, nil, [node])
 
+    @stream.expect(:config, @config)
     @stream.expect(:user, alice)
     @stream.expect(:router, router)
 
@@ -30,16 +35,12 @@ class VcardTest < MiniTest::Unit::TestCase
     alice = Vines::User.new(:jid => 'alice@wonderland.lit/tea')
     node = node(%q{<iq id="42" type="get"><vCard xmlns="vcard-temp"/></iq>})
 
-    router = MiniTest::Mock.new
-    router.expect(:local?, true, [node])
-
     card = node(%q{<vCard xmlns="vcard-temp"><FN>Alice in Wonderland</FN></vCard>})
 
     storage = MiniTest::Mock.new
     storage.expect(:find_vcard, card, [alice.jid.bare])
 
     @stream.expect(:user, alice)
-    @stream.expect(:router, router)
     @stream.expect(:domain, 'wonderland.lit')
     @stream.expect(:storage, storage, ['wonderland.lit'])
     expected = node(%q{
@@ -53,7 +54,6 @@ class VcardTest < MiniTest::Unit::TestCase
     stanza = Vines::Stanza::Iq::Vcard.new(node, @stream)
     stanza.process
     assert @stream.verify
-    assert router.verify
     assert storage.verify
   end
 
@@ -61,16 +61,13 @@ class VcardTest < MiniTest::Unit::TestCase
     alice = Vines::User.new(:jid => 'alice@wonderland.lit/tea')
     node = node(%q{<iq id="42" to="hatter@wonderland.lit" type="get"><vCard xmlns="vcard-temp"/></iq>})
 
-    router = MiniTest::Mock.new
-    router.expect(:local?, true, [node])
-
     card = node(%q{<vCard xmlns="vcard-temp"><FN>Mad Hatter</FN></vCard>})
 
     storage = MiniTest::Mock.new
     storage.expect(:find_vcard, card, [Vines::JID.new('hatter@wonderland.lit')])
 
+    @stream.expect(:config, @config)
     @stream.expect(:user, alice)
-    @stream.expect(:router, router)
     @stream.expect(:domain, 'wonderland.lit')
     @stream.expect(:storage, storage, ['wonderland.lit'])
     expected = node(%q{
@@ -84,7 +81,6 @@ class VcardTest < MiniTest::Unit::TestCase
     stanza = Vines::Stanza::Iq::Vcard.new(node, @stream)
     stanza.process
     assert @stream.verify
-    assert router.verify
     assert storage.verify
   end
 
@@ -92,21 +88,16 @@ class VcardTest < MiniTest::Unit::TestCase
     alice = Vines::User.new(:jid => 'alice@wonderland.lit/tea')
     node = node(%q{<iq id="42" type="get"><vCard xmlns="vcard-temp"/></iq>})
 
-    router = MiniTest::Mock.new
-    router.expect(:local?, true, [node])
-
     storage = MiniTest::Mock.new
     storage.expect(:find_vcard, nil, [alice.jid.bare])
 
     @stream.expect(:user, alice)
-    @stream.expect(:router, router)
     @stream.expect(:domain, 'wonderland.lit')
     @stream.expect(:storage, storage, ['wonderland.lit'])
 
     stanza = Vines::Stanza::Iq::Vcard.new(node, @stream)
     assert_raises(Vines::StanzaErrors::ItemNotFound) { stanza.process }
     assert @stream.verify
-    assert router.verify
     assert storage.verify
   end
 
@@ -114,11 +105,8 @@ class VcardTest < MiniTest::Unit::TestCase
     alice = Vines::User.new(:jid => 'alice@wonderland.lit/tea')
     node = node(%q{<iq id="42" to="hatter@wonderland.lit" type="set"><vCard xmlns="vcard-temp"><FN>Alice</FN></vCard></iq>})
 
-    router = MiniTest::Mock.new
-    router.expect(:local?, true, [node])
-
+    @stream.expect(:config, @config)
     @stream.expect(:user, alice)
-    @stream.expect(:router, router)
 
     stanza = Vines::Stanza::Iq::Vcard.new(node, @stream)
     assert_raises(Vines::StanzaErrors::Forbidden) { stanza.process }
@@ -130,14 +118,10 @@ class VcardTest < MiniTest::Unit::TestCase
     node = node(%q{<iq id="42" type="set"><vCard xmlns="vcard-temp"><FN>Alice</FN></vCard></iq>})
     card = node(%q{<vCard xmlns="vcard-temp"><FN>Alice</FN></vCard>})
 
-    router = MiniTest::Mock.new
-    router.expect(:local?, true, [node])
-
     storage = MiniTest::Mock.new
     storage.expect(:save_vcard, nil, [alice.jid, card])
 
     @stream.expect(:user, alice)
-    @stream.expect(:router, router)
     @stream.expect(:domain, 'wonderland.lit')
     @stream.expect(:storage, storage, ['wonderland.lit'])
     expected = node(%q{<iq id="42" to="alice@wonderland.lit/tea" type="result"/>})
@@ -146,7 +130,6 @@ class VcardTest < MiniTest::Unit::TestCase
     stanza = Vines::Stanza::Iq::Vcard.new(node, @stream)
     stanza.process
     assert @stream.verify
-    assert router.verify
     assert storage.verify
   end
 
