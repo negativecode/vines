@@ -18,6 +18,7 @@ module Vines
           if stream.encrypt?
             stream.write(PROCEED)
             stream.encrypt
+            stream.reset
             advance
           else
             stream.write(FAILURE)

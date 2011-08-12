@@ -77,6 +77,7 @@ module Vines
 
         def send_auth_success
           stream.write(SUCCESS)
+          stream.reset
           advance
         end
 

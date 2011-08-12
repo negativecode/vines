@@ -23,17 +23,23 @@ module Vines
       @user, @closed, @stanza_size = nil, false, 0
       @bucket = TokenBucket.new(100, 10)
       @store = Store.new
-
       @nodes = EM::Queue.new
       process_node_queue
+      create_parser
+      log.info { "%s %21s -> %s" %
+        ['Stream connected:'.ljust(PAD), @remote_addr, @local_addr] }
+    end
 
+    # Initialize a new XML parser for this connection. This is called when the
+    # stream is first connected as well as for stream restarts during
+    # negotiation. Subclasses can override this method to provide a different
+    # type of parser (e.g. HTTP).
+    def create_parser
       @parser = Parser.new.tap do |p|
         p.stream_open {|node| @nodes.push(node) }
         p.stream_close { close_connection }
         p.stanza {|node| @nodes.push(node) }
       end
-      log.info { "%s %21s -> %s" %
-        ['Stream connected:'.ljust(PAD), @remote_addr, @local_addr] }
     end
 
     def close_connection(after_writing=false)
@@ -50,6 +56,12 @@ module Vines
       else
         error(StreamErrors::PolicyViolation.new('max stanza size reached'))
       end
+    end
+
+    # Reset the connection's XML parser when a new <stream:stream> header
+    # is received.
+    def reset
+      create_parser
     end
 
     # Returns the storage system for the domain. If no domain is given,

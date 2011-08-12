@@ -90,6 +90,7 @@ class ClientAuthTest < MiniTest::Unit::TestCase
 
   def test_plain_auth_valid_password
     user = Vines::User.new(:jid => 'alice@wonderland.lit')
+    @stream.expect(:reset, nil)
     @stream.expect(:storage, MockStorage.new)
     @stream.expect(:user, user)
     @stream.expect(:user=, nil, [user])

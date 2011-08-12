@@ -13,6 +13,11 @@ module Vines
       def post_init
         super
         router.delete(self)
+      end
+
+      # Override +Stream#create_parser+ to provide an HTTP parser rather than
+      # a Nokogiri XML parser.
+      def create_parser
         @parser = ::Http::Parser.new.tap do |p|
           body = ''
           p.on_body = proc {|data| body << data }
@@ -110,7 +115,7 @@ module Vines
         doc = Nokogiri::XML::Document.new
         node = doc.create_element('body',
           'charsets'     => 'UTF-8',
-          'from'         => @session.domain, 
+          'from'         => @session.domain,
           'hold'         => @session.hold,
           'inactivity'   => @session.inactivity,
           'polling'      => '5',
