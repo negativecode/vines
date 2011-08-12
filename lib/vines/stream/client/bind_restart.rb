@@ -14,11 +14,10 @@ module Vines
           doc = Document.new
           features = doc.create_element('stream:features') do |el|
             el << doc.create_element('bind', 'xmlns' => NAMESPACES[:bind])
-            el << doc.create_element('session', 'xmlns' => NAMESPACES[:session])
           end
           stream.write(features)
           advance
-        end  
+        end
       end
     end
   end
