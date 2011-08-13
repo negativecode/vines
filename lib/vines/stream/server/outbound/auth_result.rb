@@ -14,6 +14,7 @@ module Vines
             case node.name
               when 'success'
                 stream.start(node)
+                stream.reset
                 advance
               when 'failure'
                 stream.close_connection

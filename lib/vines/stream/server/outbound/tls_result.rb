@@ -17,6 +17,7 @@ module Vines
               when 'proceed'
                 stream.encrypt
                 stream.start(node)
+                stream.reset
                 advance
               when 'failure'
                 stream.close_connection
