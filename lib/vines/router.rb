@@ -94,10 +94,6 @@ module Vines
       end
     end
 
-    def local_jid?(*jids)
-      @config.local_jid?(*jids)
-    end
-
     # Returns the total number of streams connected to the server.
     def size
       @streams.values.inject(0) {|sum, arr| sum + arr.size }

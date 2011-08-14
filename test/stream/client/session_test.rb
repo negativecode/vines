@@ -4,9 +4,14 @@ require 'vines'
 require 'minitest/autorun'
 
 class ClientSessionTest < MiniTest::Unit::TestCase
+  def setup
+    @stream = MiniTest::Mock.new
+    @stream.expect(:config, nil)
+  end
+
   def test_equality
-    one = Vines::Stream::Client::Session.new(nil)
-    two = Vines::Stream::Client::Session.new(nil)
+    one = Vines::Stream::Client::Session.new(@stream)
+    two = Vines::Stream::Client::Session.new(@stream)
 
     assert_nil one <=> 42
 

@@ -74,7 +74,7 @@ module Vines
         def remove_contact(jid)
           contact = stream.user.contact(jid)
           raise StanzaErrors::ItemNotFound.new(self, 'modify') unless contact
-          if router.local_jid?(contact.jid)
+          if local_jid?(contact.jid)
             user = storage(contact.jid.domain).find_user(contact.jid)
           end
 
@@ -93,7 +93,7 @@ module Vines
             :jid => contact.jid,
             :subscription => 'remove'))
 
-          if router.local_jid?(contact.jid)
+          if local_jid?(contact.jid)
             send_unavailable(stream.user.jid, contact.jid) if contact.subscribed_from?
             send_unsubscribe(contact)
             if user.contact(stream.user.jid)
@@ -111,7 +111,7 @@ module Vines
             presence(contact.jid, type) if contact.send("subscribed_#{meth}?")
           end.compact
 
-          if router.local_jid?(contact.jid)
+          if local_jid?(contact.jid)
             stream.interested_resources(contact.jid).each do |recipient|
               presence.each {|el| recipient.write(el) }
             end

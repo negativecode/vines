@@ -46,7 +46,11 @@ module Vines
     def local?
       return true unless ROUTABLE_STANZAS.include?(@node.name)
       to = JID.new(@node['to'])
-      to.empty? || stream.config.local_jid?(to)
+      to.empty? || local_jid?(to)
+    end
+
+    def local_jid?(*jids)
+      stream.config.local_jid?(*jids)
     end
 
     def route
@@ -69,11 +73,11 @@ module Vines
     # recipient's available resources. Route the stanza to a remote server if
     # the recipient isn't hosted locally.
     def send_unavailable(from, to)
-      recipients = router.available_resources(to, from) if router.local_jid?(to)
+      recipients = router.available_resources(to, from) if local_jid?(to)
 
       router.available_resources(from, to).each do |stream|
         el = unavailable(stream.user.jid, to)
-        if router.local_jid?(to)
+        if local_jid?(to)
           recipients.each {|recipient| recipient.write(el) }
         else
           router.route(el)

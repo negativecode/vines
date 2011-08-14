@@ -15,6 +15,7 @@ module Vines
 
         def initialize(stream)
           @id = Kit.uuid
+          @config = stream.config
           @state = Client::Start.new(stream)
           @available = false
           @domain = nil
@@ -106,7 +107,7 @@ module Vines
         def remote_subscribers(to=nil)
           jid = (to.nil? || to.empty?) ? nil : JID.new(to).bare
           @user.subscribed_from_contacts.reject do |c|
-            router.local_jid?(c.jid) || (jid && c.jid.bare != jid)
+            @config.local_jid?(c.jid) || (jid && c.jid.bare != jid)
           end
         end
 
