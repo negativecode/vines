@@ -16,7 +16,8 @@ body {
 }
 input[type="text"],
 input[type="email"],
-input[type="password"] {
+input[type="password"],
+textarea {
   border-radius: 2px;
   border: none;
   -webkit-box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.2);
@@ -25,6 +26,13 @@ input[type="password"] {
   font-size: 10pt;
   outline: none;
   padding: 6px;
+}
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+textarea:focus {
+  -webkit-box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.6);
+  box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.6);
 }
 input[type="button"],
 input[type="submit"] {
