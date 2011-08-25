@@ -13,8 +13,8 @@ class Layout
     $(selector).each (ix, node) =>
       node = $(node)
       getter = node[get]
-      parent = getter.call node.parent()
-      fixed = this.fixed node, selector, (n) -> getter.call n
+      parent = getter.call node.parent(), true
+      fixed = this.fixed node, selector, (n) -> getter.call(n, true)
       node[set].call node, parent - fixed
 
   fixed: (node, selector, fn) ->
