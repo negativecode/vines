@@ -2,16 +2,18 @@
   margin: 0;
   padding: 0;
 }
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
 html {
   background: #0c1a2d;
-  height: 100%;
 }
 body {
   background: #0c1a2d;
   color: #222;
   font-family: "Helvetica Neue", Helvetica, sans-serif;
   font-size: 10pt;
-  height: 100%;
   line-height: 20pt;
 }
 input[type="text"],
