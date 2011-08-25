@@ -20,7 +20,7 @@ class Session
           callback true
           this.findRoster =>
             this.notify('roster')
-            @xmpp.send $('<presence/>').get 0
+            @xmpp.send this.xml '<presence/>'
             this.findCards()
 
   disconnect: -> @xmpp.disconnect()
@@ -96,12 +96,12 @@ class Session
     $('item', node).map(-> new Contact this ).get()
 
   findRoster: (callback) ->
-    node = $("""
+    node = this.xml """
       <iq id='#{this.uniqueId()}' type="get">
         <query xmlns="jabber:iq:roster"/>
       </iq>
-    """)
-    this.sendIQ node.get(0), (result) =>
+    """
+    this.sendIQ node, (result) =>
       contacts = this.parseRoster(result)
       @roster[contact.jid] = contact for contact in contacts
       callback()
@@ -116,40 +116,40 @@ class Session
     @xmpp.send node
 
   sendPresence: (away, status) ->
-    node = $ '<presence/>'
+    node = $ this.xml '<presence/>'
     if away
-      node.append $('<show>xa</show>')
-      node.append $('<status/>').text status if status != 'Away'
+      node.append $(this.xml '<show>xa</show>')
+      node.append $(this.xml '<status/>').text status if status != 'Away'
     else
-      node.append $('<status/>').text status if status != 'Available'
-    @xmpp.send node.get 0
+      node.append $(this.xml '<status/>').text status if status != 'Available'
+    @xmpp.send node
 
   sendIQ: (node, callback) ->
     @xmpp.sendIQ node, callback, callback, 5000
 
   updateContact: (contact, add) ->
-    node = $("""
+    node = this.xml """
       <iq id="#{this.uniqueId()}" type="set">
         <query xmlns="jabber:iq:roster">
           <item name="" jid="#{contact.jid}"/>
         </query>
       </iq>
-    """)
+    """
     $('item', node).attr 'name', contact.name
     for group in contact.groups
-      $('item', node).append $('<group></group>').text group
-    @xmpp.send node.get 0
+      $('item', node).append $(this.xml '<group></group>').text group
+    @xmpp.send node
     this.sendSubscribe(contact.jid) if add
 
   removeContact: (jid) ->
-    node = $("""
+    node = this.xml """
       <iq id="#{this.uniqueId()}" type="set">
         <query xmlns="jabber:iq:roster">
           <item jid="#{jid}" subscription="remove"/>
         </query>
       </iq>
-    """)
-    @xmpp.send node.get 0
+    """
+    @xmpp.send node
 
   sendSubscribe: (jid) ->
     @xmpp.send this.presence jid, 'subscribe'
@@ -161,12 +161,12 @@ class Session
     @xmpp.send this.presence jid, 'unsubscribed'
 
   presence: (to, type) ->
-    $("""
+    this.xml """
       <presence
         id="#{this.uniqueId()}"
         to="#{to}"
         type="#{type}"/>
-    """).get 0
+    """
 
   handleIq: (node) ->
     node = $(node)
