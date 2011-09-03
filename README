@@ -21,7 +21,7 @@ Additional documentation can be found at www.getvines.com.
 
 == Dependencies
 
-* bcrypt-ruby >= 2.1.4
+* bcrypt-ruby >= 3.0.0
 * eventmachine >= 0.12.10
 * nokogiri >= 1.5.0
 * ruby >= 1.9.2
