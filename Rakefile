@@ -34,7 +34,7 @@ all client and server connections."
   s.add_dependency "eventmachine", "~> 0.12.10"
   s.add_dependency "http_parser.rb", "~> 0.5.2"
   s.add_dependency "net-ldap", "~> 0.2.2"
-  s.add_dependency "nokogiri", "~> 1.5.0"
+  s.add_dependency "nokogiri", "~> 1.4.7"
 
   s.add_development_dependency "minitest", "= 2.2.2"
   s.add_development_dependency "rake"
