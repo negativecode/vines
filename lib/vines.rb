@@ -66,7 +66,9 @@ end
   uri
   yaml
 
+  vines/log
   vines/jid
+
   vines/stanza
   vines/stanza/iq
   vines/stanza/iq/query
