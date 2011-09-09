@@ -6,6 +6,7 @@ module Vines
       class Request
         BUF_SIZE      = 1024
         MODIFIED      = '%a, %d %b %Y %H:%M:%S GMT'.freeze
+        MOVED         = 'Moved Permanently'.freeze
         NOT_FOUND     = 'Not Found'.freeze
         NOT_MODIFIED  = 'Not Modified'.freeze
         IF_MODIFIED   = 'If-Modified-Since'.freeze
@@ -44,6 +45,13 @@ module Vines
         # to implement caching.
         def reply_with_file(dir)
           path = File.expand_path(File.join(dir, @path))
+
+          # redirect requests missing a slash so relative links work
+          if File.directory?(path) && !@path.end_with?('/')
+            send_status(301, MOVED, "Location: #{redirect_uri}")
+            return
+          end
+
           path = File.join(path, 'index.html') if File.directory?(path)
 
           if path.start_with?(dir) && File.exist?(path)
@@ -72,6 +80,18 @@ module Vines
 
         private
 
+        # Attempt to rebuild the full request URI from the Host header. If it
+        # wasn't sent by the client, just return the relative path that
+        # was requested. The Location response header must contain the fully
+        # qualified URI, but most browsers will accept relative paths as well.
+        def redirect_uri
+          host = headers['Host']
+          uri = "#{path}/"
+          uri = "#{uri}?#{query}" unless (query || '').empty?
+          uri = "http://#{host}#{uri}" if host
+          uri
+        end
+
         # Return true if the file has been modified since the client last
         # requested it with the If-Modified-Since header.
         def modified?(path)
@@ -82,10 +102,11 @@ module Vines
           File.mtime(path).utc.strftime(MODIFIED)
         end
 
-        def send_status(status, message)
+        def send_status(status, message, *headers)
           header = [
             "HTTP/1.1 #{status} #{message}",
-            "Connection: close"
+            "Connection: close",
+            *headers
           ].join("\r\n")
           @stream.stream_write("#{header}\r\n\r\n")
           @stream.close_connection_after_writing
