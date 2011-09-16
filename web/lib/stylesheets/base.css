@@ -272,6 +272,16 @@ ul.selectable li.selected {
   color: #fff;
   text-shadow: -1px 1px 1px hsl(210, 51%, 45%), 0px -1px 1px hsl(210, 51%, 49%);
 }
+ul.selectable li.selected.secondary {
+  background: hsl(220, 29%, 80%);
+  background: -moz-linear-gradient(hsl(220, 29%, 80%), hsl(217, 25%, 69%));
+  background: -o-linear-gradient(hsl(220, 29%, 80%), hsl(217, 25%, 69%));
+  background: -webkit-gradient(linear, left top, left bottom, from(hsl(220, 29%, 80%)), to(hsl(217, 25%, 69%)));
+  border-top: 1px solid hsl(218, 23%, 79%);
+  border-bottom: 1px solid hsl(218, 20%, 65%);
+  color: #fff;
+  text-shadow: -1px 1px 1px #94a1b8;
+}
 .column {
   height: 100%;
   position: absolute;
