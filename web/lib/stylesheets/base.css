@@ -366,3 +366,17 @@ form.overlay input[type="email"] {
   position: relative;
   left: 10px;
 }
+.notification {
+  background: rgba(12, 26, 45, 0.75);
+  border-radius: 5px;
+  color: #fff;
+  font-size: 11pt;
+  font-weight: bold;
+  padding: 10px 100px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  text-align: center;
+  text-shadow: 0 1px 1px #000;
+  z-index: 2;
+}

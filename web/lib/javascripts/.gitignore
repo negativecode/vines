@@ -5,6 +5,7 @@ filter.js
 layout.js
 login.js
 navbar.js
+notification.js
 router.js
 session.js
 transfer.js
