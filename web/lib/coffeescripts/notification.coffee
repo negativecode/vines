@@ -3,7 +3,7 @@ class Notification
     this.draw()
 
   draw: ->
-    node = $('<div class="notification" style="display:none;"></div>').appendTo 'body'
+    node = $('<div class="notification float" style="display:none;"></div>').appendTo 'body'
     node.text @text
     top = node.outerHeight() / 2
     left = node.outerWidth() / 2
