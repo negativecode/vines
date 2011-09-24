@@ -368,11 +368,11 @@ form.overlay input[type="email"] {
 }
 .notification {
   background: rgba(12, 26, 45, 0.75);
-  border-radius: 5px;
+  border-radius: 30px;
   color: #fff;
-  font-size: 11pt;
+  font-size: 10pt;
   font-weight: bold;
-  padding: 10px 100px;
+  padding: 5px 100px;
   position: absolute;
   top: 50%;
   left: 50%;
