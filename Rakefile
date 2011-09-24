@@ -70,7 +70,7 @@ def scripts(doc)
     file = node['src'].split('/').last()
     if node['src'].start_with?('/lib')
       lib << file
-    elsif node['src'].start_with?('/chat')
+    elsif node['src'].start_with?('javascripts')
       chat << file
     end
   end
@@ -81,7 +81,7 @@ end
 def rewrite_js(doc)
   doc.css('script').each {|node| node.remove }
   doc.css('head').each do |node|
-    %w[/lib/javascripts/base.js /chat/javascripts/app.js].each do |src|
+    %w[/lib/javascripts/base.js javascripts/app.js].each do |src|
       script = doc.create_element('script',
         'type' => 'text/javascript',
         'src' => src)

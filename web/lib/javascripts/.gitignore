@@ -4,6 +4,7 @@ contact.js
 filter.js
 layout.js
 login.js
+logout.js
 navbar.js
 notification.js
 router.js
