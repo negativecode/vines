@@ -21,8 +21,14 @@ class ContactTest < MiniTest::Unit::TestCase
     refute alice.hash == hatter.hash
   end
 
-  def test_initialize_missing_jid
+  def test_initialize_missing_jid_raises
     assert_raises(ArgumentError) { Vines::Contact.new }
+    assert_raises(ArgumentError) { Vines::Contact.new(:jid => '') }
+  end
+
+  def test_initialize_domain_only_jid_does_not_raise
+    contact = Vines::Contact.new(:jid => 'tea.wonderland.lit')
+    assert_equal 'tea.wonderland.lit', contact.jid.to_s
   end
 
   def test_to_roster_xml_sorts_groups
