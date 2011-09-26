@@ -40,7 +40,7 @@ module Vines
           raise StanzaErrors::BadRequest.new(self, 'modify') if items.size != 1
           item = items.first
 
-          jid = JID.new(item['jid'])
+          jid = JID.new(item['jid']) rescue (raise StanzaErrors::JidMalformed.new(self, 'modify'))
           raise StanzaErrors::BadRequest.new(self, 'modify') if jid.empty? || !jid.bare?
 
           if item['subscription'] == 'remove'
