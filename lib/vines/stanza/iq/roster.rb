@@ -96,7 +96,7 @@ module Vines
           if local_jid?(contact.jid)
             send_unavailable(stream.user.jid, contact.jid) if contact.subscribed_from?
             send_unsubscribe(contact)
-            if user.contact(stream.user.jid)
+            if user && user.contact(stream.user.jid)
               push_roster_updates(contact.jid, user.contact(stream.user.jid))
             end
           else
