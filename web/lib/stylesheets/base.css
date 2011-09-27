@@ -360,6 +360,7 @@ form.inset .buttons {
   text-align: right;
 }
 form.overlay input[type="text"],
+form.overlay input[type="password"],
 form.overlay input[type="email"] {
   margin-bottom: 10px;
   width: 228px;
