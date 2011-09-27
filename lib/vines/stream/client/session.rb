@@ -102,6 +102,14 @@ module Vines
           router.available_resources(subscribed, @user.jid)
         end
 
+        # Returns contacts hosted at remote servers to which this user has
+        # successfully subscribed.
+        def remote_subscribed_to_contacts
+          @user.subscribed_to_contacts.reject do |c|
+            @config.local_jid?(c.jid)
+          end
+        end
+
         # Returns contacts hosted at remote servers that are subscribed
         # to this user's presence updates.
         def remote_subscribers(to=nil)

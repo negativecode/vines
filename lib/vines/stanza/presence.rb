@@ -23,11 +23,12 @@ module Vines
       end
 
       def outbound?
-        stream.class != Vines::Stream::Server
+        !inbound?
       end
 
       def inbound?
-        stream.class == Vines::Stream::Server
+        stream.class == Vines::Stream::Server ||
+        stream.class == Vines::Stream::Component
       end
 
       def outbound_broadcast_presence
@@ -54,6 +55,9 @@ module Vines
               stream.write(el)
             end
           end
+          stream.remote_subscribed_to_contacts.each do |contact|
+            send_probe(contact.jid.bare)
+          end
           stream.available!
         end
 
@@ -61,7 +65,6 @@ module Vines
           node = @node.clone
           node['to'] = contact.jid.bare.to_s
           router.route(node) rescue nil # ignore RemoteServerNotFound
-          send_probe(contact.jid.bare) if initial
         end
       end
 
@@ -79,7 +82,7 @@ module Vines
           'id'   => Kit.uuid,
           'to'   => to.bare.to_s,
           'type' => 'probe')
-        router.route(probe)
+        router.route(probe) rescue nil # ignore RemoteServerNotFound
       end
 
       def auto_reply_to_subscription_request(from, type)

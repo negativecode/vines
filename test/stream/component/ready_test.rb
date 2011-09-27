@@ -50,6 +50,7 @@ class ComponentReadyTest < MiniTest::Unit::TestCase
     node = node(%q{<message from="alice@tea.wonderland.lit" to="romeo@verona.lit"/>})
     @stream.expect(:remote_domain, 'tea.wonderland.lit')
     @stream.expect(:config, @config)
+    @stream.expect(:user=, nil, [Vines::User.new(:jid => 'alice@tea.wonderland.lit')])
 
     @router = MiniTest::Mock.new
     @router.expect(:route, nil, [node])
@@ -64,17 +65,17 @@ class ComponentReadyTest < MiniTest::Unit::TestCase
     node = node(%q{<message from="alice@tea.wonderland.lit" to="hatter@wonderland.lit"/>})
     @stream.expect(:remote_domain, 'tea.wonderland.lit')
     @stream.expect(:config, @config)
+    @stream.expect(:user=, nil, [Vines::User.new(:jid => 'alice@tea.wonderland.lit')])
+    @stream.expect(:user, Vines::User.new(:jid => 'alice@tea.wonderland.lit'))
 
     @recipient = MiniTest::Mock.new
+    @recipient.expect(:user, Vines::User.new(:jid => 'hatter@wonderland.lit'))
     @recipient.expect(:write, nil, [node])
 
-    @router = MiniTest::Mock.new
-    @router.expect(:connected_resources, [@recipient], ['hatter@wonderland.lit', 'alice@tea.wonderland.lit'])
-    @stream.expect(:router, @router)
+    @stream.expect(:connected_resources, [@recipient], ['hatter@wonderland.lit'])
 
     @state.node(node)
     assert @stream.verify
-    assert @router.verify
     assert @recipient.verify
   end
 
