@@ -19,5 +19,11 @@ module Vines
       hex[16] = %w[8 9 a b][rand(4)]
       hex.scan(/(\w{8})(\w{4})(\w{4})(\w{4})(\w{12})/).first.join('-')
     end
+    
+    def self.generate_password
+      hash = Digest::SHA512.new
+      1024.times { hash << rand.to_s }
+      hash.hexdigest
+    end
   end
 end
