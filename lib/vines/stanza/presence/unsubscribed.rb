@@ -16,11 +16,12 @@ module Vines
 
           return unless stream.user.subscribed_from?(to)
           send_unavailable(stream.user.jid, to)
-          local? ? process_inbound : route
 
           stream.user.remove_subscription_from(to)
           storage.save_user(stream.user)
           stream.update_user_streams(stream.user)
+
+          local? ? process_inbound : route
 
           contact = stream.user.contact(to)
           stream.interested_resources(stream.user.jid).each do |recipient|

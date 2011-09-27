@@ -13,11 +13,12 @@ module Vines
         def process_outbound
           self['from'] = stream.user.jid.bare.to_s
           to = stamp_to
-          local? ? process_inbound : route
 
           stream.user.add_subscription_from(to)
           storage.save_user(stream.user)
           stream.update_user_streams(stream.user)
+
+          local? ? process_inbound : route
 
           contact = stream.user.contact(to)
           stream.interested_resources(stream.user.jid).each do |recipient|

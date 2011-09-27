@@ -15,11 +15,11 @@ module Vines
           to = stamp_to
 
           return unless stream.user.subscribed_to?(to)
-          local? ? process_inbound : route
-
           stream.user.remove_subscription_to(to)
           storage.save_user(stream.user)
           stream.update_user_streams(stream.user)
+
+          local? ? process_inbound : route
 
           contact = stream.user.contact(to)
           stream.interested_resources(stream.user.jid).each do |recipient|
