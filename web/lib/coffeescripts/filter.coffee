@@ -42,7 +42,7 @@ class Filter
       val = (node.attr(attr) || '').toLowerCase()
       val.indexOf(text) != -1
 
-    $('li', @list).each (ix, node) =>
+    $('> li', @list).each (ix, node) =>
       node = $ node
       matches = (true for attr in @attrs when test node, attr)
       if matches.length > 0 then node.show() else node.hide()
