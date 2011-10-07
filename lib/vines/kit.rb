@@ -1,10 +1,8 @@
 # encoding: UTF-8
 
 module Vines
-
   # A module for utility methods with no better home.
   module Kit
-
     # Create a hex-encoded, SHA-512 HMAC of the data, using the secret key.
     def self.hmac(key, data)
       digest = OpenSSL::Digest::Digest.new("sha512")
@@ -19,8 +17,9 @@ module Vines
       hex[16] = %w[8 9 a b][rand(4)]
       hex.scan(/(\w{8})(\w{4})(\w{4})(\w{4})(\w{12})/).first.join('-')
     end
-    
-    def self.generate_password
+
+    # Generates a random 128 character authentication token.
+    def self.auth_token
       hash = Digest::SHA512.new
       1024.times { hash << rand.to_s }
       hash.hexdigest

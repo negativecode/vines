@@ -18,4 +18,9 @@ class KitTest < MiniTest::Unit::TestCase
     assert ids.all? {|id| id.match(/\w{8}-\w{4}-[4]\w{3}-[89ab]\w{3}-\w{12}/) }
     assert_equal ids.length, ids.uniq.length
   end
+
+  def test_auth_token
+    refute_equal Vines::Kit.auth_token, Vines::Kit.auth_token
+    assert_equal 128, Vines::Kit.auth_token.length
+  end
 end
