@@ -1,5 +1,6 @@
 #login-page {
   background: -moz-radial-gradient(#1a3762, #0c1a2d);
+  background: -o-radial-gradient(#1a3762, #0c1a2d);
   background: -webkit-gradient(radial, 50% 50%, 0, 50% 50%, 500, from(#1a3762), to(#0c1a2d));
 }
 #login-page #container {
