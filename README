@@ -7,7 +7,7 @@ LDAP authentication can be used so user names and passwords aren't stored in the
 database. SSL encryption is mandatory on all client and server connections.
 
 The Vines XMPP server includes a web chat client. The web application is available 
-immediately after starting the chat server at http://localhost:5280/chat/
+immediately after starting the chat server at http://localhost:5280/chat/.
 
 Additional documentation can be found at www.getvines.com.
 
@@ -21,9 +21,9 @@ Additional documentation can be found at www.getvines.com.
 
 == Dependencies
 
-* bcrypt-ruby >= 3.0.0
+* bcrypt-ruby >= 3.0.1
 * eventmachine >= 0.12.10
-* nokogiri >= 1.5.0
+* nokogiri >= 1.4.7
 * ruby >= 1.9.2
 
 == Ubuntu setup
@@ -31,8 +31,7 @@ $ sudo apt-get install build-essential ruby1.9.1 ruby1.9.1-dev libxml2-dev libxs
 
 == Contact
 
-* David Graham  <david@negativecode.com>
-* Chris Johnson <chris@negativecode.com>
+* David Graham <david@negativecode.com>
 
 == License
 

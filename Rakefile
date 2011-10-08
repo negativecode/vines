@@ -5,10 +5,14 @@ require 'rubygems/package_task'
 require 'nokogiri'
 require_relative 'lib/vines/version'
 
-spec = Gem::Specification.new do |s| 
+ignore = File.read('web/lib/javascripts/.gitignore')
+  .split("\n").map {|f| "web/lib/javascripts/#{f}" }
+
+CLOBBER.include('pkg', 'web/chat/javascripts', *ignore)
+
+spec = Gem::Specification.new do |s|
   s.name    = "vines"
   s.version = Vines::VERSION
-  s.date    = Time.now.strftime("%Y-%m-%d")
 
   s.summary     = "Vines is an XMPP chat server that's easy to install and run."
   s.description = "Vines is an XMPP chat server that supports thousands of
@@ -18,21 +22,20 @@ implementation that you provide. LDAP authentication can be used so user names
 and passwords aren't stored in the chat database. SSL encryption is mandatory on
 all client and server connections."
 
-  s.authors      = ["David Graham", "Chris Johnson"]
-  s.email        = %w[david@negativecode.com chris@negativecode.com]
+  s.authors      = ["David Graham"]
+  s.email        = %w[david@negativecode.com]
   s.homepage     = "http://www.getvines.com"
 
-  s.files        = FileList['[A-Z]*', '{bin,lib,conf,web}/**/*']
   s.test_files   = FileList["test/**/*"]
   s.executables  = %w[vines]
   s.require_path = "lib"
 
   s.add_dependency "activerecord", "~> 3.1.0"
-  s.add_dependency "bcrypt-ruby", "~> 3.0.0"
+  s.add_dependency "bcrypt-ruby", "~> 3.0.1"
   s.add_dependency "em-http-request", "~> 0.3.0"
   s.add_dependency "em-redis", "~> 0.3.0"
   s.add_dependency "eventmachine", "~> 0.12.10"
-  s.add_dependency "http_parser.rb", "~> 0.5.2"
+  s.add_dependency "http_parser.rb", "~> 0.5.3"
   s.add_dependency "net-ldap", "~> 0.2.2"
   s.add_dependency "nokogiri", "~> 1.4.7"
 
@@ -43,8 +46,12 @@ all client and server connections."
   s.required_ruby_version = '>= 1.9.2'
 end
 
-Gem::PackageTask.new(spec) do |pkg|
-  pkg.need_tar = true
+# Set gem file list after CoffeeScripts have been compiled, so web/lib/javascripts/
+# is included in the gem.
+task :gemprep do
+  spec.files = FileList['[A-Z]*', '{bin,lib,conf,web}/**/*']
+  Gem::PackageTask.new(spec).define
+  Rake::Task['gem'].invoke
 end
 
 module Rake
@@ -117,4 +124,4 @@ task :cleanup do
   File.delete('/tmp/index.html')
 end
 
-task :default => [:clobber, :test, :compile, :gem, :cleanup]
+task :default => [:clobber, :test, :compile, :gemprep, :cleanup]
