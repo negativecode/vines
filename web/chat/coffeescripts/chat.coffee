@@ -179,8 +179,8 @@ class ChatPage
 
   atBottom: ->
     msgs = $('#messages')
-    bottom = msgs.prop('scrollHeight') - msgs.height()
-    msgs.scrollTop() == bottom
+    bottom = msgs.prop('scrollHeight') - msgs.outerHeight()
+    msgs.scrollTop() >= bottom
 
   send: ->
     return false unless @currentContact
