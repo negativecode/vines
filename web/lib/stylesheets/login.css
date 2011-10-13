@@ -1,7 +1,8 @@
 #login-page {
   background: -moz-radial-gradient(#1a3762, #0c1a2d);
+  background: -ms-radial-gradient(center, 500px 500px, #1a3762, #0c1a2d);
   background: -o-radial-gradient(#1a3762, #0c1a2d);
-  background: -webkit-gradient(radial, 50% 50%, 0, 50% 50%, 500, from(#1a3762), to(#0c1a2d));
+  background: -webkit-radial-gradient(center, 500px 500px, #1a3762, #0c1a2d);
 }
 #login-page #container {
   height: 100%;
@@ -30,11 +31,11 @@
 #login-page #start {
   background: #285696;
   background: -moz-linear-gradient(#4693ff, #285696);
+  background: -ms-linear-gradient(#4693ff, #285696);
   background: -o-linear-gradient(#4693ff, #285696);
-  background: -webkit-gradient(linear, left top, left bottom, from(#4693ff), to(#285696));
+  background: -webkit-linear-gradient(#4693ff, #285696);
   border: 1px solid #4693ff;
   border-radius: 30px;
-  -webkit-box-shadow: 0 1px 1px #0c1a2d, inset 0 1px 1px rgba(255, 255, 255, 0.1);
   box-shadow: 0 1px 1px #0c1a2d, inset 0 1px 1px rgba(255, 255, 255, 0.1);
   color: #76b6ff;
   cursor: pointer;
@@ -48,7 +49,6 @@
   text-shadow: 0 -1px 1px #0c1a2d;
 }
 #login-page #start:active {
-  -webkit-box-shadow: inset 0 1px 5px #0c1a2d;
   box-shadow: inset 0 1px 7px #0c1a2d;
   padding-top: 7px;
   padding-bottom: 9px;

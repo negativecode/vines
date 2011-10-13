@@ -22,7 +22,6 @@
 }
 #chat-page #messages li img {
   border: 3px solid #fff;
-  -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 0 40px rgba(0, 0, 0, 0.06) inset;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 0 40px rgba(0, 0, 0, 0.06) inset;
   position: absolute;
   top: 7px;
@@ -108,8 +107,9 @@
 #chat-page #roster .unread {
   background: #319be7;
   background: -moz-linear-gradient(#319be7, #1b78d9);
+  background: -ms-linear-gradient(#319be7, #1b78d9);
   background: -o-linear-gradient(#319be7, #1b78d9);
-  background: -webkit-gradient(linear, left top, left bottom, from(#319be7), to(#1b78d9));
+  background: -webkit-linear-gradient(#319be7, #1b78d9);
   border-radius: 30px;
   color: #fff;
   display: inline-block;
@@ -125,7 +125,6 @@
 #chat-page #roster .vcard-img {
   background: #fff;
   border: 1px solid #fff;
-  -webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 0 40px rgba(0, 0, 0, 0.06) inset;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 0 40px rgba(0, 0, 0, 0.06) inset;
   height: 32px;
   width: 32px;

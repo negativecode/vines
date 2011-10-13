@@ -22,28 +22,35 @@ input[type="password"],
 textarea {
   border-radius: 2px;
   border: none;
-  -webkit-box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.2);
   box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.2);
   font-family: "Helvetica Neue", Helvetica, sans-serif;
   font-size: 10pt;
   outline: none;
   padding: 6px;
 }
+/* ipad */
+@media only screen and (min-device-width: 768px) and (max-device-width: 1024px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  textarea {
+    border: 1px solid #eee;
+  }
+}
 input[type="text"]:focus,
 input[type="email"]:focus,
 input[type="password"]:focus,
 textarea:focus {
-  -webkit-box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.6);
   box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.6);
 }
 input[type="button"],
 input[type="submit"] {
   background: -moz-linear-gradient(#ececec, #dcdcdc);
+  background: -ms-linear-gradient(#ececec, #dcdcdc);
   background: -o-linear-gradient(#ececec, #dcdcdc);
-  background: -webkit-gradient(linear, left top, left bottom, from(#ececec), to(#dcdcdc));
+  background: -webkit-linear-gradient(#ececec, #dcdcdc);
   border: 1px solid #ccc;
   border-radius: 3px;
-  -webkit-box-shadow: 0 1px 1px #fff, inset 0 1px 1px rgba(255, 255, 255, 0.5);
   box-shadow: 0 1px 1px #fff, inset 0 1px 1px rgba(255, 255, 255, 0.5);
   color: #222;
   cursor: pointer;
@@ -60,8 +67,9 @@ input[type="submit"] {
 input[type="submit"] {
   background: #8dd2f7;
   background: -moz-linear-gradient(#8dd2f7, #58b8f4);
+  background: -ms-linear-gradient(#8dd2f7, #58b8f4);
   background: -o-linear-gradient(#8dd2f7, #58b8f4);
-  background: -webkit-gradient(linear, left top, left bottom, from(#8dd2f7), to(#58b8f4));
+  background: -webkit-linear-gradient(#8dd2f7, #58b8f4);
   border: 1px solid #448ccd;
   border-top: 1px solid #5da8db;
   color: #0d4078;
@@ -69,7 +77,6 @@ input[type="submit"] {
 }
 input[type="button"]:active,
 input[type="submit"]:active {
-  -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8);
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8);
   text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
 }
@@ -77,8 +84,9 @@ input[type="button"].cancel,
 input[type="submit"].cancel {
   background: #ff3137;
   background: -moz-linear-gradient(#ff3137, #dd2828);
+  background: -ms-linear-gradient(#ff3137, #dd2828);
   background: -o-linear-gradient(#ff3137, #dd2828);
-  background: -webkit-gradient(linear, left top, left bottom, from(#ff3137), to(#dd2828));
+  background: -webkit-linear-gradient(#ff3137, #dd2828);
   border: 1px solid #981a1a;
   border-top: 1px solid #ac1f23;
   color: #4a0f11;
@@ -98,10 +106,10 @@ optgroup option {
 #navbar {
   background: #0c1a2d;
   background: -moz-linear-gradient(#1e4171, #0c1a2d);
+  background: -ms-linear-gradient(#1e4171, #0c1a2d);
   background: -o-linear-gradient(#1e4171, #0c1a2d);
-  background: -webkit-gradient(linear, left top, left bottom, from(#1e4171), to(#0c1a2d));
+  background: -webkit-linear-gradient(#1e4171, #0c1a2d);
   border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-  -webkit-box-shadow: 0 0 3px 1px #222;
   box-shadow: 0 0 3px 1px #222;
   color: #bdd5ff;
   height: 60px;
@@ -129,7 +137,6 @@ optgroup option {
 }
 #navbar #current-user-avatar {
   border: 1px solid rgba(255, 255, 255, 0.1);
-  -webkit-box-shadow: 0 0 1px 0px #bdd5ff;
   box-shadow: 0 0 1px 0px #bdd5ff;
   height: 48px;
   width: 48px;
@@ -265,8 +272,9 @@ optgroup option {
 ul.selectable li.selected {
   background: #319be7;
   background: -moz-linear-gradient(#319be7, #1b78d9);
+  background: -ms-linear-gradient(#319be7, #1b78d9);
   background: -o-linear-gradient(#319be7, #1b78d9);
-  background: -webkit-gradient(linear, left top, left bottom, from(#319be7), to(#1b78d9));
+  background: -webkit-linear-gradient(#319be7, #1b78d9);
   border-top: 1px solid #148ddf;
   border-bottom: 1px solid #095bba;
   color: #fff;
@@ -275,8 +283,9 @@ ul.selectable li.selected {
 ul.selectable li.selected.secondary {
   background: hsl(220, 29%, 80%);
   background: -moz-linear-gradient(hsl(220, 29%, 80%), hsl(217, 25%, 69%));
+  background: -ms-linear-gradient(hsl(220, 29%, 80%), hsl(217, 25%, 69%));
   background: -o-linear-gradient(hsl(220, 29%, 80%), hsl(217, 25%, 69%));
-  background: -webkit-gradient(linear, left top, left bottom, from(hsl(220, 29%, 80%)), to(hsl(217, 25%, 69%)));
+  background: -webkit-linear-gradient(hsl(220, 29%, 80%), hsl(217, 25%, 69%));
   border-top: 1px solid hsl(218, 23%, 79%);
   border-bottom: 1px solid hsl(218, 20%, 65%);
   color: #fff;
@@ -315,7 +324,6 @@ ul.selectable li.selected.secondary {
   width: 27px;
 }
 .primary {
-  -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, 0.5), 0 0 40px rgba(0, 0, 0, 0.1) inset;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.5), 0 0 40px rgba(0, 0, 0, 0.1) inset;
   width: 460px;
   left: 260px;
@@ -323,7 +331,6 @@ ul.selectable li.selected.secondary {
 }
 .sidebar {
   background: #f8f8f8;
-  -webkit-box-shadow: 0 0 40px rgba(0, 0, 0, 0.1) inset;
   box-shadow: 0 0 40px rgba(0, 0, 0, 0.1) inset;
   width: 260px;
 }
@@ -331,7 +338,6 @@ form.overlay {
   background: inherit;
   border-bottom: 1px solid #ddd;
   border-top: 1px solid #fff;
-  -webkit-box-shadow: 0px -3px 5px rgba(0, 0, 0, 0.1);
   box-shadow: 0px -3px 5px rgba(0, 0, 0, 0.1);
   padding-top: 10px;
   position: absolute;
