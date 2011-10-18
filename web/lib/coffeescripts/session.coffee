@@ -201,6 +201,7 @@ class Session
         text: body.text()
         html: html.text()
         received: new Date()
+        node: node
     true # keep handler alive
 
   handlePresence: (node) ->
@@ -219,6 +220,7 @@ class Session
       offline: type == 'unavailable' || type == 'error'
       away:    show.text() == 'away' || show.text() == 'xa'
       dnd:     show.text() == 'dnd'
+      node:    node
     contact = @roster[from.split('/')[0]]
     contact.update presence if contact
     this.notify 'presence', presence
