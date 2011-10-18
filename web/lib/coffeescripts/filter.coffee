@@ -13,9 +13,10 @@ class Filter
     form = $('<form class="filter-form" style="display:none;"></form>').appendTo @form
     text = $('<input class="filter-text" type="search" placeholder="Filter" results="5"/>').appendTo form
 
-    new Button @icon, ICONS.search,
-      scale: 0.5
-      translation: '-8 -8'
+    if @icon
+      new Button @icon, ICONS.search,
+        scale: 0.5
+        translation: '-8 -8'
 
     form.submit -> false
     text.keyup  => this.filter(text)
