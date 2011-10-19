@@ -40,9 +40,8 @@ class RequestTest < MiniTest::Unit::TestCase
   def test_reply_with_file_404
     request = Vines::Stream::Http::Request.new(@stream, @parser, '<html></html>')
 
-    expected = "HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n"
+    expected = "HTTP/1.1 404 Not Found\r\n\r\n"
     @stream.expect(:stream_write, nil, [expected])
-    @stream.expect(:close_connection_after_writing, nil)
 
     request.reply_with_file(Dir.pwd)
     assert @stream.verify
@@ -53,9 +52,8 @@ class RequestTest < MiniTest::Unit::TestCase
     @parser.expect(:request_path, '../passwords')
     request = Vines::Stream::Http::Request.new(@stream, @parser, '<html></html>')
 
-    expected = "HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n"
+    expected = "HTTP/1.1 404 Not Found\r\n\r\n"
     @stream.expect(:stream_write, nil, [expected])
-    @stream.expect(:close_connection_after_writing, nil)
 
     request.reply_with_file(Dir.pwd)
     assert @stream.verify
@@ -70,7 +68,6 @@ class RequestTest < MiniTest::Unit::TestCase
     mtime = File.mtime(INDEX).utc.strftime('%a, %d %b %Y %H:%M:%S GMT')
     headers = [
       "HTTP/1.1 200 OK",
-      "Connection: close",
       'Content-Type: text/html; charset="utf-8"',
       "Content-Length: 20",
       "Last-Modified: #{mtime}"
@@ -78,7 +75,6 @@ class RequestTest < MiniTest::Unit::TestCase
 
     @stream.expect(:stream_write, nil, ["#{headers}\r\n\r\n"])
     @stream.expect(:stream_write, nil, ["index.html contents\n"])
-    @stream.expect(:close_connection_after_writing, nil)
 
     request.reply_with_file(Dir.pwd)
     assert @stream.verify
@@ -92,12 +88,10 @@ class RequestTest < MiniTest::Unit::TestCase
 
     headers = [
       "HTTP/1.1 301 Moved Permanently",
-      "Connection: close",
       "Location: http://wonderland.lit/http/?ok=true"
     ].join("\r\n")
 
     @stream.expect(:stream_write, nil, ["#{headers}\r\n\r\n"])
-    @stream.expect(:close_connection_after_writing, nil)
     # so the /http url above will work
     request.reply_with_file(File.expand_path('../../', __FILE__))
     assert @stream.verify

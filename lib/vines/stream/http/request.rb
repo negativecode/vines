@@ -105,11 +105,9 @@ module Vines
         def send_status(status, message, *headers)
           header = [
             "HTTP/1.1 #{status} #{message}",
-            "Connection: close",
             *headers
           ].join("\r\n")
           @stream.stream_write("#{header}\r\n\r\n")
-          @stream.close_connection_after_writing
         end
 
         # Stream the contents of the file to the client in a 200 OK response.
@@ -118,7 +116,6 @@ module Vines
         def send_file(path, status=200, message='OK')
           header = [
             "HTTP/1.1 #{status} #{message}",
-            "Connection: close",
             "Content-Type: #{content_type(path)}",
             "Content-Length: #{File.size(path)}",
             "Last-Modified: #{mtime(path)}"
@@ -130,7 +127,6 @@ module Vines
               @stream.stream_write(buf)
             end
           end
-          @stream.close_connection_after_writing
         end
 
         def content_type(path)
