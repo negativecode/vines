@@ -43,7 +43,8 @@ $ sudo apt-get -y install build-essential bison \
 $ sudo yum install -y bash curl git gcc-c++ patch \
   readline readline-devel zlib zlib-devel \
   libyaml-devel libffi-devel openssl-devel make \
-  bzip2 libxslt libxslt-devel libxml2 libxml2-devel
+  bzip2 sqlite sqlite-devel libxslt libxslt-devel \
+  libxml2 libxml2-devel
 </pre>
 
 <h2>SUSE</h2>
@@ -54,8 +55,8 @@ $ sudo yum install -y bash curl git gcc-c++ patch \
 $ sudo zypper install -y bash curl git gcc-c++ \
   patch libreadline6 readline-devel zlib zlib-devel \
   libyaml-devel libffi45-devel libopenssl-devel \
-  make bzip2 libxslt libxslt-devel libxml2 \
-  libxml2-devel
+  make bzip2 sqlite3 sqlite3-devel libxslt \
+  libxslt-devel libxml2 libxml2-devel
 </pre>
 
 <h2>FreeBSD</h2>
@@ -65,7 +66,7 @@ $ sudo zypper install -y bash curl git gcc-c++ \
 </p>
 <pre>
 $ sudo pkg_add -r bash curl git openssl bzip2 \
-  readline libxml2 libxslt libyaml
+  readline sqlite3 libxml2 libxslt libyaml
 </pre>
 
 <h2>Install RVM &amp; Ruby 1.9.2</h2>
