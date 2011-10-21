@@ -11,7 +11,7 @@ class Session
   connect: (jid, password, callback) ->
     @xmpp.connect jid, password, (status) =>
       switch status
-        when Strophe.Status.AUTHFAIL or Strophe.Status.CONNFAIL
+        when Strophe.Status.AUTHFAIL, Strophe.Status.CONNFAIL
           callback false
         when Strophe.Status.CONNECTED
           @xmpp.addHandler ((el) => this.handleIq(el)), null, 'iq'
