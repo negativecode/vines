@@ -3,23 +3,26 @@ class LoginPage
 
   start: ->
     $('#error').hide()
-    callback = (success) =>
+
+    [jid, password] = ($(id).val().trim() for id in ['#jid', '#password'])
+    if jid.length == 0 || password.length == 0 || jid.indexOf('@') == -1
+      $('#error').show()
+      return
+
+    @session.connect jid, password, (success) =>
       unless success
         @session.disconnect()
         $('#error').show()
         $('#password').val('').focus()
         return
 
-      localStorage['jid'] = $('#jid').val()
+      localStorage['jid'] = jid
       $('#current-user-name').text @session.bareJid()
-      $('#current-user-avatar').attr 'src', @session.avatar(@session.jid())
+      $('#current-user-avatar').attr 'src', @session.avatar @session.jid()
       $('#current-user-avatar').attr 'alt', @session.bareJid()
       $('#container').fadeOut 200, =>
         $('#navbar').show()
         window.location.hash = @startPage
-
-    @session.connect $('#jid').val(), $('#password').val(), callback
-    false
 
   draw: ->
     @session.disconnect()
@@ -38,8 +41,8 @@ class LoginPage
         <p id="error" style="display:none;">User name and password not found.</p>
       </form>
     """).appendTo '#container'
-    $('#login-form').submit => this.start()
     $('#container').fadeIn 1000
+    $('#login-form').submit => this.start(); false
     $('#jid').keydown      -> $('#error').fadeOut()
     $('#password').keydown -> $('#error').fadeOut()
     this.resize()
