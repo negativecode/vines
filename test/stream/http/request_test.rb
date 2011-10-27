@@ -40,8 +40,12 @@ class RequestTest < MiniTest::Unit::TestCase
   def test_reply_with_file_404
     request = Vines::Stream::Http::Request.new(@stream, @parser, '<html></html>')
 
-    expected = "HTTP/1.1 404 Not Found\r\n\r\n"
-    @stream.expect(:stream_write, nil, [expected])
+    headers = [
+      "HTTP/1.1 404 Not Found",
+      "Content-Length: 0"
+    ].join("\r\n")
+
+    @stream.expect(:stream_write, nil, ["#{headers}\r\n\r\n"])
 
     request.reply_with_file(Dir.pwd)
     assert @stream.verify
@@ -52,8 +56,12 @@ class RequestTest < MiniTest::Unit::TestCase
     @parser.expect(:request_path, '../passwords')
     request = Vines::Stream::Http::Request.new(@stream, @parser, '<html></html>')
 
-    expected = "HTTP/1.1 404 Not Found\r\n\r\n"
-    @stream.expect(:stream_write, nil, [expected])
+    headers = [
+      "HTTP/1.1 404 Not Found",
+      "Content-Length: 0"
+    ].join("\r\n")
+
+    @stream.expect(:stream_write, nil, ["#{headers}\r\n\r\n"])
 
     request.reply_with_file(Dir.pwd)
     assert @stream.verify
@@ -88,6 +96,7 @@ class RequestTest < MiniTest::Unit::TestCase
 
     headers = [
       "HTTP/1.1 301 Moved Permanently",
+      "Content-Length: 0",
       "Location: http://wonderland.lit/http/?ok=true"
     ].join("\r\n")
 

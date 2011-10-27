@@ -105,6 +105,7 @@ module Vines
         def send_status(status, message, *headers)
           header = [
             "HTTP/1.1 #{status} #{message}",
+            "Content-Length: 0",
             *headers
           ].join("\r\n")
           @stream.stream_write("#{header}\r\n\r\n")
