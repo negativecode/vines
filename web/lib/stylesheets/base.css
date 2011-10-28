@@ -180,7 +180,7 @@ optgroup option {
   border-right: 1px solid transparent;
   color: rgba(255, 255, 255, 0.8);
   display: inline-block;
-  font-family: "Trebuchet MS";
+  font-family: "Trebuchet MS", "Helvetica Neue", Helvetica, sans-serif;
   font-weight: bold;
   font-size: 11px;
   height: 100%;
