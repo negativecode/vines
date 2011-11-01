@@ -1,0 +1,49 @@
+---
+layout: docs
+title: Vines - XMPP/Jabber chat server for Ruby
+---
+<h2>Vines Overview</h2>
+<p>
+  Vines contains three different components, distributed as Ruby gems:
+  vines, the base chat server, vines-agent that's installed on each server, and
+  vines-services, the data server with which the agents interact.</p>
+</p>
+
+<h3>Chat Server</h3>
+<p>
+  The <em>vines</em> gem installs a fully standards-compliant XMPP chat server without any
+  agents or services. If we're just looking for a chat server for our team
+  that's easy to install and maintain, we can simply install this gem and
+  ignore the other two components.
+</p>
+<p>
+  The server is the centralized process to which the other components connect,
+  so this gem is typically only installed on one machine.
+</p>
+
+<h3>Agent</h3>
+<p>
+  The <em>vines-agent</em> gem installs an XMPP bot that connects to the chat server and
+  waits for shell commands to execute. The agent enforces access control permissions
+  so chat users can only execute commands on the system as approved unix accounts.
+</p>
+<p>
+  This gem is installed to each machine on which we'd like to run commands.
+  The agent requires the services component to be installed on the chat server.
+</p>
+
+<h3>Services Component</h3>
+<p>
+  The <em>vines-services</em> gem installs an external XMPP component that
+  connects to the chat server. This component provides the
+  <a href="/services/web">web user interface</a> and data access to
+  the agents. This is typically installed wherever the vines gem is installed,
+  not on each agent machine.
+</p>
+<p>
+  While the base Vines chat server is capable to storing data in a number of
+  databases, the Vines Services product requires an
+  <a href="https://couchdb.apache.org/">Apache CouchDB</a> database. CouchDB
+  provides the features needed to quickly and dynamically group servers based
+  on their attributes.
+</p>

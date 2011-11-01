@@ -1,0 +1,223 @@
+---
+layout: docs
+title: Vines - XMPP/Jabber chat server for Ruby
+---
+  <h2>A Config File Made for Humans</h2>
+  <p>
+    Don't worry, we won't be doing any XML sit-ups to configure the server. Here's
+    an example Vines server configuration file located at wonderland.lit/conf/config.rb:
+  </p>
+<pre>
+Vines::Config.configure do
+  host 'wonderland.lit' do
+    storage 'fs' do
+      dir 'conf/users'
+    end
+  end
+
+  client '0.0.0.0', 5222 do
+    max_stanza_size 65536
+    max_resources_per_account 5
+  end
+
+  server '0.0.0.0', 5269 do
+    max_stanza_size 131072
+    hosts []
+  end
+
+  http '0.0.0.0', 5280 do
+    max_stanza_size 131072
+  end
+
+  component '0.0.0.0', 5347 do
+    max_stanza_size 131072
+    components 'tea.wonderland.lit'  => 'secr3t',
+               'cake.wonderland.lit' => 'passw0rd'
+  end
+end
+</pre>
+  <p>
+    Hopefully, this is mostly self-explanatory, but let's go through the
+    highlights. For full documentation, read the comments in the conf/config.rb
+    file.
+  </p>
+
+  <h2>Virtual Hosts</h2>
+  <p>
+    One chat server can host user names at many domains: wonderland.lit,
+    verona.lit, example.com, etc. Each of these virtual hosts is configured in
+    the config.rb file. Each virtual host can use its own storage database or
+    they can share a database.
+  </p>
+  <p>
+    In our example, we've configured the chat server to host the fictitious
+    wonderland.lit domain and store user information in the file system under
+    the conf/users directory. This means we can chat with any user name in the
+    wonderland.lit domain: alice@wonderland.lit, cat@wonderland.lit,
+    hatter@wonderland.lit, etc.
+  </p>
+
+  <h2>Pluggable Storage</h2>
+  <p>
+    Vines can store user data in several databases out of the box:
+    <a href="http://couchdb.apache.org/">Apache CouchDB</a>,
+    <a href="http://redis.io/">Redis</a>, any SQL database, or simply in the
+    local file system. It's easy to plug in custom databases through a simple
+    storage API. Each of these connectors is documented in the default
+    conf/config.rb file.
+  </p>
+  <p>
+    Our example server is using the local file system storage database, which
+    stores data in one file per user under the conf/users directory. A user file
+    is a simple YAML document describing the user and their roster. Let's look
+    at the conf/users/alice@wonderland.lit.user file.
+  </p>
+<pre>
+name: Alice
+password: $2a$10$kDyV4w7tKIEuM5Ii7qFQiuGLbIyH3k . . .
+roster:
+  cat@wonderland.lit:
+    name: Cheshire Cat
+    subscription: both
+    ask:
+    groups:
+    - Cats
+    - Friends
+    - Cat Friends
+  hatter@wonderland.lit:
+    subscription: none
+    ask: subscribe
+</pre>
+  <p>
+    Alice's password is securely stored as a
+    <a href="http://en.wikipedia.org/wiki/Bcrypt">bcrypt</a> hash. She has two
+    users on her roster: cat@wonderland.lit and hatter@wonderland.lit. The Mad
+    Hatter is on her buddy list, but she doesn't have a presence subscription
+    to him yet so she can't see when he goes on and offline.
+  </p>
+  <p>
+    To add a new user, the Red Queen, to our chat server, we just copy this
+    file and rename it to red.queen@wonderland.lit.user.
+  </p>
+  <p>
+  </p>
+
+  <h2>LDAP</h2>
+  <p>
+    Storing users in the file system is simple and fast, but maybe we're already
+    using an LDAP directory to store passwords. We can add an LDAP
+    connector to our chat server so authentication is performed against our
+    corporate directory instead of the file system.
+  </p>
+<pre>
+host 'wonderland.lit' do
+  storage 'fs' do
+    dir 'conf/users'
+   end
+
+   ldap 'ldap.wonderland.lit', 636 do
+    dn 'cn=Directory Manager'
+    password 'secr3t'
+    basedn 'dc=wonderland,dc=lit'
+    groupdn 'cn=chatters,dc=wonderland,dc=lit' # optional
+    object_class 'person'
+    user_attr 'uid'
+    name_attr 'cn'
+    tls true
+  end
+end
+</pre>
+  <p>
+    In this example we're storing user information, like rosters, in the file
+    system, but not their passwords. When a user logs into the chat server, their
+    password will be authenticated with the LDAP server at ldap.wonderland.lit,
+    listening on port 636. The user files under conf/users can have their password
+    field deleted. It's never used as long as the LDAP connector is in place.
+  </p>
+  <p>
+    The LDAP attribute defined by <em>user_attr</em> must contain the user's
+    full chat ID. In our example, the value of Alice's <em>uid</em> field in our
+    LDAP directory is alice@wonderland.lit. The LDAP <em>mail</em> attribute is
+    also popular because the user's email address generally matches their chat ID.
+  </p>
+  <p>
+    The optional <em>groupdn</em> value limits which users are allowed to login
+    to the chat server. If not set, all LDAP users that authenticate successfully
+    are allowed to chat. However, if a group is set, only users belonging to that
+    LDAP group are allowed to access the chat server. See the
+    <a href="/commands">vines ldap</a> command line tool for more information.
+  </p>
+
+  <h2>Client Connections</h2>
+  <p>
+    This port is listening for typical, client to server, connections from chat
+    programs like iChat. Our example is listening on port 5222 on all interfaces
+    on our machine.
+  </p>
+<pre>
+client '0.0.0.0', 5222 do
+  max_stanza_size 65536
+  max_resources_per_account 5
+end
+</pre>
+  <p>
+    The <em>max_stanza_size</em> property defines, in bytes, the largest message
+    the server will allow a client to send. This helps prevent denial of service
+    attacks where an attacker floods the server with huge messages.
+  </p>
+  <p>
+    The <em>max_resources_per_account</em> property specifies how many times one
+    user can login at the same time. For example, Alice may be logged in to chat
+    on her laptop and her mobile phone.
+  </p>
+
+  <h2>Server to Server</h2>
+  <p>
+    One of the best parts of XMPP is server federation. Users at our wonderland.lit
+    domain can chat with users at verona.lit through a server to server connection.
+  </p>
+<pre>
+server '0.0.0.0', 5269 do
+  max_stanza_size 131072
+  hosts ['verona.lit']
+end
+</pre>
+  <p>
+    It's a good idea to set <em>max_stanza_size</em> much higher for server
+    connections than clients, so we've set it to 128 KB. We trust servers a bit
+    more than clients to be well behaved.
+  </p>
+  <p>
+    The <em>hosts</em> property is a white list of remote chat servers to which
+    we're allowed to connect. The domain must be listed here and its SSL
+    certificate must be trusted for the remote connection to succeed.
+  </p>
+
+  <h2>BOSH/HTTP</h2>
+  <p>
+    Web applications can connect to our chat server by tunneling the XMPP
+    protocol through HTTP. This connector allows our web apps to chat just like
+    normal XMPP clients.
+  </p>
+<pre>
+http '0.0.0.0', 5280 do
+  max_stanza_size 131072
+end
+</pre>
+
+  <h2>Components</h2>
+  <p>
+    The XMPP component protocol allows us to extend our chat server with trusted
+    services, or bots.
+  </p>
+<pre>
+component '0.0.0.0', 5347 do
+  max_stanza_size 131072
+  components 'tea.wonderland.lit'  => 'secr3t',
+             'cake.wonderland.lit' => 'passw0rd'
+end
+</pre>
+  <p>
+    Each sub-domain listed in the <em>components</em> attribute is allowed to
+    connect to the server if they provide the shared secret configured here.
+  </p>

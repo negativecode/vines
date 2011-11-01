@@ -1,0 +1,90 @@
+---
+layout: docs
+title: Vines - XMPP/Jabber chat server for Ruby
+---
+<h2>Vines Services Web Application</h2>
+<p>
+  The vines-services gem provides a web user interface available at
+  http://localhost:5280/ immediately after running <em>vines-services
+  init</em>.
+</p>
+
+<h3>Systems</h3>
+<p>
+  The Systems screen is the terminal window into remote shell sessions with
+  systems and services.
+</p>
+<figure class="screenshot">
+<a href="/images/systems.png"><img src="/images/systems.png" alt="Add agent account"/></a>
+<figcaption>Chatting with a service. <a href="/images/systems.png">Click for larger image</a>.</figcaption>
+</figure>
+<p>
+  This chat session is with a service called All Systems that contains two
+  machines: orchid.local and fedora.wonderland.lit. Commands are sent to both
+  systems simultaneously and their output is returned to the web terminal. We're
+  interacting with a real bash shell on the remote systems, so we can use all the
+  unix commands we already know and love. We can change directories, redirect
+  output, and connect commands with pipes.
+</p>
+
+<h3>Services</h3>
+<p>
+  Services are dynamic groups of systems based on their attributes, gathered by
+  the agents. The agent collects data about the system with
+  <a href="http://wiki.opscode.com/display/chef/Ohai">Ohai</a>, the same gem that
+  Chef uses for configuration management.
+</p>
+<p>
+  As attributes of the systems change over time, they are automatically added
+  or removed from services. For example, when you provision a new web server,
+  Vines will automatically add it to the Web Servers service we've defined.
+  This lets us manage large groups of systems together as one unit.
+</p>
+<figure class="screenshot">
+<a href="/images/services.png"><img src="/images/services.png" alt="Add agent account"/></a>
+<figcaption>Updating service criteria. <a href="/images/services.png">Click for larger image</a>.</figcaption>
+</figure>
+
+<h3>VinesQL</h3>
+<p>
+  Service criteria is written using a simple query language, called VinesQL. A
+  service containing Fedora and Ubuntu servers in the 192.168.1.x subnet that
+  have been running for more than 5 minutes would be:
+</p>
+<pre>
+kernel.name is 'Linux' and
+  (platform is 'fedora' or platform is 'ubuntu') and
+    ipaddress starts with '192.168.1.' and
+      uptime_seconds > 300
+</pre>
+<p>
+  The available system attributes and operators are listed in the services
+  screen as a quick reference.
+</p>
+
+<h3>Permissions</h3>
+<p>
+  Services allow us to define who is allowed to use which unix user
+  accounts. We can give our trusted system administrators root access and others
+  access just to the user ID's they need to do their work. It's a convenient way
+  to avoid defining permissions on each machine separately with a sudoers file.
+</p>
+<p>
+  The built-in <em>v user</em> command uses these permissions to determine
+  whether to allow a user ID switch.
+</p>
+<pre>
+$ v user
+-> current: apache
+   allowed: apache, mysql, pgsql
+$ whoami
+apache
+$ v user pgsql
+-> switched user to pgsql
+$ whoami
+pgsql
+$ v user root
+-> user switch not allowed
+$ whoami
+pgsql
+</pre>

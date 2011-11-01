@@ -39,12 +39,40 @@
       </div>
     </header>
     <section id="main" class="container_12">
-      {{ content }}
+      <nav id="sidebar" class="grid_3">
+        <h2>Quick Start</h2>
+        <ul class="nav-links">
+          <li><a href="/docs">Overview</a></li>
+          <li><a href="/ruby">Install Ruby</a></li>
+          <li><a href="/services">Install Vines</a></li>
+        </ul>
+        <h2>Chat Server</h2>
+        <ul class="nav-links">
+          <li><a href="/server">Install</a></li>
+          <li><a href="/server/configure">Configure</a></li>
+          <li><a href="/server/commands">Commands</a></li>
+          <li><a href="/server/web-chat-client">Web Chat Client</a></li>
+        </ul>
+        <h2>Services</h2>
+        <ul class="nav-links">
+          <li><a href="/services">Install</a></li>
+          <li><a href="/services/web">Web Application</a></li>
+        </ul>
+        <h2>Agent</h2>
+        <ul class="nav-links">
+          <li><a href="/agent">Install</a></li>
+        </ul>
+      </nav>
+      <div class="grid_7">
+        <div id="content">
+          {{ content }}
+        </div>
+      </div>
       <div class="clear"></div>
     </section>
   </div>
   <footer>
-    <section class="container_12"> 
+    <section class="container_12">
       <div class="grid_4 prefix_8">
         <p>Built with care by</p>
         <a id="logo" href="http://www.negativecode.com">Negative <span>Code</span></a>

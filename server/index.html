@@ -1,0 +1,43 @@
+---
+layout: docs
+title: Vines - XMPP/Jabber chat server for Ruby
+---
+<h2>Vines Server Install</h2>
+<p>
+  These instructions install the basic Vines XMPP server. To install the full Vines
+  stack, capable of chatting with servers, refer to the Vines Services
+  <a href="/services">installation guide</a>.
+</p>
+<pre>
+$ gem install vines
+$ vines init wonderland.lit
+$ cd wonderland.lit &amp;&amp; vines start
+</pre>
+<p>
+  That's all there is to it. No database to setup, no web console to configure.
+  Just three commands and we're ready to chat.
+</p>
+<p>
+  The init command creates two example users in the wonderland.lit domain:
+  alice@wonderland.lit and arthur@wonderland.lit. Alice and Arthur are on
+  each other's buddy lists (or <em>rosters</em> in XMPP terminology) so they
+  can chat together as soon as we login with our favorite chat client.
+</p>
+<p>
+  The iChat, <a href="http://adium.im/">Adium</a>, and
+  <a href="http://www.pidgin.im/">Pidgin</a> chat clients are nice to get started
+  with because they allow us to specify a chat server host name that's different
+  from our wonderland.lit domain, which obviously won't route with the fanciful
+  .lit extension. Launch one of those clients and set the server name to
+  <em>localhost</em> and the port to <em>5222</em>. To log in, use
+  alice@wonderland.lit with password <em>secr3t</em>.
+</p>
+<p>
+  Do this once more with arthur@wonderland.lit, his password is also
+  <em>secr3t</em>, and we should see each user online and ready to chat.
+</p>
+<p>
+  This is a good default chat server that works right out of the box, but
+  check out the <a href="/server/configure">config file documentation</a> for
+  more customized deployments.
+</p>

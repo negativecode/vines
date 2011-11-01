@@ -1,0 +1,50 @@
+---
+layout: docs
+title: Vines - XMPP/Jabber chat server for Ruby
+---
+<h2>Vines Services Install</h2>
+<p>
+  The Vines Services installer creates a Vines chat server, the services
+  component, and an agent on the local machine. It also populates CouchDB
+  with some initial data. It's a quick way to get all three components up
+  and running quickly.
+</p>
+<p>
+  Before installing Vines, make sure that <a href="/ruby">Ruby</a> and CouchDB
+  are installed. Couchbase provides
+  <a href="http://www.couchbase.com/downloads/couchbase-single-server/community">CouchDB installers</a>
+  for several platforms.
+</p>
+<p>
+  After installing CouchDB, we can check its web
+  management interface at http://localhost:5984/_utils to make sure it's running.
+</p>
+<pre>
+$ gem install vines vines-agent vines-services
+$ vines-services init wonderland.lit
+Creating a new chat user account
+User ID: alice
+Password:
+Created user: alice@wonderland.lit
+Started vines server: vines start -d
+Started vines services component: vines-services start -d
+Created user: orchid.local@wonderland.lit
+Started vines agent: vines-agent start -d
+Initialized server, agent, and services directories: wonderland.lit
+Login as alice@wonderland.lit at http://localhost:5280/
+</pre>
+<p>
+  That's all there is to it. Just two commands and we're ready to start using
+  Vines.
+</p>
+<p>
+  Notice that the init command created a user account for the local system,
+  orchid.local@wonderland.lit. As soon as we login with alice's user name and
+  password, we'll be able to chat with our first server.
+</p>
+<p>
+  The web application is a good place to login and get started, but we can also
+  use any other XMPP client like iChat, <a href="http://adium.im/">Adium</a>, and
+  <a href="http://www.pidgin.im/">Pidgin</a>. Just use <em>localhost</em> as the
+  server name and a port of <em>5222</em>.
+</p>

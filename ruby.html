@@ -1,5 +1,5 @@
 ---
-layout: site
+layout: docs
 title: Vines - Install Ruby
 ---
 <h2>Install Ruby 1.9.2</h2>
@@ -28,11 +28,10 @@ The install is only two steps:
   Install the following packages using apt-get.
 </p>
 <pre>
-$ sudo apt-get -y install build-essential bison \
-  openssl libreadline6 libreadline6-dev curl \
-  git-core zlib1g zlib1g-dev libssl-dev libyaml-dev \
-  libsqlite3-0 libsqlite3-dev sqlite3 libxml2-dev \
-  libxslt-dev autoconf libc6-dev ncurses-dev
+$ sudo apt-get -y install build-essential bison openssl \
+  libreadline6 libreadline6-dev curl git-core zlib1g zlib1g-dev \
+  libssl-dev libyaml-dev libsqlite3-0 libsqlite3-dev sqlite3 \
+  libxml2-dev libxslt-dev autoconf libc6-dev ncurses-dev
 </pre>
 <p>
   Ubuntu 11.10 provides a Ruby 1.9.2 package, so we can skip the RVM steps.
@@ -50,11 +49,10 @@ $ sudo gem install vines
   Install the following packages using yum.
 </p>
 <pre>
-$ sudo yum install -y bash curl git gcc-c++ patch \
-  readline readline-devel zlib zlib-devel \
-  libyaml-devel libffi-devel openssl-devel make \
-  bzip2 sqlite sqlite-devel libxslt libxslt-devel \
-  libxml2 libxml2-devel
+$ sudo yum install -y bash curl git gcc-c++ patch readline \
+  readline-devel zlib zlib-devel libyaml-devel libffi-devel \
+  openssl-devel make bzip2 sqlite sqlite-devel libxslt \
+  libxslt-devel libxml2 libxml2-devel
 </pre>
 
 <h2>SUSE</h2>
@@ -62,11 +60,10 @@ $ sudo yum install -y bash curl git gcc-c++ patch \
   Install the following packages using zypper.
 </p>
 <pre>
-$ sudo zypper install -y bash curl git gcc-c++ \
-  patch libreadline6 readline-devel zlib zlib-devel \
-  libyaml-devel libffi45-devel libopenssl-devel \
-  make bzip2 sqlite3 sqlite3-devel libxslt \
-  libxslt-devel libxml2 libxml2-devel
+$ sudo zypper install -y bash curl git gcc-c++ patch \
+  libreadline6 readline-devel zlib zlib-devel libyaml-devel \
+  libffi45-devel libopenssl-devel make bzip2 sqlite3 \
+  sqlite3-devel libxslt libxslt-devel libxml2 libxml2-devel
 </pre>
 
 <h2>FreeBSD</h2>
@@ -75,8 +72,8 @@ $ sudo zypper install -y bash curl git gcc-c++ \
   run <code>bash</code> to enter a bash shell before installing RVM.
 </p>
 <pre>
-$ sudo pkg_add -r bash curl git openssl bzip2 \
-  readline sqlite3 libxml2 libxslt libyaml
+$ sudo pkg_add -r bash curl git openssl bzip2 readline \
+  sqlite3 libxml2 libxslt libyaml
 $ bash
 </pre>
 
