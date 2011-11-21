@@ -6,12 +6,9 @@ module Vines
 
     attr_reader :stream
 
-    EMPTY   = ''.freeze
-    FROM    = 'from'.freeze
-    MESSAGE = 'message'.freeze
-    TO      = 'to'.freeze
-
-    ROUTABLE_STANZAS = %w[message iq presence].freeze
+    EMPTY = ''.freeze
+    FROM, MESSAGE, TO = %w[from message to].map {|s| s.freeze }
+    ROUTABLE_STANZAS  = %w[message iq presence].freeze
 
     @@types = {}
 
