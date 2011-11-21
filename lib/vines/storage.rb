@@ -22,7 +22,7 @@ module Vines
 
     # Wrap a blocking IO method in a new method that pushes the original method
     # onto EventMachine's thread pool using EM#defer. Storage classes implemented
-    # with blocking IO don't need to worry about threading or blocking the the
+    # with blocking IO don't need to worry about threading or blocking the
     # EventMachine reactor thread if they wrap their methods with this one.
     #
     # For example:
