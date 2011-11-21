@@ -67,8 +67,7 @@ module Vines
     # Returns the storage system for the domain. If no domain is given,
     # the stream's storage mechanism is returned.
     def storage(domain=nil)
-      host = @config.vhosts[domain || self.domain]
-      host.storage if host
+      @config.storage(domain || self.domain)
     end
 
     # Reload the user's information into their active connections. Call this
@@ -156,7 +155,7 @@ module Vines
     end
 
     def router
-      Router.instance
+      @config.router
     end
 
     private

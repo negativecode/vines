@@ -22,6 +22,7 @@ module Vines
         def close
           Sessions.delete(@id)
           router.delete(self)
+          delete_from_cluster
           @requests.each {|req| req.stream.close_connection }
           @requests.clear
           @responses.clear

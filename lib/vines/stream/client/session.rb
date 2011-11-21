@@ -10,8 +10,8 @@ module Vines
       class Session
         include Comparable
 
-        attr_accessor :domain, :last_broadcast_presence, :user
-        attr_reader   :id, :state
+        attr_accessor :domain, :user
+        attr_reader   :id, :last_broadcast_presence, :state
 
         def initialize(stream)
           @id = Kit.uuid
@@ -47,12 +47,18 @@ module Vines
 
         def available!
           @available = true
+          save_to_cluster
         end
 
         # An available resource has sent initial presence and can
         # receive presence subscription requests.
         def available?
           @available && connected?
+        end
+
+        def bind!(resource)
+          @user.jid.resource = resource
+          save_to_cluster
         end
 
         # A connected resource has authenticated and bound a resource
@@ -67,12 +73,18 @@ module Vines
           @requested_roster && connected?
         end
 
+        def last_broadcast_presence=(node)
+          @last_broadcast_presence = node
+          save_to_cluster
+        end
+
         def ready?
           @state.class == Client::Ready
         end
 
         def requested_roster!
           @requested_roster = true
+          save_to_cluster
         end
 
         def stream_type
@@ -83,6 +95,7 @@ module Vines
         # passes itself to this method in case multiple streams are accessing this
         # session.
         def unbind!(stream)
+          delete_from_cluster
           @unbound = true
           @available = false
           broadcast_unavailable
@@ -123,20 +136,22 @@ module Vines
 
         def broadcast_unavailable
           return unless authenticated?
+          Fiber.new do
+            broadcast(unavailable, available_subscribers)
+            broadcast(unavailable, router.available_resources(@user.jid, @user.jid))
+            remote_subscribers.each do |contact|
+              node = el.clone
+              node['to'] = contact.jid.bare.to_s
+              router.route(node) rescue nil # ignore RemoteServerNotFound
+            end
+          end.resume
+        end
 
+        def unavailable
           doc = Nokogiri::XML::Document.new
-          el = doc.create_element('presence',
+          doc.create_element('presence',
             'from' => @user.jid.to_s,
             'type' => 'unavailable')
-
-          broadcast(el, available_subscribers)
-          broadcast(el, router.available_resources(@user.jid, @user.jid))
-
-          remote_subscribers.each do |contact|
-            node = el.clone
-            node['to'] = contact.jid.bare.to_s
-            router.route(node) rescue nil # ignore RemoteServerNotFound
-          end
         end
 
         def broadcast(stanza, recipients)
@@ -147,7 +162,24 @@ module Vines
         end
 
         def router
-          Router.instance
+          @config.router
+        end
+
+        def save_to_cluster
+          if @config.cluster?
+            @config.cluster.save_session(@user.jid, to_hash)
+          end
+        end
+
+        def delete_from_cluster
+          if connected? && @config.cluster?
+            @config.cluster.delete_session(@user.jid)
+          end
+        end
+
+        def to_hash
+          presence = @last_broadcast_presence ? @last_broadcast_presence.to_s : nil
+          {available: @available, interested: @requested_roster, presence: presence.to_s}
         end
       end
     end

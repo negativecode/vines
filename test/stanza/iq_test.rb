@@ -39,6 +39,7 @@ class IqTest < MiniTest::Unit::TestCase
     }.strip.gsub(/\n|\s{2,}/, ''))
 
     recipient = MiniTest::Mock.new
+    recipient.expect(:user, alice, [])
     recipient.expect(:write, nil, [node])
 
     @stream.expect(:config, @config)

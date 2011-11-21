@@ -17,7 +17,8 @@ module Vines
           raise StreamErrors::NotAuthorized unless bind?(node)
           raise StreamErrors::PolicyViolation.new('max bind attempts reached') if @attempts > MAX_ATTEMPTS
           raise StanzaErrors::ResourceConstraint.new(node, 'wait') if resource_limit_reached?
-          stream.user.jid.resource = resource(node)
+
+          stream.bind!(resource(node))
           doc = Document.new
           result = doc.create_element('iq', 'id' => node['id'], 'type' => 'result') do |el|
             el << doc.create_element('bind') do |bind|
@@ -25,7 +26,6 @@ module Vines
               bind << doc.create_element('jid', stream.user.jid.to_s)
             end
           end
-
           stream.write(result)
           send_empty_features
           advance

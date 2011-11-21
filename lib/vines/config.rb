@@ -9,7 +9,7 @@ module Vines
   class Config
     LOG_LEVELS = %w[debug info warn error fatal].freeze
 
-    attr_reader :vhosts
+    attr_reader :router, :vhosts
 
     @@instance = nil
     def self.configure(&block)
@@ -21,7 +21,8 @@ module Vines
     end
 
     def initialize(&block)
-      @vhosts, @ports = {}, {}
+      @vhosts, @ports, @cluster = {}, {}, nil
+      @router = Router.new(self)
       instance_eval(&block)
       raise "must define at least one virtual host" if @vhosts.empty?
     end
@@ -45,6 +46,12 @@ module Vines
       end
     end
 
+    def cluster(&block)
+      return @cluster unless block
+      raise "one cluster definition allowed" if @cluster
+      @cluster = Cluster.new(self, &block)
+    end
+
     def log(level)
       const = Logger.const_get(level.to_s.upcase) rescue nil
       unless LOG_LEVELS.include?(level.to_s) && const
@@ -62,7 +69,14 @@ module Vines
       @vhosts.key?(domain)
     end
 
-    # Return true if all JID's belong to components hosted by this server.
+    # Returns the storage system for the domain or nil if domain is not hosted
+    # at this server.
+    def storage(domain)
+      host = @vhosts[domain]
+      host.storage if host
+    end
+
+    # Return true if all JIDs belong to components hosted by this server.
     def component?(*jids)
       !jids.flatten.index do |jid|
         !component_password(JID.new(jid).domain)
@@ -75,7 +89,7 @@ module Vines
       host.password(domain) if host
     end
 
-    # Return true if all of the JID's are hosted by this server.
+    # Return true if all of the JIDs are hosted by this server.
     def local_jid?(*jids)
       !jids.flatten.index do |jid|
         !vhost?(JID.new(jid).domain)
@@ -93,13 +107,19 @@ module Vines
       @ports[:server] && @ports[:server].hosts.include?(domain)
     end
 
+    # Return true if the server is a member of a cluster, serving the same
+    # domains from different machines.
+    def cluster?
+      !!@cluster
+    end
+
     # Retrieve the Port subclass with this name:
     # [:client, :server, :http, :component]
     def [](name)
       @ports[name] or raise ArgumentError.new("no port named #{name}")
     end
 
-    # Return true if the two JID's are allowed to send messages to each other.
+    # Return true if the two JIDs are allowed to send messages to each other.
     # Both domains must have enabled cross_domain_messages in their config files.
     def allowed?(to, from)
       to, from = JID.new(to), JID.new(from)
@@ -127,14 +147,14 @@ module Vines
       local_jid?(jid) ? cross_domain?(comp, jid) : cross_domain?(comp)
     end
 
-    # Return the JID's domain with the first subdomain stripped off. For example,
+    # Return the JIDs domain with the first subdomain stripped off. For example,
     # alice@tea.wonderland.lit returns wonderland.lit.
     def strip_domain(jid)
       domain = jid.domain.split('.').drop(1).join('.')
       JID.new(domain)
     end
 
-    # Return true if all JID's are allowed to exchange cross domain messages.
+    # Return true if all JIDs are allowed to exchange cross domain messages.
     def cross_domain?(*jids)
       !jids.flatten.index do |jid|
         !@vhosts[jid.domain].cross_domain_messages?

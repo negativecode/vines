@@ -55,7 +55,7 @@ module Vines
 
           contact = stream.user.contact(jid)
           unless contact
-            contact = Contact.new(:jid => jid)
+            contact = Contact.new(jid: jid)
             stream.user.roster << contact
           end
           contact.name = item['name']
@@ -89,9 +89,8 @@ module Vines
           end
 
           send_result_iq
-          push_roster_updates(stream.user.jid, Contact.new(
-            :jid => contact.jid,
-            :subscription => 'remove'))
+          push_roster_updates(stream.user.jid,
+            Contact.new(jid: contact.jid, subscription: 'remove'))
 
           if local_jid?(contact.jid)
             send_unavailable(stream.user.jid, contact.jid) if contact.subscribed_from?
@@ -139,7 +138,10 @@ module Vines
 
         def send_result_iq
           doc = Document.new
-          node = doc.create_element('iq', 'id' => self['id'], 'type' => 'result')
+          node = doc.create_element('iq',
+            'id'   => self['id'],
+            'to'   => stream.user.jid.to_s,
+            'type' => 'result')
           stream.write(node)
         end
       end

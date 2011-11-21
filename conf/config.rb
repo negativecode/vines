@@ -98,6 +98,15 @@ Vines::Config.configure do
   component '0.0.0.0', 5347 do
     max_stanza_size 131072
   end
+
+  # Configure the redis connection used to form a cluster of server instances,
+  # serving the same chat domains across many different machines.
+  #cluster do
+  #  host 'redis.wonderland.lit'
+  #  port 6379
+  #  database 0
+  #  password ''
+  #end
 end
 
 # Available storage implementations:

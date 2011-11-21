@@ -4,8 +4,9 @@ module Vines
   # The router tracks all stream connections to the server for all clients,
   # servers, and components. It sends stanzas to the correct stream based on
   # the 'to' attribute. Router is a singleton, shared by all streams, that must
-  # be accessed with +Router.instance+, not +Router.new+.
+  # be accessed with +Config#router+.
   class Router
+    EMPTY = [].freeze
 
     STREAM_TYPES = [:client, :server, :component].freeze
     STREAM_TYPES.each do |name|
@@ -14,62 +15,61 @@ module Vines
       end
     end
 
-    @@instance = nil
-    def self.instance
-      @@instance ||= self.new
-    end
-
-    def initialize
-      @config = nil
+    def initialize(config)
+      @config = config
       @streams = Hash.new {|h,k| h[k] = [] }
       @pending = Hash.new {|h,k| h[k] = [] }
     end
 
-    # Returns streams for all connected resources for this JID. A
-    # resource is considered connected after it has completed authentication
-    # and resource binding.
-    def connected_resources(jid, from)
+    # Returns streams for all connected resources for this JID. A resource is
+    # considered connected after it has completed authentication and resource
+    # binding.
+    def connected_resources(jid, from, proxies=true)
       jid, from = JID.new(jid), JID.new(from)
-      clients.select do |stream|
+      return [] unless @config.allowed?(jid, from)
+      local = clients.select do |stream|
         stream.connected? &&
-          jid == (jid.bare? ? stream.user.jid.bare : stream.user.jid) &&
-          @config.allowed?(jid, from)
+          jid == (jid.bare? ? stream.user.jid.bare : stream.user.jid)
       end
+      [local, proxies ? proxies(jid) : []].flatten
     end
 
-    # Returns streams for all available resources for this JID. A
-    # resource is marked available after it sends initial presence.
-    # This method accepts a single JID or a list of JIDs.
+    # Returns streams for all available resources for this JID. A resource is
+    # marked available after it sends initial presence. This method accepts a
+    # single JID or a list of JIDs.
     def available_resources(*jids, from)
       jids = filter_allowed(jids, from)
-      clients.select do |stream|
+      local = clients.select do |stream|
         stream.available? && jids.include?(stream.user.jid.bare)
       end
+      proxies = proxies(*jids.keys).select {|stream| stream.available? }
+      [local, proxies].flatten
     end
 
-    # Returns streams for all interested resources for this JID. A
-    # resource is marked interested after it requests the roster.
-    # This method accepts a single JID or a list of JIDs.
+    # Returns streams for all interested resources for this JID. A resource is
+    # marked interested after it requests the roster. This method accepts a
+    # single JID or a list of JIDs.
     def interested_resources(*jids, from)
       jids = filter_allowed(jids, from)
-      clients.select do |stream|
+      local = clients.select do |stream|
         stream.interested? && jids.include?(stream.user.jid.bare)
       end
+      proxies = proxies(*jids.keys).select {|stream| stream.interested? }
+      [local, proxies].flatten
     end
 
     # Add the connection to the routing table. The connection must return
     # :client, :server, or :component from its +stream_type+ method so the
     # router can properly route stanzas to the stream.
-    def <<(connection)
-      type = stream_type(connection)
-      @config ||= connection.config
-      @streams[type] << connection
+    def <<(stream)
+      type = stream_type(stream)
+      @streams[type] << stream
     end
 
     # Remove the connection from the routing table.
-    def delete(connection)
-      type = stream_type(connection)
-      @streams[type].delete(connection)
+    def delete(stream)
+      type = stream_type(stream)
+      @streams[type].delete(stream)
     end
 
     # Send the stanza to the appropriate remote server-to-server stream
@@ -124,7 +124,7 @@ module Vines
       end
     end
 
-    # Return the bare JID's from the list that are allowed to talk to
+    # Return the bare JIDs from the list that are allowed to talk to
     # the +from+ JID. Store them in a Hash for fast +include?+ checks.
     def filter_allowed(jids, from)
       from = JID.new(from)
@@ -134,6 +134,11 @@ module Vines
           ids[jid] = nil if @config.allowed?(jid, from)
         end
       end
+    end
+
+    def proxies(*jids)
+      return EMPTY unless @config.cluster?
+      @config.cluster.remote_sessions(*jids)
     end
 
     def connection_to(to, from)

@@ -53,7 +53,7 @@ end
   bcrypt
   digest/sha1
   em-http
-  em-redis
+  em-hiredis
   eventmachine
   fiber
   fileutils
@@ -114,6 +114,12 @@ end
   vines/user
   vines/version
   vines/xmpp_server
+
+  vines/cluster
+  vines/cluster/connection
+  vines/cluster/publisher
+  vines/cluster/sessions
+  vines/cluster/subscriber
 
   vines/stream
   vines/stream/state

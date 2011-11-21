@@ -169,7 +169,7 @@ class RosterTest < MiniTest::Unit::TestCase
     @stream.expect(:update_user_streams, nil, [alice])
     @stream.expect(:domain, 'wonderland.lit')
     @stream.expect(:storage, storage, ['wonderland.lit'])
-    expected = node(%q{<iq id="42" type="result"/>})
+    expected = node(%Q{<iq id="42" to="#{alice.jid}" type="result"/>})
     @stream.expect(:write, nil, [expected])
 
     node = node(%q{

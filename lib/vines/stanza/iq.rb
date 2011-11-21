@@ -36,13 +36,7 @@ module Vines
         to = validate_to
         return false if to.nil? || to.to_s == stream.domain
         self['from'] = stream.user.jid.to_s
-        if local?
-          stream.available_resources(to).each do |recipient|
-            recipient.write(@node)
-          end
-        else
-          route
-        end
+        local? ? broadcast(stream.available_resources(to)) : route
         true
       end
     end

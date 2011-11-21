@@ -50,6 +50,11 @@ module Vines
           @settings[:max_resources_per_account]
         end
       end
+
+      def start
+        super
+        config.cluster.start if config.cluster?
+      end
     end
 
     class ServerPort < Port

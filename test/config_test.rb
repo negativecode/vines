@@ -80,6 +80,9 @@ class ConfigTest < MiniTest::Unit::TestCase
   def test_duplicate_client
     assert_raises(RuntimeError) do
       Vines::Config.new do
+        host 'wonderland.lit' do
+          storage(:fs) { dir '.' }
+        end
         client
         client
       end
@@ -89,6 +92,9 @@ class ConfigTest < MiniTest::Unit::TestCase
   def test_duplicate_server
     assert_raises(RuntimeError) do
       Vines::Config.new do
+        host 'wonderland.lit' do
+          storage(:fs) { dir '.' }
+        end
         server
         server
       end
@@ -98,6 +104,9 @@ class ConfigTest < MiniTest::Unit::TestCase
   def test_duplicate_http
     assert_raises(RuntimeError) do
       Vines::Config.new do
+        host 'wonderland.lit' do
+          storage(:fs) { dir '.' }
+        end
         http
         http
       end
@@ -107,10 +116,55 @@ class ConfigTest < MiniTest::Unit::TestCase
   def test_duplicate_component
     assert_raises(RuntimeError) do
       Vines::Config.new do
+        host 'wonderland.lit' do
+          storage(:fs) { dir '.' }
+        end
         component
         component
       end
     end
+  end
+
+  def test_duplicate_cluster
+    assert_raises(RuntimeError) do
+      Vines::Config.new do
+        host 'wonderland.lit' do
+          storage(:fs) { dir '.' }
+        end
+        cluster {}
+        cluster {}
+      end
+    end
+  end
+
+  def test_missing_cluster
+    config = Vines::Config.new do
+      host 'wonderland.lit' do
+        storage(:fs) { dir '.' }
+      end
+    end
+    assert_nil config.cluster
+    refute config.cluster?
+  end
+
+  def test_cluster
+    config = Vines::Config.new do
+      host 'wonderland.lit' do
+        storage(:fs) { dir '.' }
+      end
+      cluster do
+        host 'redis.wonderland.lit'
+        port 12345
+        database 8
+        password 'secr3t'
+      end
+    end
+    refute_nil config.cluster
+    assert config.cluster?
+    assert_equal 'redis.wonderland.lit', config.cluster.host
+    assert_equal 12345, config.cluster.port
+    assert_equal 8, config.cluster.database
+    assert_equal 'secr3t', config.cluster.password
   end
 
   def test_default_client

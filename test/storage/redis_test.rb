@@ -1,5 +1,6 @@
 # encoding: UTF-8
 
+require 'mock_redis'
 require 'storage_tests'
 require 'vines'
 require 'minitest/autorun'
@@ -7,41 +8,7 @@ require 'minitest/autorun'
 class RedisTest < MiniTest::Unit::TestCase
   include StorageTests
 
-  MOCK_REDIS = Class.new do
-    def initialize
-      @db = {}
-    end
-    def del(key)
-      @db.delete(key)
-      EM.next_tick { yield if block_given? }
-    end
-    def get(key)
-      EM.next_tick { yield @db[key] }
-    end
-    def set(key, value)
-      @db[key] = value
-      EM.next_tick { yield if block_given? }
-    end
-    def hget(key, field)
-      EM.next_tick { yield @db[key][field] rescue nil }
-    end
-    def hgetall(key)
-      EM.next_tick { yield @db[key] || {} }
-    end
-    def hset(key, field, value)
-      @db[key] ||= {}
-      @db[key][field] = value
-      EM.next_tick { yield if block_given? }
-    end
-    def hmset(key, *args)
-      @db[key] = Hash[*args]
-      EM.next_tick { yield if block_given? }
-    end
-    def flushdb
-      @db.clear
-      EM.next_tick { yield if block_given? }
-    end
-  end.new
+  MOCK_REDIS = MockRedis.new
 
   def setup
     EMLoop.new do
@@ -54,7 +21,7 @@ class RedisTest < MiniTest::Unit::TestCase
         'password' => BCrypt::Password.create('secret'),
         'name' => 'Tester'
       }.to_json)
-      db.hmset('roster:full@wonderland.lit', 
+      db.hmset('roster:full@wonderland.lit',
         'contact1@wonderland.lit',
         {'name' => 'Contact1', 'groups' => %w[Group1 Group2]}.to_json,
         'contact2@wonderland.lit',
