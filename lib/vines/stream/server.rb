@@ -109,7 +109,7 @@ module Vines
         raise StreamErrors::UnsupportedVersion unless node['version'] == '1.0'
         raise StreamErrors::ImproperAddressing unless valid_address?(@domain) && valid_address?(@remote_domain)
         raise StreamErrors::HostUnknown unless config.vhost?(@domain)
-        raise StreamErrors::NotAuthorized unless config.s2s?(@remote_domain)
+        raise StreamErrors::NotAuthorized unless config.s2s?(@remote_domain) && config.allowed?(@domain, @remote_domain)
         raise StreamErrors::InvalidNamespace unless node.namespaces['xmlns'] == NAMESPACES[:server]
         raise StreamErrors::InvalidNamespace unless node.namespaces['xmlns:stream'] == NAMESPACES[:stream]
       end
