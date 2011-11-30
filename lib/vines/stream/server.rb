@@ -35,7 +35,8 @@ module Vines
 
       def self.connect(config, to, from, srv, callback)
         if srv.empty?
-          callback.call(nil)
+          # fiber so storage calls work properly
+          Fiber.new { callback.call(nil) }.resume
         else
           begin
             rr = srv.shift
