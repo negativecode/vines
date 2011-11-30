@@ -9,7 +9,7 @@ module Vines
     class Publisher
       include Vines::Log
 
-      ALL, STANZA, USER = %w[nodes:all stanza user].map {|s| s.freeze }
+      ALL, STANZA, USER = %w[cluster:nodes:all stanza user].map {|s| s.freeze }
 
       def initialize(cluster)
         @cluster = cluster
@@ -30,7 +30,7 @@ module Vines
       # messages.
       def route(stanza, node)
         log.debug { "Sent cluster stanza: %s -> %s\n%s\n" % [@cluster.id, node, stanza] }
-        redis.publish("nodes:#{node}", {
+        redis.publish("cluster:nodes:#{node}", {
           from: @cluster.id,
           type: STANZA,
           stanza: stanza.to_s
@@ -40,7 +40,7 @@ module Vines
       # Notify the remote node that the user's roster has changed and it should
       # reload the user from storage.
       def update_user(jid, node)
-        redis.publish("nodes:#{node}", {
+        redis.publish("cluster:nodes:#{node}", {
           from: @cluster.id,
           type: USER,
           jid: jid.to_s

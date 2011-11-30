@@ -244,6 +244,7 @@ class HostTest < MiniTest::Unit::TestCase
     refute host.component?('tea')
     refute host.component?(:cake)
     assert host.component?('tea.wonderland.lit')
+    assert host.component?(Vines::JID.new('tea.wonderland.lit'))
     assert host.component?('cake.wonderland.lit')
     assert_nil host.password(nil)
     assert_nil host.password('bogus')
@@ -256,6 +257,7 @@ class HostTest < MiniTest::Unit::TestCase
     refute config.component?('tea')
     refute config.component?('bogus')
     assert config.component?('tea.wonderland.lit')
+    assert config.component?(Vines::JID.new('tea.wonderland.lit'))
     assert config.component?('cake.wonderland.lit')
     assert config.component?('tea.wonderland.lit', 'cake.wonderland.lit')
     refute config.component?('tea.wonderland.lit', 'bogus.wonderland.lit')
@@ -264,6 +266,78 @@ class HostTest < MiniTest::Unit::TestCase
     assert_nil config.component_password('bogus')
     assert_equal 'secr3t', config.component_password('tea.wonderland.lit')
     assert_equal 'passw0rd', config.component_password('cake.wonderland.lit')
+  end
+
+  def test_invalid_pubsub_domain_raises
+    assert_raises(ArgumentError) do
+      Vines::Config.new do
+        host 'wonderland.lit' do
+          storage(:fs) { dir '.' }
+          pubsub 'exam ple'
+        end
+      end
+    end
+  end
+
+  def test_invalid_jid_pubsub_domain_raises
+    assert_raises(RuntimeError) do
+      Vines::Config.new do
+        host 'wonderland.lit' do
+          storage(:fs) { dir '.' }
+          pubsub 'alice@example'
+        end
+      end
+    end
+  end
+
+  def test_multi_subdomain_pubsub_raises
+    assert_raises(RuntimeError) do
+      Vines::Config.new do
+        host 'wonderland.lit' do
+          storage(:fs) { dir '.' }
+          pubsub 'exam.ple'
+        end
+      end
+    end
+  end
+
+  def test_case_insensitive_pubsub_name
+    config = Vines::Config.new do
+      host 'WONDERLAND.LIT' do
+        storage(:fs) { dir '.' }
+        pubsub 'TEA', :CAKE
+      end
+    end
+    host = config.vhosts['wonderland.lit']
+    refute_nil host
+    assert_equal 2, host.pubsubs.size
+    refute_nil host.pubsubs['tea.wonderland.lit']
+    refute_nil host.pubsubs['cake.wonderland.lit']
+  end
+
+  def test_pubsub?
+    config = Vines::Config.new do
+      host 'wonderland.lit' do
+        storage(:fs) { dir '.' }
+        pubsub 'tea', :cake
+      end
+    end
+    host = config.vhosts['wonderland.lit']
+    refute_nil host
+    refute host.pubsub?(nil)
+    refute host.pubsub?('tea')
+    refute host.pubsub?(:cake)
+    assert host.pubsub?('tea.wonderland.lit')
+    assert host.pubsub?(Vines::JID.new('tea.wonderland.lit'))
+    assert host.pubsub?('cake.wonderland.lit')
+    assert_equal ['tea.wonderland.lit', 'cake.wonderland.lit'], host.pubsubs.keys
+
+    refute config.pubsub?(nil)
+    refute config.pubsub?('tea')
+    refute config.pubsub?('bogus')
+    assert config.pubsub?('tea.wonderland.lit')
+    assert config.pubsub?(Vines::JID.new('tea.wonderland.lit'))
+    assert config.pubsub?('cake.wonderland.lit')
   end
 
   def test_default_private_storage_is_off

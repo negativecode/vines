@@ -13,8 +13,8 @@ class ClusterSubscriberTest < MiniTest::Unit::TestCase
 
   def test_subscribe
     @cluster.expect(:connect, @connection)
-    @connection.expect(:subscribe, nil, ['nodes:all'])
-    @connection.expect(:subscribe, nil, ['nodes:abc'])
+    @connection.expect(:subscribe, nil, ['cluster:nodes:all'])
+    @connection.expect(:subscribe, nil, ['cluster:nodes:abc'])
     @connection.expect(:on, nil, [:message])
     subscriber = Vines::Cluster::Subscriber.new(@cluster)
     subscriber.subscribe
@@ -28,7 +28,7 @@ class ClusterSubscriberTest < MiniTest::Unit::TestCase
     @cluster.expect(:poke, nil, ['node-42', now])
 
     subscriber = Vines::Cluster::Subscriber.new(@cluster)
-    subscriber.send(:on_message, 'nodes:all', msg)
+    subscriber.send(:on_message, 'cluster:nodes:all', msg)
     assert @connection.verify
     assert @cluster.verify
   end
@@ -39,7 +39,7 @@ class ClusterSubscriberTest < MiniTest::Unit::TestCase
     @cluster.expect(:poke, nil, ['node-42', now])
 
     subscriber = Vines::Cluster::Subscriber.new(@cluster)
-    subscriber.send(:on_message, 'nodes:all', msg)
+    subscriber.send(:on_message, 'cluster:nodes:all', msg)
     assert @connection.verify
     assert @cluster.verify
   end
@@ -50,7 +50,7 @@ class ClusterSubscriberTest < MiniTest::Unit::TestCase
     @cluster.expect(:delete_sessions, nil, ['node-42'])
 
     subscriber = Vines::Cluster::Subscriber.new(@cluster)
-    subscriber.send(:on_message, 'nodes:all', msg)
+    subscriber.send(:on_message, 'cluster:nodes:all', msg)
     assert @connection.verify
     assert @cluster.verify
   end
@@ -65,7 +65,7 @@ class ClusterSubscriberTest < MiniTest::Unit::TestCase
     @cluster.expect(:connected_resources, [stream], ['alice@wonderland.lit/tea'])
 
     subscriber = Vines::Cluster::Subscriber.new(@cluster)
-    subscriber.send(:on_message, 'nodes:abc', msg)
+    subscriber.send(:on_message, 'cluster:nodes:abc', msg)
     assert stream.verify
     assert @connection.verify
     assert @cluster.verify
@@ -85,7 +85,7 @@ class ClusterSubscriberTest < MiniTest::Unit::TestCase
     @cluster.expect(:connected_resources, [stream], [alice.jid.bare])
 
     subscriber = Vines::Cluster::Subscriber.new(@cluster)
-    subscriber.send(:on_message, 'nodes:abc', msg)
+    subscriber.send(:on_message, 'cluster:nodes:abc', msg)
     assert storage.verify
     assert stream.verify
     assert @connection.verify

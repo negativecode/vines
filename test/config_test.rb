@@ -569,6 +569,62 @@ class ConfigTest < MiniTest::Unit::TestCase
     refute config.allowed?(hamlet, romeo)
   end
 
+  def test_same_domain_user_to_pubsub_allowed
+    config = Vines::Config.new do
+      host 'wonderland.lit' do
+        cross_domain_messages false
+        storage(:fs) { dir '.' }
+        pubsub 'games'
+      end
+    end
+    alice = Vines::JID.new('alice@wonderland.lit')
+    pubsub = Vines::JID.new('games.wonderland.lit')
+    assert config.allowed?(alice, pubsub)
+    assert config.allowed?(pubsub, alice)
+  end
+
+  def test_cross_domain_user_to_pubsub_not_allowed
+    config = Vines::Config.new do
+      host 'wonderland.lit' do
+        cross_domain_messages true
+        storage(:fs) { dir '.' }
+        pubsub 'games'
+      end
+    end
+    config = Vines::Config.new do
+      host 'verona.lit' do
+        cross_domain_messages false
+        storage(:fs) { dir '.' }
+      end
+    end
+    pubsub = Vines::JID.new('games.wonderland.lit')
+    romeo = Vines::JID.new('romeo@verona.lit')
+    refute config.allowed?(pubsub, romeo)
+    refute config.allowed?(romeo, pubsub)
+  end
+
+  def test_remote_user_to_pubsub_allowed
+    config = Vines::Config.new do
+      host 'wonderland.lit' do
+        cross_domain_messages true
+        storage(:fs) { dir '.' }
+        pubsub 'games'
+      end
+      host 'verona.lit' do
+        cross_domain_messages false
+        storage(:fs) { dir '.' }
+        pubsub 'games'
+      end
+    end
+    wonderland = Vines::JID.new('games.wonderland.lit')
+    verona = Vines::JID.new('games.verona.lit')
+    hamlet = Vines::JID.new('hamlet@denmark.lit')
+    assert config.allowed?(wonderland, hamlet)
+    assert config.allowed?(hamlet, wonderland)
+    refute config.allowed?(verona, hamlet)
+    refute config.allowed?(hamlet, verona)
+  end
+
   def test_remote_user_to_local_user_allowed
     config = Vines::Config.new do
       host 'wonderland.lit' do

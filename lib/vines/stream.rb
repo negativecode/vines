@@ -70,6 +70,11 @@ module Vines
       @config.storage(domain || self.domain)
     end
 
+    # Returns the Vines::Config::Host virtual host for the stream's domain.
+    def vhost
+      @config.vhosts[domain]
+    end
+
     # Reload the user's information into their active connections. Call this
     # after storage.save_user() to sync the new user state with their other
     # connections.

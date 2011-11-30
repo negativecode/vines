@@ -9,7 +9,7 @@ module Vines
         register "/iq[@id and @type='get']/ns:query", 'ns' => NS
 
         def process
-          return if route_iq
+          return if route_iq || to_pubsub_domain?
           result = to_result.tap do |node|
             node << node.document.create_element('query') do |query|
               query.default_namespace = NS

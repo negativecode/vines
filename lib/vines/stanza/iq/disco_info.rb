@@ -13,18 +13,30 @@ module Vines
           result = to_result.tap do |el|
             el << el.document.create_element('query') do |query|
               query.default_namespace = NS
-              query << el.document.create_element('identity', 'category' => 'server', 'type' => 'im')
-              query << el.document.create_element('feature', 'var' => NAMESPACES[:disco_info])
-              query << el.document.create_element('feature', 'var' => NAMESPACES[:disco_items])
-              query << el.document.create_element('feature', 'var' => NAMESPACES[:ping])
-              query << el.document.create_element('feature', 'var' => NAMESPACES[:vcard])
-              query << el.document.create_element('feature', 'var' => NAMESPACES[:version])
-              if stream.config.private_storage?(stream.domain)
-                query << el.document.create_element('feature', 'var' => NAMESPACES[:storage])
+              if to_pubsub_domain?
+                identity(query, 'pubsub', 'service')
+                features(query, :disco_info, :pubsub)
+              else
+                identity(query, 'server', 'im')
+                features = [:disco_info, :disco_items, :ping, :vcard, :version]
+                features << :storage if stream.config.private_storage?(stream.domain)
+                features(query, features)
               end
             end
           end
           stream.write(result)
+        end
+
+        private
+
+        def identity(query, category, type)
+          query << query.document.create_element('identity', 'category' => category, 'type' => type)
+        end
+
+        def features(query, *features)
+          features.flatten.each do |feature|
+            query << query.document.create_element('feature', 'var' => NAMESPACES[feature])
+          end
         end
       end
     end

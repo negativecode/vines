@@ -32,7 +32,7 @@ module Vines
       dupes = names.uniq.size != names.size || (@vhosts.keys & names).any?
       raise "one host definition per domain allowed" if dupes
       names.each do |name|
-        @vhosts[name] = Host.new(name, &block)
+        @vhosts[name] = Host.new(self, name, &block)
       end
     end
 
@@ -66,14 +66,27 @@ module Vines
 
     # Return true if the domain is virtual hosted by this server.
     def vhost?(domain)
-      @vhosts.key?(domain)
+      @vhosts.key?(domain.to_s)
     end
 
     # Returns the storage system for the domain or nil if domain is not hosted
     # at this server.
     def storage(domain)
-      host = @vhosts[domain]
+      host = @vhosts[domain.to_s]
       host.storage if host
+    end
+
+    # Returns the PubSub system for the domain or nil if pubsub is not enabled
+    # for this domain.
+    def pubsub(domain)
+      host = @vhosts.values.find {|host| host.pubsub?(domain) }
+      host.pubsubs[domain.to_s] if host
+    end
+
+    # Return true if the domain is a pubsub service hosted at a virtual host
+    # at this server.
+    def pubsub?(domain)
+      @vhosts.values.any? {|host| host.pubsub?(domain) }
     end
 
     # Return true if all JIDs belong to components hosted by this server.
@@ -129,6 +142,8 @@ module Vines
       return check_components(to, from) if component?(to, from)     # component to component
       return check_component(to, from)  if component?(to)           # to component
       return check_component(from, to)  if component?(from)         # from component
+      return check_component(to, from)  if pubsub?(to)              # to pubsub service
+      return check_component(from, to)  if pubsub?(from)            # from pubsub service
       return cross_domain?(to)          if local_jid?(to)           # from is remote
       return cross_domain?(from)        if local_jid?(from)         # to is remote
       return false

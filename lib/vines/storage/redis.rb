@@ -37,12 +37,17 @@ module Vines
         doc = {name: user.name, password: user.password}
         contacts = user.roster.map {|c| [c.jid.to_s, c.to_h.to_json] }.flatten
         roster = "roster:#{user.jid.bare}"
-        query(:multi)
-        query(:set, "user:#{user.jid.bare}", doc.to_json)
-        query(:del, roster)
-        query(:hmset, roster, *contacts) unless contacts.empty?
-        query(:exec)
+
+        redis.multi
+        redis.set("user:#{user.jid.bare}", doc.to_json)
+        redis.del(roster)
+        redis.hmset(roster, *contacts) unless contacts.empty?
+
+        req = redis.exec
+        req.callback { yield }
+        req.errback  { yield }
       end
+      fiber :save_user
 
       def find_vcard(jid)
         jid = JID.new(jid).bare.to_s

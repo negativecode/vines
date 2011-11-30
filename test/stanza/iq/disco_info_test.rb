@@ -8,11 +8,16 @@ class DiscoInfoTest < MiniTest::Unit::TestCase
   ALICE = Vines::User.new(:jid => 'alice@wonderland.lit/home')
 
   def setup
-    @config = MiniTest::Mock.new
+    @config = Vines::Config.new do
+      host 'wonderland.lit' do
+        storage(:fs) { dir '.' }
+      end
+    end
     @stream = MiniTest::Mock.new
     @stream.expect(:user, ALICE)
     @stream.expect(:domain, 'wonderland.lit')
     @stream.expect(:config, @config)
+    @stream.expect(:vhost, @config.vhosts['wonderland.lit'])
   end
 
   def test_private_storage_disabled
@@ -32,13 +37,12 @@ class DiscoInfoTest < MiniTest::Unit::TestCase
       </iq>
     }.strip.gsub(/\n|\s{2,}/, ''))
 
-    @config.expect(:private_storage?, false, ['wonderland.lit'])
+    @config.vhosts['wonderland.lit'].private_storage false
     @stream.expect(:write, nil, [expected])
 
     stanza = Vines::Stanza::Iq::DiscoInfo.new(node, @stream)
     stanza.process
     assert @stream.verify
-    assert @config.verify
   end
 
   def test_private_storage_enabled
@@ -59,13 +63,12 @@ class DiscoInfoTest < MiniTest::Unit::TestCase
       </iq>
     }.strip.gsub(/\n|\s{2,}/, ''))
 
-    @config.expect(:private_storage?, true, ['wonderland.lit'])
+    @config.vhosts['wonderland.lit'].private_storage true
     @stream.expect(:write, nil, [expected])
 
     stanza = Vines::Stanza::Iq::DiscoInfo.new(node, @stream)
     stanza.process
     assert @stream.verify
-    assert @config.verify
   end
 
   private

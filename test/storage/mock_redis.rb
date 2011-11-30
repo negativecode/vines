@@ -1,7 +1,5 @@
 # encoding: UTF-8
 
-require 'set'
-
 # A mock redis storage implementation that saves data to an in-memory Hash.
 class MockRedis
   attr_reader :db

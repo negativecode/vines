@@ -44,14 +44,10 @@ module Vines
         private
 
         def to_result
-          doc = Document.new
-          node = doc.create_element('iq',
-            'from' => stream.user.jid.to_s,
-            'id'   => self['id'],
-            'to'   => stream.user.jid.to_s,
-            'type' => 'result')
-          yield node if block_given?
-          node
+          super.tap do |node|
+            node['from'] = stream.user.jid.to_s
+            yield node if block_given?
+          end
         end
 
         def validate_children_size

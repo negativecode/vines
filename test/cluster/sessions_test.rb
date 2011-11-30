@@ -2,7 +2,6 @@
 
 require 'vines'
 require 'ext/nokogiri'
-require 'set'
 require 'storage/storage_tests'
 require 'storage/mock_redis'
 require 'minitest/autorun'
@@ -28,7 +27,7 @@ class ClusterSessionsTest < MiniTest::Unit::TestCase
         assert_equal 2, @connection.db["sessions:alice@wonderland.lit"].size
         assert_equal session1.to_json, @connection.db["sessions:alice@wonderland.lit"]['tea']
         assert_equal session2.to_json, @connection.db["sessions:alice@wonderland.lit"]['cake']
-        assert_equal [jid1, jid2], @connection.db["node:abc"].to_a
+        assert_equal [jid1, jid2], @connection.db["cluster:nodes:abc"].to_a
         assert @cluster.verify
       end
     end
@@ -41,13 +40,13 @@ class ClusterSessionsTest < MiniTest::Unit::TestCase
       @connection.db["sessions:alice@wonderland.lit"] = {}
       @connection.db["sessions:alice@wonderland.lit"]['tea'] = {node: 'abc', available: true}.to_json
       @connection.db["sessions:alice@wonderland.lit"]['cake'] = {node: 'abc', available: true}.to_json
-      @connection.db["node:abc"] = Set.new([jid1, jid2])
+      @connection.db["cluster:nodes:abc"] = Set.new([jid1, jid2])
 
       sessions = Vines::Cluster::Sessions.new(@cluster)
       sessions.delete(jid1)
       EM.next_tick do
         assert_equal 1, @connection.db["sessions:alice@wonderland.lit"].size
-        assert_equal [jid2], @connection.db["node:abc"].to_a
+        assert_equal [jid2], @connection.db["cluster:nodes:abc"].to_a
         assert @cluster.verify
       end
     end

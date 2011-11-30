@@ -96,6 +96,7 @@ module Vines
         # session.
         def unbind!(stream)
           delete_from_cluster
+          unsubscribe_pubsub
           @unbound = true
           @available = false
           broadcast_unavailable
@@ -140,7 +141,7 @@ module Vines
             broadcast(unavailable, available_subscribers)
             broadcast(unavailable, router.available_resources(@user.jid, @user.jid))
             remote_subscribers.each do |contact|
-              node = el.clone
+              node = unavailable
               node['to'] = contact.jid.bare.to_s
               router.route(node) rescue nil # ignore RemoteServerNotFound
             end
@@ -174,6 +175,12 @@ module Vines
         def delete_from_cluster
           if connected? && @config.cluster?
             @config.cluster.delete_session(@user.jid)
+          end
+        end
+
+        def unsubscribe_pubsub
+          if connected?
+            @config.vhosts[@user.jid.domain].unsubscribe_pubsub(@user.jid)
           end
         end
 

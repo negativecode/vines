@@ -15,6 +15,8 @@ module Vines
     :bind         => 'urn:ietf:params:xml:ns:xmpp-bind'.freeze,
     :session      => 'urn:ietf:params:xml:ns:xmpp-session'.freeze,
     :ping         => 'urn:xmpp:ping'.freeze,
+    :pubsub       => 'http://jabber.org/protocol/pubsub'.freeze,
+    :pubsub_event => 'http://jabber.org/protocol/pubsub#event'.freeze,
     :disco_items  => 'http://jabber.org/protocol/disco#items'.freeze,
     :disco_info   => 'http://jabber.org/protocol/disco#info'.freeze,
     :http_bind    => 'http://jabber.org/protocol/httpbind'.freeze,
@@ -62,6 +64,7 @@ end
   net/ldap
   nokogiri
   openssl
+  set
   socket
   uri
   yaml
@@ -92,6 +95,12 @@ end
   vines/stanza/presence/unavailable
   vines/stanza/presence/unsubscribe
   vines/stanza/presence/unsubscribed
+  vines/stanza/pubsub
+  vines/stanza/pubsub/create
+  vines/stanza/pubsub/delete
+  vines/stanza/pubsub/publish
+  vines/stanza/pubsub/subscribe
+  vines/stanza/pubsub/unsubscribe
 
   vines/storage
   vines/storage/couchdb
@@ -103,6 +112,7 @@ end
   vines/config
   vines/config/host
   vines/config/port
+  vines/config/pubsub
 
   vines/store
   vines/contact
@@ -118,6 +128,7 @@ end
   vines/cluster
   vines/cluster/connection
   vines/cluster/publisher
+  vines/cluster/pubsub
   vines/cluster/sessions
   vines/cluster/subscriber
 

@@ -10,11 +10,11 @@ module Vines
       include Vines::Log
 
       ALL, FROM, HEARTBEAT, OFFLINE, ONLINE, STANZA, TIME, TO, TYPE, USER =
-        %w[nodes:all from heartbeat offline online stanza time to type user].map {|s| s.freeze }
+        %w[cluster:nodes:all from heartbeat offline online stanza time to type user].map {|s| s.freeze }
 
       def initialize(cluster)
         @cluster = cluster
-        @channel = "nodes:#{@cluster.id}"
+        @channel = "cluster:nodes:#{@cluster.id}"
         @messages = EM::Queue.new
         process_messages
       end

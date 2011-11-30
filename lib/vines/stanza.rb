@@ -112,6 +112,14 @@ module Vines
 
     private
 
+    # Return true if the to and from JIDs are allowed to communicate with one
+    # another based on the cross_domain_messages setting in conf/config.rb. If
+    # a domain's users are isolated to sending messages only within their own
+    # domain, pubsub stanzas must not be processed from remote JIDs.
+    def allowed?
+      stream.config.allowed?(validate_to, stream.user.jid)
+    end
+
     def validate_address(attr)
       jid = (self[attr] || EMPTY)
       return if jid.empty?

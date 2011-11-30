@@ -19,6 +19,11 @@ Vines::Config.configure do
   # The private_storage attribute allows clients to store XML fragments
   # on the server, using the XEP-0049 Private XML Storage feature.
   #
+  # The pubsub attribute defines the XEP-0060 Publish-Subscribe services hosted
+  # at these virtual host domains. In the example below, pubsub services are
+  # available at games.wonderland.lit and scores.wonderland.lit as well as
+  # games.verona.lit and scores.verona.lit.
+  #
   # Shared storage example:
   # host 'verona.lit', 'wonderland.lit' do
   #   private_storage false
@@ -28,6 +33,7 @@ Vines::Config.configure do
   #   end
   #   components 'tea'  => 'secr3t',
   #              'cake' => 'passw0rd'
+  #   pubsub 'games', 'scores'
   # end
 
   host 'wonderland.lit' do
@@ -38,6 +44,7 @@ Vines::Config.configure do
     end
     # components 'tea'  => 'secr3t',
     #            'cake' => 'passw0rd'
+    # pubsub 'games', 'scores'
   end
 
   # Hosts can use LDAP authentication that overrides the authentication

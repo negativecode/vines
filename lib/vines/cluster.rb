@@ -32,6 +32,7 @@ module Vines
       @sessions = Sessions.new(self)
       @publisher = Publisher.new(self)
       @subscriber = Subscriber.new(self)
+      @pubsub = PubSub.new(self)
       instance_eval(&block)
     end
 
@@ -113,6 +114,17 @@ module Vines
       @connection.create
     end
 
+    # Turn an asynchronous redis query into a blocking call by pausing the
+    # fiber in which this code is running. Return the result of the query
+    # from this method, rather than passing it to a callback block.
+    def query(name, *args)
+      fiber, yielding = Fiber.current, true
+      req = connection.send(name, *args)
+      req.errback  { fiber.resume rescue yielding = false }
+      req.callback {|response| fiber.resume(response) }
+      Fiber.yield if yielding
+    end
+
     # Return the connected streams for this user, without any proxy streams
     # to remote cluster nodes (locally connected streams only).
     def connected_resources(jid)
@@ -123,6 +135,53 @@ module Vines
     # domain is not hosted here.
     def storage(domain)
       @config.storage(domain)
+    end
+
+    # Create a pubsub topic (a.k.a. node), in the given domain, to which
+    # messages may be published. The domain argument will be one of the
+    # configured pubsub subdomains in conf/config.rb (e.g. games.wonderland.lit,
+    # topics.wonderland.lit, etc).
+    def add_pubsub_node(domain, node)
+      @pubsub.add_node(domain, node)
+    end
+
+    # Remove a pubsub topic so messages may no longer be broadcast to it.
+    def delete_pubsub_node(domain, node)
+      @pubsub.delete_node(domain, node)
+    end
+
+    # Subscribe the JID to the pubsub topic so it will receive any messages
+    # published to it.
+    def subscribe_pubsub(domain, node, jid)
+      @pubsub.subscribe(domain, node, jid)
+    end
+
+    # Unsubscribe the JID from the pubsub topic, deregistering its interest
+    # in receiving any messages published to it.
+    def unsubscribe_pubsub(domain, node, jid)
+      @pubsub.unsubscribe(domain, node, jid)
+    end
+
+    # Unsubscribe the JID from all pubsub topics. This is useful when the
+    # JID's session ends by logout or disconnect.
+    def unsubscribe_all_pubsub(domain, jid)
+      @pubsub.unsubscribe_all(domain, jid)
+    end
+
+    # Return true if the pubsub topic exists and messages may be published to it.
+    def pubsub_node?(domain, node)
+      @pubsub.node?(domain, node)
+    end
+
+    # Return true if the JID is a registered subscriber to the pubsub topic and
+    # messages published to it should be routed to the JID.
+    def pubsub_subscribed?(domain, node, jid)
+      @pubsub.subscribed?(domain, node, jid)
+    end
+
+    # Return a list of JIDs subscribed to the pubsub topic.
+    def pubsub_subscribers(domain, node)
+      @pubsub.subscribers(domain, node)
     end
 
     private

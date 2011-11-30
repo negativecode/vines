@@ -7,11 +7,14 @@ module Vines
     # conf/config.rb file. Host instances can be accessed at runtime through
     # the +Config#vhosts+ method.
     class Host
-      def initialize(name, &block)
-        @name, @storage, @ldap = name.downcase, nil, nil
+      attr_reader :pubsubs
+
+      def initialize(config, name, &block)
+        @config, @name = config, name.downcase
+        @storage, @ldap = nil, nil
         @cross_domain_messages = false
         @private_storage = false
-        @components = {}
+        @components, @pubsubs = {}, {}
         validate_domain(@name)
         instance_eval(&block)
         raise "storage required for #{@name}" unless @storage
@@ -44,8 +47,8 @@ module Vines
         return @components unless options
 
         names = options.keys.map {|domain| "#{domain}.#{@name}".downcase }
-        dupes = names.uniq.size != names.size || (@components.keys & names).any?
-        raise "duplicate component domains not allowed" if dupes
+        raise "duplicate component domains not allowed" if dupes?(names, @components.keys)
+        raise "pubsub domains overlap component domains" if dupes?(names, @pubsubs.keys)
 
         options.each do |domain, password|
           raise 'component domain required' if (domain || '').to_s.strip.empty?
@@ -58,11 +61,43 @@ module Vines
       end
 
       def component?(domain)
-        !!@components[domain]
+        !!@components[domain.to_s]
       end
 
       def password(domain)
-        @components[domain]
+        @components[domain.to_s]
+      end
+
+      def pubsub(*domains)
+        domains.flatten!
+        raise 'define at least one pubsub domain' if domains.empty?
+        names = domains.map {|domain| "#{domain}.#{@name}".downcase }
+        raise "duplicate pubsub domains not allowed" if dupes?(names, @pubsubs.keys)
+        raise "pubsub domains overlap component domains" if dupes?(names, @components.keys)
+        domains.each do |domain|
+          raise 'pubsub domain required' if (domain || '').to_s.strip.empty?
+          name = "#{domain}.#{@name}".downcase
+          raise "pubsub domains must be one level below their host: #{name}" if domain.to_s.include?('.')
+          validate_domain(name)
+          @pubsubs[name] = PubSub.new(@config, name)
+        end
+      end
+
+      def pubsub?(domain)
+        @pubsubs.key?(domain.to_s)
+      end
+
+      # Unsubscribe this JID from all pubsub topics hosted at this virtual host.
+      # This should be called when the user's session ends via logout or
+      # disconnect.
+      def unsubscribe_pubsub(jid)
+        @pubsubs.values.each do |pubsub|
+          pubsub.unsubscribe_all(jid)
+        end
+      end
+
+      def disco_items
+        [@components.keys, @pubsubs.keys].flatten.sort
       end
 
       def private_storage(enabled)
@@ -75,7 +110,12 @@ module Vines
 
       private
 
-      # Prevent domains in config files that won't form valid JID's.
+      # Return true if the arrays contain any duplicate items.
+      def dupes?(a, b)
+        a.uniq.size != a.size || b.uniq.size != b.size || (a & b).any?
+      end
+
+      # Prevent domains in config files that won't form valid JIDs.
       def validate_domain(name)
         jid = JID.new(name)
         raise "incorrect domain: #{name}" if jid.node || jid.resource
