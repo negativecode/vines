@@ -109,14 +109,7 @@ module Vines
           presence = [%w[to unsubscribe], %w[from unsubscribed]].map do |meth, type|
             presence(contact.jid, type) if contact.send("subscribed_#{meth}?")
           end.compact
-
-          if local_jid?(contact.jid)
-            stream.interested_resources(contact.jid).each do |recipient|
-              presence.each {|el| recipient.write(el) }
-            end
-          else
-            presence.each {|el| router.route(el) }
-          end
+          broadcast_to_interested_resources(presence, contact.jid)
         end
 
         def presence(to, type)
@@ -137,11 +130,8 @@ module Vines
         end
 
         def send_result_iq
-          doc = Document.new
-          node = doc.create_element('iq',
-            'id'   => self['id'],
-            'to'   => stream.user.jid.to_s,
-            'type' => 'result')
+          node = to_result
+          node.remove_attribute('from')
           stream.write(node)
         end
       end

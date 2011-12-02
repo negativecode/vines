@@ -96,6 +96,28 @@ module Vines
         stream.write(node)
       end
 
+      # Send the contact's roster item to the current user's interested streams.
+      # Roster pushes are required, following presence subscription updates, to
+      # notify the user's clients of the contact's current state.
+      def send_roster_push(to)
+        contact = stream.user.contact(to)
+        stream.interested_resources(stream.user.jid).each do |recipient|
+          contact.send_roster_push(recipient)
+        end
+      end
+
+      # Notify the current user's interested streams of a contact's subscription
+      # state change as a result of receiving a subscribed, unsubscribe, or
+      # unsubscribed presence stanza.
+      def broadcast_subscription_change(contact)
+        stamp_from
+        stream.interested_resources(stamp_to).each do |recipient|
+          @node['to'] = recipient.user.jid.to_s
+          recipient.write(@node)
+          contact.send_roster_push(recipient)
+        end
+      end
+
       # Validate that the incoming stanza has a 'to' attribute and strip any
       # resource part from it so it's a bare jid. Return the bare JID object
       # that was stamped.
@@ -104,6 +126,14 @@ module Vines
         raise StanzaErrors::BadRequest.new(self, 'modify') unless to
         to.bare.tap do |bare|
           self['to'] = bare.to_s
+        end
+      end
+
+      # Presence subscription stanzas must be addressed from the user's bare
+      # JID. Return the user's bare JID object that was stamped.
+      def stamp_from
+        stream.user.jid.bare.tap do |bare|
+          self['from'] = bare.to_s
         end
       end
     end
