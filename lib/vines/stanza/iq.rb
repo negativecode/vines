@@ -40,7 +40,7 @@ module Vines
         to = validate_to
         return false if to.nil? || to.to_s == stream.domain || to_pubsub_domain?
         self['from'] = stream.user.jid.to_s
-        local? ? broadcast(stream.available_resources(to)) : route
+        local? ? broadcast(stream.connected_resources(to)) : route
         true
       end
 

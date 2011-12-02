@@ -45,7 +45,7 @@ class IqTest < MiniTest::Unit::TestCase
     @stream.expect(:config, @config)
     @stream.expect(:user, hatter)
     @stream.expect(:domain, 'wonderland.lit')
-    @stream.expect(:available_resources, [recipient], [alice.jid.to_s])
+    @stream.expect(:connected_resources, [recipient], [alice.jid.to_s])
     @stream.expect(:vhost, @config.vhosts['wonderland.lit'])
 
     stanza = Vines::Stanza::Iq.new(node, @stream)
