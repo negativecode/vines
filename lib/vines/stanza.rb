@@ -42,7 +42,7 @@ module Vines
     # if it's destined for a remote domain or external component.
     def local?
       return true unless ROUTABLE_STANZAS.include?(@node.name)
-      to = JID.new(@node['to'])
+      to = JID.new(@node[TO])
       to.empty? || local_jid?(to)
     end
 
@@ -128,7 +128,7 @@ module Vines
       return false if local_jid?(to)
       to = JID.new(to)
       stanzas.each do |el|
-        el['to'] = to.bare.to_s
+        el[TO] = to.bare.to_s
         router.route(el)
       end
       true
@@ -142,7 +142,7 @@ module Vines
     def send_to_recipients(stanzas, recipients)
       recipients.each do |recipient|
         stanzas.each do |el|
-          el['to'] = recipient.user.jid.to_s
+          el[TO] = recipient.user.jid.to_s
           recipient.write(el)
         end
       end
