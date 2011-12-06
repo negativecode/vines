@@ -29,12 +29,16 @@ class HandshakeTest < MiniTest::Unit::TestCase
   end
 
   def test_valid_secret
+    router = MiniTest::Mock.new
+    router.expect(:<<, nil, [@stream])
+    @stream.expect(:router, router)
     @stream.expect(:secret, 'secr3t')
     @stream.expect(:write, nil, ['<handshake/>'])
     @stream.expect(:advance, nil, [Vines::Stream::Component::Ready.new(@stream)])
     node = node('<handshake>secr3t</handshake>')
     @state.node(node)
     assert @stream.verify
+    assert router.verify
   end
 
   private

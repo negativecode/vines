@@ -18,7 +18,6 @@ module Vines
     end
 
     def post_init
-      router << self
       @remote_addr, @local_addr = addresses
       @user, @closed, @stanza_size = nil, false, 0
       @bucket = TokenBucket.new(100, 10)

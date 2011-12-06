@@ -11,6 +11,7 @@ module Vines
         def node(node)
           raise StreamErrors::NotAuthorized unless handshake?(node)
           stream.write('<handshake/>')
+          stream.router << stream
           advance
         end
 

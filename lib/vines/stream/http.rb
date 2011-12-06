@@ -10,11 +10,6 @@ module Vines
         @session = Http::Session.new(self)
       end
 
-      def post_init
-        super
-        router.delete(self)
-      end
-
       # Override +Stream#create_parser+ to provide an HTTP parser rather than
       # a Nokogiri XML parser.
       def create_parser
@@ -96,7 +91,6 @@ module Vines
         raise StreamErrors::InvalidNamespace unless node.namespaces['xmlns'] == NAMESPACES[:http_bind]
 
         Sessions[@session.id] = @session
-        router << @session
         send_stream_header
       end
 

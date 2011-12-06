@@ -12,6 +12,7 @@ module Vines
           raise StreamErrors::NotAuthorized unless stream?(node)
           stream.start(node)
           stream.write('<stream:features/>')
+          stream.router << stream
           advance
         end
       end

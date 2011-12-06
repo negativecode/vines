@@ -11,6 +11,7 @@ module Vines
 
           def node(node)
             raise StreamErrors::NotAuthorized unless empty_features?(node)
+            stream.router << stream
             advance
             stream.notify_connected
           end
