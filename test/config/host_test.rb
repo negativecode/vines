@@ -338,6 +338,7 @@ class HostTest < MiniTest::Unit::TestCase
     assert config.pubsub?('tea.wonderland.lit')
     assert config.pubsub?(Vines::JID.new('tea.wonderland.lit'))
     assert config.pubsub?('cake.wonderland.lit')
+    refute config.pubsub?('alice@cake.wonderland.lit')
   end
 
   def test_default_private_storage_is_off
@@ -362,5 +363,8 @@ class HostTest < MiniTest::Unit::TestCase
     refute_nil host
     assert host.private_storage?
     assert config.private_storage?('wonderland.lit')
+    assert config.private_storage?(Vines::JID.new('wonderland.lit'))
+    refute config.private_storage?(Vines::JID.new('alice@wonderland.lit'))
+    refute config.private_storage?(nil)
   end
 end

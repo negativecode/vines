@@ -61,6 +61,7 @@ class ConfigTest < MiniTest::Unit::TestCase
     end
     assert_equal ['wonderland.lit'], config.vhosts.keys
     assert config.vhost?('wonderland.lit')
+    refute config.vhost?('alice@wonderland.lit')
     refute config.vhost?('tea.wonderland.lit')
     refute config.vhost?('bogus')
   end
@@ -253,7 +254,10 @@ class ConfigTest < MiniTest::Unit::TestCase
     refute_nil port
     assert config.s2s?('verona.lit')
     assert config.s2s?('denmark.lit')
-    assert !config.s2s?('bogus')
+    assert config.s2s?(Vines::JID.new('denmark.lit'))
+    refute config.s2s?(Vines::JID.new('hamlet@denmark.lit'))
+    refute config.s2s?('bogus')
+    refute config.s2s?(nil)
     assert_equal Vines::Config::ServerPort, port.class
     assert_equal '0.0.0.1', port.host
     assert_equal 42, port.port
