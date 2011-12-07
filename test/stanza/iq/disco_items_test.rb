@@ -30,9 +30,8 @@ class DiscoItemsTest < MiniTest::Unit::TestCase
     end
 
     @stream.expect(:user, Vines::User.new(:jid => 'alice@wonderland.lit/home'))
-    @stream.expect(:domain, 'wonderland.lit')
     @stream.expect(:write, nil, [expected])
-    @stream.expect(:vhost, config.vhosts['wonderland.lit'])
+    @stream.expect(:config, config)
 
     stanza = Vines::Stanza::Iq::DiscoItems.new(node, @stream)
     stanza.process

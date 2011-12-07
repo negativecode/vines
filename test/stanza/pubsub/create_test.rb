@@ -18,7 +18,7 @@ class CreatePubSubTest < MiniTest::Unit::TestCase
     @stream.expect(:user, @user)
   end
 
-  def test_missing_to_address_is_ignored
+  def test_missing_to_address_raises
     node = node(%q{
       <iq type='set' id='42'>
         <pubsub xmlns='http://jabber.org/protocol/pubsub'>
@@ -27,8 +27,10 @@ class CreatePubSubTest < MiniTest::Unit::TestCase
       </iq>
     }.strip.gsub(/\n|\s{2,}/, ''))
 
+    @stream.expect(:domain, 'wonderland.lit')
+
     stanza = Vines::Stanza::PubSub::Create.new(node, @stream)
-    stanza.process
+    assert_raises(Vines::StanzaErrors::FeatureNotImplemented) { stanza.process }
     assert @stream.verify
   end
 
@@ -40,8 +42,6 @@ class CreatePubSubTest < MiniTest::Unit::TestCase
         </pubsub>
       </iq>
     }.strip.gsub(/\n|\s{2,}/, ''))
-
-    @stream.expect(:domain, 'wonderland.lit')
 
     stanza = Vines::Stanza::PubSub::Create.new(node, @stream)
     assert_raises(Vines::StanzaErrors::FeatureNotImplemented) { stanza.process }
@@ -59,9 +59,6 @@ class CreatePubSubTest < MiniTest::Unit::TestCase
 
     router = MiniTest::Mock.new
     router.expect(:route, nil, [node])
-
-    @stream.expect(:domain, 'wonderland.lit')
-    @stream.expect(:vhost, @config.vhosts['wonderland.lit'])
     @stream.expect(:router, router)
 
     stanza = Vines::Stanza::PubSub::Create.new(node, @stream)
@@ -80,9 +77,6 @@ class CreatePubSubTest < MiniTest::Unit::TestCase
       </iq>
     }.strip.gsub(/\n|\s{2,}/, ''))
 
-    @stream.expect(:domain, 'wonderland.lit')
-    @stream.expect(:vhost, @config.vhosts['wonderland.lit'])
-
     stanza = Vines::Stanza::PubSub::Create.new(node, @stream)
     assert_raises(Vines::StanzaErrors::BadRequest) { stanza.process }
     assert @stream.verify
@@ -96,9 +90,6 @@ class CreatePubSubTest < MiniTest::Unit::TestCase
         </pubsub>
       </iq>
     }.strip.gsub(/\n|\s{2,}/, ''))
-
-    @stream.expect(:domain, 'wonderland.lit')
-    @stream.expect(:vhost, @config.vhosts['wonderland.lit'])
 
     stanza = Vines::Stanza::PubSub::Create.new(node, @stream)
     def stanza.pubsub
@@ -119,8 +110,6 @@ class CreatePubSubTest < MiniTest::Unit::TestCase
       </iq>
     }.strip.gsub(/\n|\s{2,}/, ''))
 
-    @stream.expect(:domain, 'wonderland.lit')
-    @stream.expect(:vhost, @config.vhosts['wonderland.lit'])
     def @stream.nodes; @nodes; end
     def @stream.write(node)
       @nodes ||= []

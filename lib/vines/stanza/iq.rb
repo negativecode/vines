@@ -38,7 +38,7 @@ module Vines
       # component, s2s, or c2s stream.
       def route_iq
         to = validate_to
-        return false if to.nil? || to.to_s == stream.domain || to_pubsub_domain?
+        return false if to.nil? || stream.config.vhost?(to) || to_pubsub_domain?
         self['from'] = stream.user.jid.to_s
         local? ? broadcast(stream.connected_resources(to)) : route
         true
@@ -49,7 +49,7 @@ module Vines
       # to the server and stanzas addressed to pubsub domains, both of which must
       # be handled locally and not routed.
       def to_pubsub_domain?
-        stream.vhost.pubsub?(validate_to)
+        stream.config.pubsub?(validate_to)
       end
     end
   end

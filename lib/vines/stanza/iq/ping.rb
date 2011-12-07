@@ -7,7 +7,7 @@ module Vines
         register "/iq[@id and @type='get']/ns:ping", 'ns' => NAMESPACES[:ping]
 
         def process
-          return if route_iq || to_pubsub_domain?
+          return if route_iq || !allowed?
           stream.write(to_result)
         end
       end

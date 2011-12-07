@@ -9,12 +9,13 @@ module Vines
         register "/iq[@id and @type='get']/ns:query", 'ns' => NS
 
         def process
-          return if route_iq
+          return if route_iq || !allowed?
           result = to_result.tap do |el|
             el << el.document.create_element('query') do |query|
               query.default_namespace = NS
               unless to_pubsub_domain?
-                stream.vhost.disco_items.each do |domain|
+                to = (validate_to || stream.domain).to_s
+                stream.config.vhosts[to].disco_items.each do |domain|
                   query << el.document.create_element('item', 'jid' => domain)
                 end
               end

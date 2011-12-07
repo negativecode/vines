@@ -15,9 +15,7 @@ class DiscoInfoTest < MiniTest::Unit::TestCase
     end
     @stream = MiniTest::Mock.new
     @stream.expect(:user, ALICE)
-    @stream.expect(:domain, 'wonderland.lit')
     @stream.expect(:config, @config)
-    @stream.expect(:vhost, @config.vhosts['wonderland.lit'])
   end
 
   def test_private_storage_disabled

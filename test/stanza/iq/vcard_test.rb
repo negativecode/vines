@@ -9,6 +9,7 @@ class VcardTest < MiniTest::Unit::TestCase
     @stream = MiniTest::Mock.new
     @config = Vines::Config.new do
       host 'wonderland.lit' do
+        cross_domain_messages true
         storage(:fs) { dir '.' }
       end
     end
@@ -40,6 +41,7 @@ class VcardTest < MiniTest::Unit::TestCase
     storage = MiniTest::Mock.new
     storage.expect(:find_vcard, card, [alice.jid.bare])
 
+    @stream.expect(:config, @config)
     @stream.expect(:user, alice)
     @stream.expect(:domain, 'wonderland.lit')
     @stream.expect(:storage, storage, ['wonderland.lit'])
@@ -68,7 +70,6 @@ class VcardTest < MiniTest::Unit::TestCase
 
     @stream.expect(:config, @config)
     @stream.expect(:user, alice)
-    @stream.expect(:domain, 'wonderland.lit')
     @stream.expect(:storage, storage, ['wonderland.lit'])
     expected = node(%q{
       <iq from="hatter@wonderland.lit" id="42" to="alice@wonderland.lit/tea" type="result">
@@ -91,6 +92,7 @@ class VcardTest < MiniTest::Unit::TestCase
     storage = MiniTest::Mock.new
     storage.expect(:find_vcard, nil, [alice.jid.bare])
 
+    @stream.expect(:config, @config)
     @stream.expect(:user, alice)
     @stream.expect(:domain, 'wonderland.lit')
     @stream.expect(:storage, storage, ['wonderland.lit'])
@@ -121,6 +123,7 @@ class VcardTest < MiniTest::Unit::TestCase
     storage = MiniTest::Mock.new
     storage.expect(:save_vcard, nil, [alice.jid, card])
 
+    @stream.expect(:config, @config)
     @stream.expect(:user, alice)
     @stream.expect(:domain, 'wonderland.lit')
     @stream.expect(:storage, storage, ['wonderland.lit'])

@@ -396,6 +396,8 @@ class ConfigTest < MiniTest::Unit::TestCase
     refute config.local_jid?(nil)
     refute config.local_jid?('alice@wonderland.lit', nil)
     assert config.local_jid?('alice@wonderland.lit')
+    assert config.local_jid?(Vines::JID.new('alice@wonderland.lit'))
+    assert config.local_jid?(Vines::JID.new('wonderland.lit'))
     assert config.local_jid?('alice@wonderland.lit', 'romeo@verona.lit')
     refute config.local_jid?('alice@wonderland.lit', 'romeo@bogus.lit')
     refute config.local_jid?('alice@tea.wonderland.lit')
@@ -421,6 +423,8 @@ class ConfigTest < MiniTest::Unit::TestCase
     alice = Vines::JID.new('alice@wonderland.lit')
     hatter = Vines::JID.new('hatter@wonderland.lit')
     assert config.allowed?(alice, hatter)
+    assert config.allowed?(hatter, alice)
+    assert config.allowed?('wonderland.lit', alice)
   end
 
   def test_both_vhosts_with_cross_domain_allowed

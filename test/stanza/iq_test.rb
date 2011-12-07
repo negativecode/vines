@@ -7,7 +7,6 @@ require 'minitest/autorun'
 class IqTest < MiniTest::Unit::TestCase
   def setup
     @stream = MiniTest::Mock.new
-    @stream.expect(:domain, 'wonderland.lit')
     @config = Vines::Config.new do
       host 'wonderland.lit' do
         storage(:fs) { dir '.' }
@@ -44,9 +43,7 @@ class IqTest < MiniTest::Unit::TestCase
 
     @stream.expect(:config, @config)
     @stream.expect(:user, hatter)
-    @stream.expect(:domain, 'wonderland.lit')
     @stream.expect(:connected_resources, [recipient], [alice.jid.to_s])
-    @stream.expect(:vhost, @config.vhosts['wonderland.lit'])
 
     stanza = Vines::Stanza::Iq.new(node, @stream)
     stanza.process

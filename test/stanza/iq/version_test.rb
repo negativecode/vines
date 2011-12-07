@@ -21,11 +21,9 @@ class VersionTest < MiniTest::Unit::TestCase
     router = MiniTest::Mock.new
     router.expect(:route, nil, [node])
 
-    @stream.expect(:domain, 'wonderland.lit')
     @stream.expect(:config, @config)
     @stream.expect(:user, alice)
     @stream.expect(:router, router)
-    @stream.expect(:vhost, @config.vhosts['wonderland.lit'])
 
     stanza = Vines::Stanza::Iq::Version.new(node, @stream)
     stanza.process
@@ -37,9 +35,9 @@ class VersionTest < MiniTest::Unit::TestCase
     alice = Vines::User.new(:jid => 'alice@wonderland.lit/tea')
     node = node(%q{<iq id="42" type="get"><query xmlns="jabber:iq:version"/></iq>})
 
+    @stream.expect(:config, @config)
     @stream.expect(:user, alice)
     @stream.expect(:domain, 'wonderland.lit')
-    @stream.expect(:vhost, @config.vhosts['wonderland.lit'])
 
     expected = node(%Q{
       <iq from="wonderland.lit" id="42" to="alice@wonderland.lit/tea" type="result">

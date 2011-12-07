@@ -9,6 +9,7 @@ module Vines
         register "/iq[@id and @type='get' or @type='set']/ns:vCard", 'ns' => NS
 
         def process
+          return unless allowed?
           if local?
             get? ? vcard_query : vcard_update
           else
@@ -22,7 +23,7 @@ module Vines
         def vcard_query
           to = validate_to
           jid = to ? to.bare : stream.user.jid.bare
-          card = storage.find_vcard(jid)
+          card = storage(jid.domain).find_vcard(jid)
 
           raise StanzaErrors::ItemNotFound.new(self, 'cancel') unless card
 
@@ -45,11 +46,8 @@ module Vines
 
           storage.save_vcard(stream.user.jid, elements.first)
 
-          doc = Document.new
-          result = doc.create_element('iq',
-            'id'   => self['id'],
-            'to'   => stream.user.jid.to_s,
-            'type' => 'result')
+          result = to_result
+          result.remove_attribute('from')
           stream.write(result)
         end
       end

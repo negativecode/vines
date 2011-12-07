@@ -153,7 +153,7 @@ module Vines
     # a domain's users are isolated to sending messages only within their own
     # domain, pubsub stanzas must not be processed from remote JIDs.
     def allowed?
-      stream.config.allowed?(validate_to, stream.user.jid)
+      stream.config.allowed?(validate_to || stream.domain, stream.user.jid)
     end
 
     def validate_address(attr)
