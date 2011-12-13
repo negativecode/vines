@@ -17,6 +17,22 @@ module Vines
         has_many :fragments
       end
 
+      # Wrap the method with ActiveRecord connection pool logic, so we properly
+      # return connections to the pool when we're finished with them. This also
+      # defers the original method by pushing it onto the EM thread pool because
+      # ActiveRecord uses blocking IO.
+      def self.with_connection(method, args={})
+        deferrable = args.key?(:defer) ? args[:defer] : true
+        old = "_with_connection_#{method}"
+        alias_method old, method
+        define_method method do |*args|
+          ActiveRecord::Base.connection_pool.with_connection do
+            method(old).call(*args)
+          end
+        end
+        defer(method) if deferrable
+      end
+
       %w[adapter host port database username password pool].each do |name|
         define_method(name) do |*args|
           if args.first
@@ -38,30 +54,26 @@ module Vines
       end
 
       def find_user(jid)
-        ActiveRecord::Base.clear_reloadable_connections!
-
         jid = JID.new(jid).bare.to_s
         return if jid.empty?
         xuser = user_by_jid(jid)
-        return Vines::User.new(:jid => jid).tap do |user|
+        return Vines::User.new(jid: jid).tap do |user|
           user.name, user.password = xuser.name, xuser.password
           xuser.contacts.each do |contact|
             groups = contact.groups.map {|group| group.name }
             user.roster << Vines::Contact.new(
-              :jid => contact.jid,
-              :name => contact.name,
-              :subscription => contact.subscription,
-              :ask => contact.ask,
-              :groups => groups)
+              jid: contact.jid,
+              name: contact.name,
+              subscription: contact.subscription,
+              ask: contact.ask,
+              groups: groups)
           end
         end if xuser
       end
-      defer :find_user
+      with_connection :find_user
 
       def save_user(user)
-        ActiveRecord::Base.clear_reloadable_connections!
-
-        xuser = user_by_jid(user.jid) || Sql::User.new(:jid => user.jid.bare.to_s)
+        xuser = user_by_jid(user.jid) || Sql::User.new(jid: user.jid.bare.to_s)
         xuser.name = user.name
         xuser.password = user.password
 
@@ -74,10 +86,10 @@ module Vines
         xuser.contacts.each do |contact|
           fresh = user.contact(contact.jid)
           contact.update_attributes(
-            :name => fresh.name,
-            :ask => fresh.ask,
-            :subscription => fresh.subscription,
-            :groups => groups(fresh))
+            name: fresh.name,
+            ask: fresh.ask,
+            subscription: fresh.subscription,
+            groups: groups(fresh))
         end
 
         # add new contacts to roster
@@ -85,112 +97,104 @@ module Vines
         user.roster.select {|contact| !jids.include?(contact.jid.bare.to_s) }
           .each do |contact|
             xuser.contacts.build(
-              :user => xuser,
-              :jid => contact.jid.bare.to_s,
-              :name => contact.name,
-              :ask => contact.ask,
-              :subscription => contact.subscription,
-              :groups => groups(contact))
+              user: xuser,
+              jid: contact.jid.bare.to_s,
+              name: contact.name,
+              ask: contact.ask,
+              subscription: contact.subscription,
+              groups: groups(contact))
           end
         xuser.save
       end
-      defer :save_user
+      with_connection :save_user
 
       def find_vcard(jid)
-        ActiveRecord::Base.clear_reloadable_connections!
-
         jid = JID.new(jid).bare.to_s
         return if jid.empty?
         if xuser = user_by_jid(jid)
           Nokogiri::XML(xuser.vcard).root rescue nil
         end
       end
-      defer :find_vcard
+      with_connection :find_vcard
 
       def save_vcard(jid, card)
-        ActiveRecord::Base.clear_reloadable_connections!
-
         xuser = user_by_jid(jid)
         if xuser
           xuser.vcard = card.to_xml
           xuser.save
         end
       end
-      defer :save_vcard
+      with_connection :save_vcard
 
       def find_fragment(jid, node)
-        ActiveRecord::Base.clear_reloadable_connections!
-
         jid = JID.new(jid).bare.to_s
         return if jid.empty?
         if fragment = fragment_by_jid(jid, node)
           Nokogiri::XML(fragment.xml).root rescue nil
         end
       end
-      defer :find_fragment
+      with_connection :find_fragment
 
       def save_fragment(jid, node)
-        ActiveRecord::Base.clear_reloadable_connections!
-
         jid = JID.new(jid).bare.to_s
         fragment = fragment_by_jid(jid, node) ||
           Sql::Fragment.new(
-            :user => user_by_jid(jid),
-            :root => node.name,
-            :namespace => node.namespace.href)
+            user: user_by_jid(jid),
+            root: node.name,
+            namespace: node.namespace.href)
         fragment.xml = node.to_xml
         fragment.save
       end
-      defer :save_fragment
+      with_connection :save_fragment
 
       # Create the tables and indexes used by this storage engine.
       def create_schema(args={})
-        ActiveRecord::Base.clear_reloadable_connections!
-
         args[:force] ||= false
 
         ActiveRecord::Schema.define do
-          create_table :users, :force => args[:force] do |t|
-            t.string :jid,      :limit => 2048, :null => false
-            t.string :name,     :limit => 1000, :null => true
-            t.string :password, :limit => 1000, :null => true
-            t.text   :vcard,    :null => true
+          create_table :users, force: args[:force] do |t|
+            t.string :jid,      limit: 2048, null: false
+            t.string :name,     limit: 1000, null: true
+            t.string :password, limit: 1000, null: true
+            t.text   :vcard,    null: true
           end
-          add_index :users, :jid, :unique => true
+          add_index :users, :jid, unique: true
 
-          create_table :contacts, :force => args[:force] do |t|
-            t.integer :user_id,      :null => false
-            t.string  :jid,          :limit => 2048, :null => false
-            t.string  :name,         :limit => 1000, :null => true
-            t.string  :ask,          :limit => 1000, :null => true
-            t.string  :subscription, :limit => 1000, :null => false
+          create_table :contacts, force: args[:force] do |t|
+            t.integer :user_id,      null: false
+            t.string  :jid,          limit: 2048, null: false
+            t.string  :name,         limit: 1000, null: true
+            t.string  :ask,          limit: 1000, null: true
+            t.string  :subscription, limit: 1000, null: false
           end
-          add_index :contacts, [:user_id, :jid], :unique => true
+          add_index :contacts, [:user_id, :jid], unique: true
 
-          create_table :groups, :force => args[:force] do |t|
-            t.string :name, :limit => 1000, :null => false
+          create_table :groups, force: args[:force] do |t|
+            t.string :name, limit: 1000, null: false
           end
-          add_index :groups, :name, :unique => true
+          add_index :groups, :name, unique: true
 
-          create_table :contacts_groups, :id => false, :force => args[:force] do |t|
-            t.integer :contact_id, :null => false
-            t.integer :group_id,   :null => false
+          create_table :contacts_groups, id: false, force: args[:force] do |t|
+            t.integer :contact_id, null: false
+            t.integer :group_id,   null: false
           end
-          add_index :contacts_groups, [:contact_id, :group_id], :unique => true
+          add_index :contacts_groups, [:contact_id, :group_id], unique: true
 
-          create_table :fragments, :force => args[:force] do |t|
-            t.integer :user_id,   :null => false
-            t.string  :root,      :limit => 1000, :null => false
-            t.string  :namespace, :limit => 1000, :null => false
-            t.text    :xml,       :null => false
+          create_table :fragments, force: args[:force] do |t|
+            t.integer :user_id,   null: false
+            t.string  :root,      limit: 1000, null: false
+            t.string  :namespace, limit: 1000, null: false
+            t.text    :xml,       null: false
           end
-          add_index :fragments, [:user_id, :root, :namespace], :unique => true
+          add_index :fragments, [:user_id, :root, :namespace], unique: true
         end
       end
+      with_connection :create_schema, defer: false
 
       private
 
       def establish_connection
+        ActiveRecord::Base.logger = Logger.new('/dev/null')
         ActiveRecord::Base.establish_connection(@config)
         # has_and_belongs_to_many requires a connection so configure the
         # associations here rather than in the class definitions above.
