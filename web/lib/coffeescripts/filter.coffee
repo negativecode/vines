@@ -16,7 +16,7 @@ class Filter
     if @icon
       new Button @icon, ICONS.search,
         scale: 0.5
-        translation: '-8 -8'
+        translation: '-16,-16'
 
     form.submit -> false
     text.keyup  => this.filter(text)

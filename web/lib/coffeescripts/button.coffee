@@ -8,13 +8,15 @@ class Button
   draw: ->
     paper = Raphael @node.get(0)
 
+    transform = "s#{@options.scale || 0.85}"
+    transform += ",t#{@options.translation}" if @options.translation
+
     icon = paper.path(@path).attr
       fill: @options.fill || '#000'
       stroke: @options.stroke || '#fff'
       'stroke-width': @options['stroke-width'] || 0.3
       opacity: @options.opacity || 0.6
-      scale: @options.scale || 0.85
-      translation: @options.translation || ''
+      transform: transform
 
     @node.hover(
       -> icon.animate(opacity: 1.0, 200),

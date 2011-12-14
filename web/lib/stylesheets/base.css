@@ -208,7 +208,7 @@ optgroup option {
 #navbar #nav-links li a svg {
   height: 32px;
   width: 32px;
-  position: absolute;
+  position: absolute !important;
   left: 33px;
   top: 4px;
 }
