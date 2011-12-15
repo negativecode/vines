@@ -32,7 +32,8 @@ class LoginPage
     $('#container').hide().empty()
     $("""
       <form id="login-form">
-        <h1>vines&gt;</h1>
+        <div id="icon"></div>
+        <h1>vines</h1>
         <fieldset id="login-form-controls">
           <input id="jid" name="jid" type="email" maxlength="1024" value="#{jid}" placeholder="Your user name"/>
           <input id="password" name="password" type="password" maxlength="1024" placeholder="Your password"/>
@@ -46,6 +47,18 @@ class LoginPage
     $('#jid').keydown      -> $('#error').fadeOut()
     $('#password').keydown -> $('#error').fadeOut()
     this.resize()
+    this.icon()
+
+  icon: ->
+    opts =
+      fill: '90-#ccc-#fff'
+      stroke: '#fff'
+      'stroke-width': 1.1
+      opacity: 0.95
+      scale: 3.0
+      translation: '10,8'
+      animate: false
+    new Button('#icon', ICONS.chat, opts)
 
   resize: ->
     win  = $ window

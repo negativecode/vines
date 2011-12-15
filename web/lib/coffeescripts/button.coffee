@@ -3,6 +3,7 @@ class Button
     @node = $ node
     @path = path
     @options = options || {}
+    @options.animate = true unless @options.animate?
     this.draw()
 
   draw: ->
@@ -18,6 +19,7 @@ class Button
       opacity: @options.opacity || 0.6
       transform: transform
 
-    @node.hover(
-      -> icon.animate(opacity: 1.0, 200),
-      -> icon.animate(opacity: 0.6, 200))
+    if @options.animate
+      @node.hover(
+        -> icon.animate(opacity: 1.0, 200),
+        -> icon.animate(opacity: 0.6, 200))

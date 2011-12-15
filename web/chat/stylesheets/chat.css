@@ -47,7 +47,10 @@
   content: '\2014 ';
 }
 #chat-page #message-form {
-  background: #f8f8f8;
+  background: #f8f8f8 -moz-linear-gradient(rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.05));
+  background: #f8f8f8 -ms-linear-gradient(rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.05));
+  background: #f8f8f8 -o-linear-gradient(rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.05));
+  background: #f8f8f8 -webkit-linear-gradient(rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.05));
   border-top: 1px solid #dfdfdf;
   height: 50px;
   position: absolute;
