@@ -15,7 +15,8 @@ module Vines
               query.default_namespace = NS
               if to_pubsub_domain?
                 identity(query, 'pubsub', 'service')
-                features(query, :disco_info, :ping, :pubsub)
+                pubsub = [:pubsub_create, :pubsub_delete, :pubsub_instant, :pubsub_item_ids, :pubsub_publish, :pubsub_subscribe]
+                features(query, :disco_info, :ping, :pubsub, *pubsub)
               else
                 identity(query, 'server', 'im')
                 features = [:disco_info, :disco_items, :ping, :vcard, :version]
