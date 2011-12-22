@@ -1,5 +1,6 @@
 # encoding: UTF-8
 
+require 'tmpdir'
 require 'vines'
 require 'ext/nokogiri'
 require 'minitest/autorun'
@@ -24,7 +25,7 @@ class DiscoItemsTest < MiniTest::Unit::TestCase
 
     config = Vines::Config.new do
       host 'wonderland.lit' do
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
         components 'tea' => 'secr3t', 'cake' => 'passw0rd'
       end
     end

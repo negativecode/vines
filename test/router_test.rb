@@ -1,5 +1,6 @@
 # encoding: UTF-8
 
+require 'tmpdir'
 require 'vines'
 require 'minitest/autorun'
 
@@ -8,7 +9,7 @@ class RouterTest < MiniTest::Unit::TestCase
     @alice = Vines::JID.new('alice@wonderland.lit/tea')
     @config = Vines::Config.new do
       host 'wonderland.lit' do
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
       end
     end
     @router = Vines::Router.new(@config)

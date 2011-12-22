@@ -1,5 +1,6 @@
 # encoding: UTF-8
 
+require 'tmpdir'
 require 'vines'
 require 'ext/nokogiri'
 require 'minitest/autorun'
@@ -9,7 +10,7 @@ class DeletePubSubTest < MiniTest::Unit::TestCase
     @user = Vines::User.new(jid: 'alice@wonderland.lit/tea')
     @config = Vines::Config.new do
       host 'wonderland.lit' do
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
         pubsub 'games'
       end
     end

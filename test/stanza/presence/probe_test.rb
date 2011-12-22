@@ -1,5 +1,6 @@
 # encoding: UTF-8
 
+require 'tmpdir'
 require 'vines'
 require 'ext/nokogiri'
 require 'minitest/autorun'
@@ -10,7 +11,7 @@ class ProbeTest < MiniTest::Unit::TestCase
     @stream = MiniTest::Mock.new
     @config = Vines::Config.new do
       host 'wonderland.lit' do
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
       end
     end
   end

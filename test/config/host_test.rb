@@ -1,5 +1,6 @@
 # encoding: UTF-8
 
+require 'tmpdir'
 require 'vines'
 require 'minitest/autorun'
 
@@ -30,8 +31,8 @@ class HostTest < MiniTest::Unit::TestCase
     assert_raises(RuntimeError) do
       Vines::Config.new do
         host 'wonderland.lit' do
-          storage('fs') { dir '.' }
-          storage('fs') { dir '.' }
+          storage('fs') { dir Dir.tmpdir }
+          storage('fs') { dir Dir.tmpdir }
         end
       end
     end
@@ -41,7 +42,7 @@ class HostTest < MiniTest::Unit::TestCase
     config = Vines::Config.new do
       host 'wonderland.lit' do
         storage 'fs' do
-          dir '.'
+          dir Dir.tmpdir
         end
       end
     end
@@ -51,7 +52,7 @@ class HostTest < MiniTest::Unit::TestCase
   def test_ldap_added_to_storage
     config = Vines::Config.new do
       host 'wonderland.lit' do
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
         # added after storage
         ldap 'ldap.wonderland.lit', 1636 do
           tls true
@@ -76,7 +77,7 @@ class HostTest < MiniTest::Unit::TestCase
           name_attr 'cn'
         end
         # added before storage
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
       end
     end
     %w[wonderland.lit verona.lit].each do |domain|
@@ -89,7 +90,7 @@ class HostTest < MiniTest::Unit::TestCase
     assert_raises(RuntimeError) do
       Vines::Config.new do
         host 'wonderland.lit' do
-          storage(:fs) { dir '.' }
+          storage(:fs) { dir Dir.tmpdir }
           components '' => 'secr3t'
         end
       end
@@ -100,7 +101,7 @@ class HostTest < MiniTest::Unit::TestCase
     assert_raises(RuntimeError) do
       Vines::Config.new do
         host 'wonderland.lit' do
-          storage(:fs) { dir '.' }
+          storage(:fs) { dir Dir.tmpdir }
           components nil => 'secr3t'
         end
       end
@@ -111,7 +112,7 @@ class HostTest < MiniTest::Unit::TestCase
     assert_raises(RuntimeError) do
       Vines::Config.new do
         host 'wonderland.lit' do
-          storage(:fs) { dir '.' }
+          storage(:fs) { dir Dir.tmpdir }
           components 'tea' => ''
         end
       end
@@ -122,7 +123,7 @@ class HostTest < MiniTest::Unit::TestCase
     assert_raises(RuntimeError) do
       Vines::Config.new do
         host 'wonderland.lit' do
-          storage(:fs) { dir '.' }
+          storage(:fs) { dir Dir.tmpdir }
           components 'tea' => nil
         end
       end
@@ -133,7 +134,7 @@ class HostTest < MiniTest::Unit::TestCase
     assert_raises(RuntimeError) do
       Vines::Config.new do
         host 'wonderland.lit' do
-          storage(:fs) { dir '.' }
+          storage(:fs) { dir Dir.tmpdir }
           components 'tea' => 'one'
           components 'TEA' => 'two'
         end
@@ -145,7 +146,7 @@ class HostTest < MiniTest::Unit::TestCase
     assert_raises(RuntimeError) do
       Vines::Config.new do
         host 'wonderland.lit' do
-          storage(:fs) { dir '.' }
+          storage(:fs) { dir Dir.tmpdir }
           components 'tea' => 'one', 'TEA' => 'two'
         end
       end
@@ -156,7 +157,7 @@ class HostTest < MiniTest::Unit::TestCase
     assert_raises(RuntimeError) do
       Vines::Config.new do
         host 'wonderland.lit' do
-          storage(:fs) { dir '.' }
+          storage(:fs) { dir Dir.tmpdir }
           components 'tea' => 'one'
           components :TEA => 'two'
         end
@@ -168,7 +169,7 @@ class HostTest < MiniTest::Unit::TestCase
     assert_raises(ArgumentError) do
       Vines::Config.new do
         host 'wonderland.lit ' do
-          storage(:fs) { dir '.' }
+          storage(:fs) { dir Dir.tmpdir }
         end
       end
     end
@@ -178,7 +179,7 @@ class HostTest < MiniTest::Unit::TestCase
     assert_raises(RuntimeError) do
       Vines::Config.new do
         host 'alice@wonderland.lit' do
-          storage(:fs) { dir '.' }
+          storage(:fs) { dir Dir.tmpdir }
         end
       end
     end
@@ -188,7 +189,7 @@ class HostTest < MiniTest::Unit::TestCase
     assert_raises(ArgumentError) do
       Vines::Config.new do
         host 'wonderland.lit' do
-          storage(:fs) { dir '.' }
+          storage(:fs) { dir Dir.tmpdir }
           components 'exam ple' => 'one'
         end
       end
@@ -199,7 +200,7 @@ class HostTest < MiniTest::Unit::TestCase
     assert_raises(RuntimeError) do
       Vines::Config.new do
         host 'wonderland.lit' do
-          storage(:fs) { dir '.' }
+          storage(:fs) { dir Dir.tmpdir }
           components 'alice@example' => 'one'
         end
       end
@@ -210,7 +211,7 @@ class HostTest < MiniTest::Unit::TestCase
     assert_raises(RuntimeError) do
       Vines::Config.new do
         host 'wonderland.lit' do
-          storage(:fs) { dir '.' }
+          storage(:fs) { dir Dir.tmpdir }
           components 'exam.ple' => 'one'
         end
       end
@@ -220,7 +221,7 @@ class HostTest < MiniTest::Unit::TestCase
   def test_case_insensitive_component_name
     config = Vines::Config.new do
       host 'WONDERLAND.LIT' do
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
         components 'TEA' => 'secr3t', CAKE: 'Passw0rd'
       end
     end
@@ -234,7 +235,7 @@ class HostTest < MiniTest::Unit::TestCase
   def test_component?
     config = Vines::Config.new do
       host 'wonderland.lit' do
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
         components 'tea' => 'secr3t', cake: 'passw0rd'
       end
     end
@@ -272,7 +273,7 @@ class HostTest < MiniTest::Unit::TestCase
     assert_raises(ArgumentError) do
       Vines::Config.new do
         host 'wonderland.lit' do
-          storage(:fs) { dir '.' }
+          storage(:fs) { dir Dir.tmpdir }
           pubsub 'exam ple'
         end
       end
@@ -283,7 +284,7 @@ class HostTest < MiniTest::Unit::TestCase
     assert_raises(RuntimeError) do
       Vines::Config.new do
         host 'wonderland.lit' do
-          storage(:fs) { dir '.' }
+          storage(:fs) { dir Dir.tmpdir }
           pubsub 'alice@example'
         end
       end
@@ -294,7 +295,7 @@ class HostTest < MiniTest::Unit::TestCase
     assert_raises(RuntimeError) do
       Vines::Config.new do
         host 'wonderland.lit' do
-          storage(:fs) { dir '.' }
+          storage(:fs) { dir Dir.tmpdir }
           pubsub 'exam.ple'
         end
       end
@@ -304,7 +305,7 @@ class HostTest < MiniTest::Unit::TestCase
   def test_case_insensitive_pubsub_name
     config = Vines::Config.new do
       host 'WONDERLAND.LIT' do
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
         pubsub 'TEA', :CAKE
       end
     end
@@ -318,7 +319,7 @@ class HostTest < MiniTest::Unit::TestCase
   def test_pubsub?
     config = Vines::Config.new do
       host 'wonderland.lit' do
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
         pubsub 'tea', :cake
       end
     end
@@ -344,7 +345,7 @@ class HostTest < MiniTest::Unit::TestCase
   def test_default_private_storage_is_off
     config = Vines::Config.new do
       host 'wonderland.lit' do
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
       end
     end
     host = config.vhosts['wonderland.lit']
@@ -356,7 +357,7 @@ class HostTest < MiniTest::Unit::TestCase
     config = Vines::Config.new do
       host 'wonderland.lit' do
         private_storage true
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
       end
     end
     host = config.vhosts['wonderland.lit']

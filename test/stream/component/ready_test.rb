@@ -1,5 +1,6 @@
 # encoding: UTF-8
 
+require 'tmpdir'
 require 'vines'
 require 'ext/nokogiri'
 require 'minitest/autorun'
@@ -10,7 +11,7 @@ class ComponentReadyTest < MiniTest::Unit::TestCase
     @state  = Vines::Stream::Component::Ready.new(@stream, nil)
     @config = Vines::Config.new do
       host 'wonderland.lit' do
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
       end
     end
   end

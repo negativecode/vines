@@ -1,5 +1,6 @@
 # encoding: UTF-8
 
+require 'tmpdir'
 require 'vines'
 require 'ext/nokogiri'
 require 'minitest/autorun'
@@ -9,7 +10,7 @@ class MessageTest < MiniTest::Unit::TestCase
     @stream = MiniTest::Mock.new
     @config = Vines::Config.new do
       host 'wonderland.lit' do
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
       end
     end
   end
@@ -82,7 +83,7 @@ class MessageTest < MiniTest::Unit::TestCase
     recipient.expect(:write, nil, [expected])
 
     @config.host 'verona.lit' do
-      storage(:fs) { dir '.' }
+      storage(:fs) { dir Dir.tmpdir }
     end
 
     @stream.expect(:config, @config)

@@ -1,5 +1,6 @@
 # encoding: UTF-8
 
+require 'tmpdir'
 require 'vines'
 require 'minitest/autorun'
 
@@ -17,12 +18,12 @@ class ConfigTest < MiniTest::Unit::TestCase
       Vines::Config.new do
         host 'wonderland.lit' do
           storage 'fs' do
-            dir '.'
+            dir Dir.tmpdir
           end
         end
         host 'WONDERLAND.LIT' do
           storage 'fs' do
-            dir '.'
+            dir Dir.tmpdir
           end
         end
       end
@@ -34,7 +35,7 @@ class ConfigTest < MiniTest::Unit::TestCase
       Vines::Config.new do
         host 'wonderland.lit', 'wonderland.lit' do
           storage 'fs' do
-            dir '.'
+            dir Dir.tmpdir
           end
         end
       end
@@ -45,7 +46,7 @@ class ConfigTest < MiniTest::Unit::TestCase
     config = Vines::Config.configure do
       host 'wonderland.lit' do
         storage :fs do
-          dir '.'
+          dir Dir.tmpdir
         end
       end
     end
@@ -56,7 +57,7 @@ class ConfigTest < MiniTest::Unit::TestCase
   def test_vhost
     config = Vines::Config.new do
       host 'wonderland.lit' do
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
       end
     end
     assert_equal ['wonderland.lit'], config.vhosts.keys
@@ -69,7 +70,7 @@ class ConfigTest < MiniTest::Unit::TestCase
   def test_port_lookup
     config = Vines::Config.new do
       host 'wonderland.lit' do
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
       end
       client
     end
@@ -82,7 +83,7 @@ class ConfigTest < MiniTest::Unit::TestCase
     assert_raises(RuntimeError) do
       Vines::Config.new do
         host 'wonderland.lit' do
-          storage(:fs) { dir '.' }
+          storage(:fs) { dir Dir.tmpdir }
         end
         client
         client
@@ -94,7 +95,7 @@ class ConfigTest < MiniTest::Unit::TestCase
     assert_raises(RuntimeError) do
       Vines::Config.new do
         host 'wonderland.lit' do
-          storage(:fs) { dir '.' }
+          storage(:fs) { dir Dir.tmpdir }
         end
         server
         server
@@ -106,7 +107,7 @@ class ConfigTest < MiniTest::Unit::TestCase
     assert_raises(RuntimeError) do
       Vines::Config.new do
         host 'wonderland.lit' do
-          storage(:fs) { dir '.' }
+          storage(:fs) { dir Dir.tmpdir }
         end
         http
         http
@@ -118,7 +119,7 @@ class ConfigTest < MiniTest::Unit::TestCase
     assert_raises(RuntimeError) do
       Vines::Config.new do
         host 'wonderland.lit' do
-          storage(:fs) { dir '.' }
+          storage(:fs) { dir Dir.tmpdir }
         end
         component
         component
@@ -130,7 +131,7 @@ class ConfigTest < MiniTest::Unit::TestCase
     assert_raises(RuntimeError) do
       Vines::Config.new do
         host 'wonderland.lit' do
-          storage(:fs) { dir '.' }
+          storage(:fs) { dir Dir.tmpdir }
         end
         cluster {}
         cluster {}
@@ -141,7 +142,7 @@ class ConfigTest < MiniTest::Unit::TestCase
   def test_missing_cluster
     config = Vines::Config.new do
       host 'wonderland.lit' do
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
       end
     end
     assert_nil config.cluster
@@ -151,7 +152,7 @@ class ConfigTest < MiniTest::Unit::TestCase
   def test_cluster
     config = Vines::Config.new do
       host 'wonderland.lit' do
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
       end
       cluster do
         host 'redis.wonderland.lit'
@@ -171,7 +172,7 @@ class ConfigTest < MiniTest::Unit::TestCase
   def test_default_client
     config = Vines::Config.new do
       host 'wonderland.lit' do
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
       end
       client
     end
@@ -190,7 +191,7 @@ class ConfigTest < MiniTest::Unit::TestCase
   def test_configured_client
     config = Vines::Config.new do
       host 'wonderland.lit' do
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
       end
       client '0.0.0.1', 42 do
         max_stanza_size 60_000
@@ -212,7 +213,7 @@ class ConfigTest < MiniTest::Unit::TestCase
   def test_max_stanza_size
     config = Vines::Config.new do
       host 'wonderland.lit' do
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
       end
       client do
         max_stanza_size 0
@@ -224,7 +225,7 @@ class ConfigTest < MiniTest::Unit::TestCase
   def test_default_server
     config = Vines::Config.new do
       host 'wonderland.lit' do
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
       end
       server
     end
@@ -243,7 +244,7 @@ class ConfigTest < MiniTest::Unit::TestCase
   def test_configured_server
     config = Vines::Config.new do
       host 'wonderland.lit' do
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
       end
       server '0.0.0.1', 42 do
         max_stanza_size 60_000
@@ -270,7 +271,7 @@ class ConfigTest < MiniTest::Unit::TestCase
   def test_default_http
     config = Vines::Config.new do
       host 'wonderland.lit' do
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
       end
       http
     end
@@ -291,7 +292,7 @@ class ConfigTest < MiniTest::Unit::TestCase
   def test_configured_http
     config = Vines::Config.new do
       host 'wonderland.lit' do
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
       end
       http '0.0.0.1', 42 do
         bind '/custom'
@@ -317,7 +318,7 @@ class ConfigTest < MiniTest::Unit::TestCase
   def test_default_component
     config = Vines::Config.new do
       host 'wonderland.lit' do
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
       end
       component
     end
@@ -335,7 +336,7 @@ class ConfigTest < MiniTest::Unit::TestCase
   def test_configured_component
     config = Vines::Config.new do
       host 'wonderland.lit' do
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
       end
       component '0.0.0.1', 42 do
         max_stanza_size 60_000
@@ -357,7 +358,7 @@ class ConfigTest < MiniTest::Unit::TestCase
       config = Vines::Config.new do
         log 'bogus'
         host 'wonderland.lit' do
-          storage(:fs) { dir '.' }
+          storage(:fs) { dir Dir.tmpdir }
         end
       end
     end
@@ -367,7 +368,7 @@ class ConfigTest < MiniTest::Unit::TestCase
     config = Vines::Config.new do
       log :error
       host 'wonderland.lit' do
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
       end
     end
     assert_equal Logger::ERROR, Class.new.extend(Vines::Log).log.level
@@ -376,11 +377,11 @@ class ConfigTest < MiniTest::Unit::TestCase
   def test_cross_domain_messages
     config = Vines::Config.new do
       host 'wonderland.lit' do
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
       end
       host 'verona.lit' do
         cross_domain_messages true
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
       end
     end
     refute config.vhosts['wonderland.lit'].cross_domain_messages?
@@ -390,7 +391,7 @@ class ConfigTest < MiniTest::Unit::TestCase
   def test_local_jid?
     config = Vines::Config.new do
       host 'wonderland.lit', 'verona.lit' do
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
       end
     end
     refute config.local_jid?(nil)
@@ -407,7 +408,7 @@ class ConfigTest < MiniTest::Unit::TestCase
   def test_missing_addresses_not_allowed
     config = Vines::Config.new do
       host 'wonderland.lit', 'verona.lit' do
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
       end
     end
     refute config.allowed?(nil, nil)
@@ -417,7 +418,7 @@ class ConfigTest < MiniTest::Unit::TestCase
   def test_same_domain_allowed
     config = Vines::Config.new do
       host 'wonderland.lit', 'verona.lit' do
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
       end
     end
     alice = Vines::JID.new('alice@wonderland.lit')
@@ -431,7 +432,7 @@ class ConfigTest < MiniTest::Unit::TestCase
     config = Vines::Config.new do
       host 'wonderland.lit', 'verona.lit' do
         cross_domain_messages true
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
       end
     end
     alice = Vines::JID.new('alice@wonderland.lit')
@@ -444,11 +445,11 @@ class ConfigTest < MiniTest::Unit::TestCase
     config = Vines::Config.new do
       host 'wonderland.lit' do
         cross_domain_messages true
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
       end
       host 'verona.lit' do
         cross_domain_messages false
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
       end
     end
     alice = Vines::JID.new('alice@wonderland.lit')
@@ -461,7 +462,7 @@ class ConfigTest < MiniTest::Unit::TestCase
     config = Vines::Config.new do
       host 'wonderland.lit' do
         cross_domain_messages false
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
         components 'tea' => 'secr3t', cake: 'passw0rd'
       end
     end
@@ -476,7 +477,7 @@ class ConfigTest < MiniTest::Unit::TestCase
     config = Vines::Config.new do
       host 'wonderland.lit', 'verona.lit' do
         cross_domain_messages true
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
         components 'tea' => 'secr3t', cake: 'passw0rd'
       end
     end
@@ -490,14 +491,14 @@ class ConfigTest < MiniTest::Unit::TestCase
     config = Vines::Config.new do
       host 'wonderland.lit' do
         cross_domain_messages true
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
         components 'tea' => 'secr3t', cake: 'passw0rd'
       end
     end
     config = Vines::Config.new do
       host 'verona.lit' do
         cross_domain_messages false
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
         components 'party' => 'secr3t'
       end
     end
@@ -511,7 +512,7 @@ class ConfigTest < MiniTest::Unit::TestCase
     config = Vines::Config.new do
       host 'wonderland.lit' do
         cross_domain_messages false
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
         components 'tea' => 'secr3t', cake: 'passw0rd'
       end
     end
@@ -525,7 +526,7 @@ class ConfigTest < MiniTest::Unit::TestCase
     config = Vines::Config.new do
       host 'wonderland.lit', 'verona.lit' do
         cross_domain_messages true
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
         components 'tea' => 'secr3t', cake: 'passw0rd'
       end
     end
@@ -539,14 +540,14 @@ class ConfigTest < MiniTest::Unit::TestCase
     config = Vines::Config.new do
       host 'wonderland.lit' do
         cross_domain_messages true
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
         components 'tea' => 'secr3t', cake: 'passw0rd'
       end
     end
     config = Vines::Config.new do
       host 'verona.lit' do
         cross_domain_messages false
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
       end
     end
     alice = Vines::JID.new('alice@tea.wonderland.lit')
@@ -559,12 +560,12 @@ class ConfigTest < MiniTest::Unit::TestCase
     config = Vines::Config.new do
       host 'wonderland.lit' do
         cross_domain_messages true
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
         components 'tea' => 'secr3t', cake: 'passw0rd'
       end
       host 'verona.lit' do
         cross_domain_messages false
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
         components 'tea' => 'secr3t', cake: 'passw0rd'
       end
     end
@@ -581,7 +582,7 @@ class ConfigTest < MiniTest::Unit::TestCase
     config = Vines::Config.new do
       host 'wonderland.lit' do
         cross_domain_messages false
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
         pubsub 'games'
       end
     end
@@ -595,14 +596,14 @@ class ConfigTest < MiniTest::Unit::TestCase
     config = Vines::Config.new do
       host 'wonderland.lit' do
         cross_domain_messages true
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
         pubsub 'games'
       end
     end
     config = Vines::Config.new do
       host 'verona.lit' do
         cross_domain_messages false
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
       end
     end
     pubsub = Vines::JID.new('games.wonderland.lit')
@@ -615,12 +616,12 @@ class ConfigTest < MiniTest::Unit::TestCase
     config = Vines::Config.new do
       host 'wonderland.lit' do
         cross_domain_messages true
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
         pubsub 'games'
       end
       host 'verona.lit' do
         cross_domain_messages false
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
         pubsub 'games'
       end
     end
@@ -637,11 +638,11 @@ class ConfigTest < MiniTest::Unit::TestCase
     config = Vines::Config.new do
       host 'wonderland.lit' do
         cross_domain_messages true
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
       end
       host 'verona.lit' do
         cross_domain_messages false
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
       end
     end
     alice = Vines::JID.new('alice@wonderland.lit')
@@ -657,7 +658,7 @@ class ConfigTest < MiniTest::Unit::TestCase
     config = Vines::Config.new do
       host 'wonderland.lit' do
         cross_domain_messages true
-        storage(:fs) { dir '.' }
+        storage(:fs) { dir Dir.tmpdir }
       end
     end
     romeo = Vines::JID.new('romeo@verona.lit')

@@ -29,7 +29,7 @@ Vines::Config.configure do
   #   private_storage false
   #   cross_domain_messages false
   #   storage 'fs' do
-  #     dir 'data/users'
+  #     dir 'data'
   #   end
   #   components 'tea'  => 'secr3t',
   #              'cake' => 'passw0rd'
@@ -40,7 +40,7 @@ Vines::Config.configure do
     cross_domain_messages false
     private_storage false
     storage 'fs' do
-      dir 'data/users'
+      dir 'data'
     end
     # components 'tea'  => 'secr3t',
     #            'cake' => 'passw0rd'
@@ -56,7 +56,7 @@ Vines::Config.configure do
   #   cross_domain_messages false
   #   private_storage false
   #   storage 'fs' do
-  #     dir 'data/users'
+  #     dir 'data'
   #   end
   #   ldap 'ldap.wonderland.lit', 636 do
   #     dn 'cn=Directory Manager'
@@ -119,7 +119,7 @@ end
 # Available storage implementations:
 
 #storage 'fs' do
-#  dir 'data/users'
+#  dir 'data'
 #end
 
 #storage 'couchdb' do
