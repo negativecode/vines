@@ -55,7 +55,6 @@ module Vines
 end
 
 %w[
-  resolv-replace
   active_record
   base64
   bcrypt
@@ -67,9 +66,11 @@ end
   fileutils
   http/parser
   logger
+  mongo
   net/ldap
   nokogiri
   openssl
+  resolv
   set
   socket
   uri
@@ -112,6 +113,7 @@ end
   vines/storage/couchdb
   vines/storage/ldap
   vines/storage/local
+  vines/storage/mongodb
   vines/storage/redis
   vines/storage/sql
 

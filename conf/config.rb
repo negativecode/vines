@@ -131,6 +131,16 @@ end
 #  password ''
 #end
 
+#storage 'mongodb' do
+#  host 'localhost'
+#  port 27017
+#  database 'xmpp'
+#  tls true
+#  username ''
+#  password ''
+#  pool 5
+#end
+
 #storage 'redis' do
 #  host 'localhost'
 #  port 6379
