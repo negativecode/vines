@@ -13,8 +13,8 @@ module Vines
       end
       class Group < ActiveRecord::Base; end
       class User < ActiveRecord::Base
-        has_many :contacts
-        has_many :fragments
+        has_many :contacts,  :dependent => :destroy
+        has_many :fragments, :dependent => :delete_all
       end
 
       # Wrap the method with ActiveRecord connection pool logic, so we properly
