@@ -5,7 +5,7 @@ module Vines
     class MongoDB < Storage
       register :mongodb
 
-      %w[host port database tls username password pool].each do |name|
+      %w[database tls username password pool].each do |name|
         define_method(name) do |*args|
           if args.first
             @config[name.to_sym] = args.first
@@ -16,9 +16,16 @@ module Vines
       end
 
       def initialize(&block)
-        @config = {}
+        @config, @hosts = {}, []
         instance_eval(&block)
-        [:host, :port, :database].each {|key| raise "Must provide #{key}" unless @config[key] }
+        raise "Must provide database" unless @config[:database]
+        raise "Must provide at least one host connection" if @hosts.empty?
+      end
+
+      def host(name, port)
+        pair = [name, port]
+        raise "duplicate hosts not allowed: #{name}:#{port}" if @hosts.include?(pair)
+        @hosts << pair
       end
 
       def find_user(jid)
@@ -109,7 +116,11 @@ module Vines
           pool_size: @config[:pool] || 5,
           ssl: @config[:tls]
         }
-        conn = Mongo::Connection.new(@config[:host], @config[:port], opts)
+        conn = if @hosts.size == 1
+          Mongo::Connection.new(@hosts.first[0], @hosts.first[1], opts)
+        else
+          Mongo::ReplSetConnection.new(*@hosts, opts)
+        end
         conn.db(@config[:database]).tap do |db|
           user = @config[:username] || ''
           pass = @config[:password] || ''

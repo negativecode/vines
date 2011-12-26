@@ -132,8 +132,8 @@ end
 #end
 
 #storage 'mongodb' do
-#  host 'localhost'
-#  port 27017
+#  host 'localhost', 27017
+#  host 'localhost', 27018 # optional, connects to replica set
 #  database 'xmpp'
 #  tls true
 #  username ''

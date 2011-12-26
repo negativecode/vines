@@ -43,8 +43,7 @@ class MongoDBTest < MiniTest::Unit::TestCase
 
   def storage
     storage = Vines::Storage::MongoDB.new do
-      host 'localhost'
-      port 27017
+      host 'localhost', 27017
       database 'xmpp_testcase'
     end
     def storage.db
@@ -55,12 +54,26 @@ class MongoDBTest < MiniTest::Unit::TestCase
 
   def test_init
     EMLoop.new do
+      # missing database
       assert_raises(RuntimeError) { Vines::Storage::MongoDB.new {} }
-      assert_raises(RuntimeError) { Vines::Storage::MongoDB.new { host 'localhost' } }
+      # missing a host
+      assert_raises(RuntimeError) { Vines::Storage::MongoDB.new { database 'test' } }
+      # duplicate hosts
+      assert_raises(RuntimeError) do
+        Vines::Storage::MongoDB.new do
+          host 'localhost', 27017
+          host 'localhost', 27017
+          database 'test'
+        end
+      end
       # shouldn't raise an error
       Vines::Storage::MongoDB.new do
-        host 'localhost'
-        port '27017'
+        host 'localhost', 27017
+        database 'test'
+      end
+      Vines::Storage::MongoDB.new do
+        host 'localhost', 27017
+        host 'localhost', 27018
         database 'test'
       end
     end
