@@ -22,6 +22,7 @@ module Vines
 
     def initialize(&block)
       @vhosts, @ports, @cluster = {}, {}, nil
+      @null = Storage::Null.new
       @router = Router.new(self)
       instance_eval(&block)
       raise "must define at least one virtual host" if @vhosts.empty?
@@ -69,11 +70,11 @@ module Vines
       @vhosts.key?(domain.to_s)
     end
 
-    # Returns the storage system for the domain or nil if domain is not hosted
-    # at this server.
+    # Returns the storage system for the domain or a Storage::Null instance if
+    # the domain is not hosted at this server.
     def storage(domain)
       host = @vhosts[domain.to_s]
-      host.storage if host
+      host ? host.storage : @null
     end
 
     # Returns the PubSub system for the domain or nil if pubsub is not enabled
@@ -140,11 +141,9 @@ module Vines
       return false                      if to.empty? || from.empty?
       return true                       if to.domain == from.domain # same domain always allowed
       return cross_domain?(to, from)    if local_jid?(to, from)     # both virtual hosted here
-      return check_components(to, from) if component?(to, from)     # component to component
-      return check_component(to, from)  if component?(to)           # to component
-      return check_component(from, to)  if component?(from)         # from component
-      return check_component(to, from)  if pubsub?(to)              # to pubsub service
-      return check_component(from, to)  if pubsub?(from)            # from pubsub service
+      return check_subdomains(to, from) if subdomain?(to, from)     # component/pubsub to component/pubsub
+      return check_subdomain(to, from)  if subdomain?(to)           # to component/pubsub
+      return check_subdomain(from, to)  if subdomain?(from)         # from component/pubsub
       return cross_domain?(to)          if local_jid?(to)           # from is remote
       return cross_domain?(from)        if local_jid?(from)         # to is remote
       return false
@@ -152,19 +151,38 @@ module Vines
 
     private
 
-    def check_components(to, from)
-      comp1, comp2 = strip_domain(to), strip_domain(from)
-      (comp1 == comp2) || cross_domain?(comp1, comp2)
+    # Return true if all of the JIDs are some kind of subdomain resource hosted
+    # here (either a component or a pubsub domain).
+    def subdomain?(*jids)
+      !jids.flatten.index do |jid|
+        !component?(jid) && !pubsub?(jid)
+      end
     end
 
-    def check_component(component_jid, jid)
-      comp = strip_domain(component_jid)
+    # Return true if the third-level subdomain JIDs (components and pubsubs)
+    # are allowed to communicate with each other. For example, a
+    # tea.wonderland.lit component should be allowed to send messages to
+    # pubsub.wonderland.lit because they share the second-level wonderland.lit
+    # domain.
+    def check_subdomains(to, from)
+      sub1, sub2 = strip_domain(to), strip_domain(from)
+      (sub1 == sub2) || cross_domain?(sub1, sub2)
+    end
+
+    # Return true if the third-level subdomain JID (component or pubsub) is
+    # allowed to communicate with the other JID. For example,
+    # pubsub.wonderland.lit should be allowed to send messages to
+    # alice@wonderland.lit because they share the second-level wonderland.lit
+    # domain.
+    def check_subdomain(subdomain, jid)
+      comp = strip_domain(subdomain)
       return true if comp.domain == jid.domain
       local_jid?(jid) ? cross_domain?(comp, jid) : cross_domain?(comp)
     end
 
-    # Return the JIDs domain with the first subdomain stripped off. For example,
-    # alice@tea.wonderland.lit returns wonderland.lit.
+    # Return the third-level JID's domain with the first subdomain stripped off
+    # to create a second-level domain. For example, alice@tea.wonderland.lit
+    # returns wonderland.lit.
     def strip_domain(jid)
       domain = jid.domain.split('.').drop(1).join('.')
       JID.new(domain)

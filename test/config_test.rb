@@ -374,6 +374,16 @@ class ConfigTest < MiniTest::Unit::TestCase
     assert_equal Logger::ERROR, Class.new.extend(Vines::Log).log.level
   end
 
+  def test_null_storage
+    config = Vines::Config.new do
+      host 'wonderland.lit' do
+        storage(:fs) { dir Dir.tmpdir }
+      end
+    end
+    assert_equal Vines::Storage::Local, config.storage('wonderland.lit').class
+    assert_equal Vines::Storage::Null, config.storage('bogus').class
+  end
+
   def test_cross_domain_messages
     config = Vines::Config.new do
       host 'wonderland.lit' do
@@ -458,6 +468,65 @@ class ConfigTest < MiniTest::Unit::TestCase
     refute config.allowed?(romeo, alice)
   end
 
+  def test_same_domain_component_to_pubsub_allowed
+    config = Vines::Config.new do
+      host 'wonderland.lit' do
+        cross_domain_messages false
+        storage(:fs) { dir Dir.tmpdir }
+        components 'tea' => 'secr3t', cake: 'passw0rd'
+        pubsub 'games'
+      end
+    end
+    alice = Vines::JID.new('alice@tea.wonderland.lit')
+    tea = Vines::JID.new('tea.wonderland.lit')
+    pubsub = Vines::JID.new('games.wonderland.lit')
+    assert config.allowed?(alice, pubsub)
+    assert config.allowed?(pubsub, alice)
+    assert config.allowed?(tea, pubsub)
+    assert config.allowed?(pubsub, tea)
+  end
+
+  def test_cross_domain_component_to_pubsub_allowed
+    config = Vines::Config.new do
+      host 'wonderland.lit', 'verona.lit' do
+        cross_domain_messages true
+        storage(:fs) { dir Dir.tmpdir }
+        components 'tea' => 'secr3t', cake: 'passw0rd'
+        pubsub 'games'
+      end
+    end
+    alice = Vines::JID.new('alice@tea.wonderland.lit')
+    tea = Vines::JID.new('tea.wonderland.lit')
+    pubsub = Vines::JID.new('games.verona.lit')
+    assert config.allowed?(alice, pubsub)
+    assert config.allowed?(pubsub, alice)
+    assert config.allowed?(tea, pubsub)
+    assert config.allowed?(pubsub, tea)
+  end
+
+  def test_cross_domain_component_to_pubsub_not_allowed
+    config = Vines::Config.new do
+      host 'wonderland.lit' do
+        cross_domain_messages true
+        storage(:fs) { dir Dir.tmpdir }
+        components 'tea' => 'secr3t', cake: 'passw0rd'
+        pubsub 'games'
+      end
+      host 'verona.lit' do
+        cross_domain_messages false
+        storage(:fs) { dir Dir.tmpdir }
+        components 'party' => 'secr3t'
+      end
+    end
+    romeo = Vines::JID.new('romeo@party.verona.lit')
+    party = Vines::JID.new('party.verona.lit')
+    pubsub = Vines::JID.new('games.wonderland.lit')
+    refute config.allowed?(romeo, pubsub)
+    refute config.allowed?(pubsub, romeo)
+    refute config.allowed?(party, pubsub)
+    refute config.allowed?(pubsub, party)
+  end
+
   def test_same_domain_component_to_component_allowed
     config = Vines::Config.new do
       host 'wonderland.lit' do
@@ -494,8 +563,6 @@ class ConfigTest < MiniTest::Unit::TestCase
         storage(:fs) { dir Dir.tmpdir }
         components 'tea' => 'secr3t', cake: 'passw0rd'
       end
-    end
-    config = Vines::Config.new do
       host 'verona.lit' do
         cross_domain_messages false
         storage(:fs) { dir Dir.tmpdir }
@@ -543,8 +610,6 @@ class ConfigTest < MiniTest::Unit::TestCase
         storage(:fs) { dir Dir.tmpdir }
         components 'tea' => 'secr3t', cake: 'passw0rd'
       end
-    end
-    config = Vines::Config.new do
       host 'verona.lit' do
         cross_domain_messages false
         storage(:fs) { dir Dir.tmpdir }
@@ -599,8 +664,6 @@ class ConfigTest < MiniTest::Unit::TestCase
         storage(:fs) { dir Dir.tmpdir }
         pubsub 'games'
       end
-    end
-    config = Vines::Config.new do
       host 'verona.lit' do
         cross_domain_messages false
         storage(:fs) { dir Dir.tmpdir }
