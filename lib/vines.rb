@@ -114,6 +114,7 @@ end
   vines/storage/ldap
   vines/storage/local
   vines/storage/mongodb
+  vines/storage/null
   vines/storage/redis
   vines/storage/sql
 
