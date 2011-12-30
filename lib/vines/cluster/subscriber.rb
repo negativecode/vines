@@ -97,8 +97,7 @@ module Vines
       # streams, for this user.
       def update_user(message)
         jid = JID.new(message['jid']).bare
-        storage = @cluster.storage(jid.domain)
-        if storage && user = storage.find_user(jid)
+        if user = @cluster.storage(jid.domain).find_user(jid)
           @cluster.connected_resources(jid).each do |stream|
             stream.user.update_from(user)
           end
