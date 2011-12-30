@@ -50,6 +50,14 @@ module Vines
       stream.config.local_jid?(*jids)
     end
 
+    # Return true if this stanza is addressed to a pubsub subdomain hosted
+    # at this server. This helps differentiate between IQ stanzas addressed
+    # to the server and stanzas addressed to pubsub domains, both of which must
+    # be handled locally and not routed.
+    def to_pubsub_domain?
+      stream.config.pubsub?(validate_to)
+    end
+
     def route
       stream.router.route(@node)
     end
