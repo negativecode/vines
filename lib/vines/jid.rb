@@ -30,14 +30,28 @@ module Vines
       validate
     end
 
+    # Strip the resource part from this JID and return it as a new
+    # JID object. The new JID contains only the optional node part
+    # and the required domain part from the original. This JID remains
+    # unchanged.
     def bare
       JID.new(@node, @domain)
     end
 
+    # Return true if this is a bare JID without a resource part.
     def bare?
       @resource.nil?
     end
 
+    # Return true if this is a domain-only JID without a node or resource part.
+    def domain?
+      !empty? && to_s == @domain
+    end
+
+    # Return true if this JID is equal to the empty string ''. That is, it's
+    # missing the node, domain, and resource parts that form a valid JID. It
+    # makes for easier error handling to be able to create JID objects from
+    # strings and then check if they're empty rather than nil.
     def empty?
       to_s == ''
     end

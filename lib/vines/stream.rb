@@ -239,9 +239,10 @@ module Vines
       %w[crt key].map {|ext| File.join(VINES_ROOT, 'conf', 'certs', "#{domain}.#{ext}") }
     end
 
+    # Return true if this is a valid domain-only JID that can be used in
+    # stream initiation stanza headers.
     def valid_address?(jid)
-      jid = JID.new(jid) rescue nil
-      jid && !jid.empty?
+      JID.new(jid).domain? rescue false
     end
   end
 end

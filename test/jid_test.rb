@@ -14,6 +14,7 @@ class JidTest < MiniTest::Unit::TestCase
       assert_equal '', jid.to_s
       assert_equal '', jid.bare.to_s
       assert jid.empty?
+      refute jid.domain?
     end
   end
 
@@ -32,6 +33,7 @@ class JidTest < MiniTest::Unit::TestCase
     assert_nil jid.node
     assert_nil jid.resource
     assert_equal jid, jid.bare
+    assert jid.domain?
     refute jid.empty?
   end
 
@@ -42,6 +44,7 @@ class JidTest < MiniTest::Unit::TestCase
     assert_equal 'alice', jid.node
     assert_nil jid.resource
     assert_equal jid, jid.bare
+    refute jid.domain?
     refute jid.empty?
   end
 
@@ -52,6 +55,7 @@ class JidTest < MiniTest::Unit::TestCase
     assert_equal 'alice', jid.node
     assert_nil jid.resource
     assert_equal jid, jid.bare
+    refute jid.domain?
     refute jid.empty?
   end
 
@@ -62,6 +66,7 @@ class JidTest < MiniTest::Unit::TestCase
     assert_equal 'alice', jid.node
     assert_equal 'tea', jid.resource
     refute_equal jid, jid.bare
+    refute jid.domain?
     refute jid.empty?
   end
 
@@ -72,6 +77,7 @@ class JidTest < MiniTest::Unit::TestCase
     assert_equal 'alice', jid.node
     assert_equal 'tea', jid.resource
     refute_equal jid, jid.bare
+    refute jid.domain?
     refute jid.empty?
   end
 
@@ -87,6 +93,7 @@ class JidTest < MiniTest::Unit::TestCase
     assert_nil jid.node
     assert_equal 'wonderland.lit', jid.domain
     assert_equal 'foo/bar@blarg', jid.resource
+    refute jid.domain?
   end
 
   def test_empty_part_raises
