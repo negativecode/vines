@@ -23,13 +23,19 @@ class ServerReadyTest < MiniTest::Unit::TestCase
   end
 
   def test_good_node_processes
+    config = MiniTest::Mock.new
+    config.expect(:local_jid?, true, [Vines::JID.new('romeo@verona.lit')])
+
+    @stream.expect(:config, config)
     @stream.expect(:remote_domain, 'wonderland.lit')
     @stream.expect(:domain, 'verona.lit')
-    @stream.expect(:user=, nil, [Vines::User.new(:jid => 'alice@wonderland.lit')])
+    @stream.expect(:user=, nil, [Vines::User.new(jid: 'alice@wonderland.lit')])
+
     node = node(%Q{<message from="alice@wonderland.lit" to="romeo@verona.lit"/>})
     @state.node(node)
     assert_equal 1, STANZAS.size
     assert @stream.verify
+    assert config.verify
   end
 
   def test_unsupported_stanza_type
