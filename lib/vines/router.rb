@@ -155,17 +155,17 @@ module Vines
     end
 
     def component_stream(to)
-      @components.find do |stream|
+      @components.select do |stream|
         stream.ready? && stream.remote_domain == to.domain
-      end
+      end.sample
     end
 
     def server_stream(to, from)
-      @servers.find do |stream|
+      @servers.select do |stream|
         stream.ready? &&
           stream.remote_domain == to.domain &&
             stream.domain == from.domain
-      end
+      end.sample
     end
 
     def stream_type(connection)

@@ -10,6 +10,7 @@ class RouterTest < MiniTest::Unit::TestCase
     @config = Vines::Config.new do
       host 'wonderland.lit' do
         storage(:fs) { dir Dir.tmpdir }
+        components 'tea' => 'secr3t'
       end
     end
     @router = Vines::Router.new(@config)
@@ -131,6 +132,37 @@ class RouterTest < MiniTest::Unit::TestCase
     assert stream2.verify
   end
 
+  def test_multiple_component_streams_are_load_balanced
+    stream1 = component('tea.wonderland.lit')
+    stream2 = component('tea.wonderland.lit')
+    @router << stream1
+    @router << stream2
+    stanza = Nokogiri::XML('<message from="alice@wonderland.lit" to="tea.wonderland.lit">test</message>').root
+    100.times { @router.route(stanza) }
+
+    assert_equal 100, stream1.count + stream2.count
+    assert stream1.count > 33
+    assert stream2.count > 33
+    assert stream1.verify
+    assert stream2.verify
+  end
+
+  def test_multiple_s2s_streams_are_load_balanced
+    @config.vhosts['wonderland.lit'].cross_domain_messages true
+    stream1 = s2s('wonderland.lit', 'verona.lit')
+    stream2 = s2s('wonderland.lit', 'verona.lit')
+    @router << stream1
+    @router << stream2
+    stanza = Nokogiri::XML('<message from="alice@wonderland.lit" to="romeo@verona.lit">test</message>').root
+    100.times { @router.route(stanza) }
+
+    assert_equal 100, stream1.count + stream2.count
+    assert stream1.count > 33
+    assert stream2.count > 33
+    assert stream1.verify
+    assert stream2.verify
+  end
+
   private
 
   def stream(jid)
@@ -139,5 +171,32 @@ class RouterTest < MiniTest::Unit::TestCase
       stream.expect(:stream_type, :client)
       stream.expect(:user, Vines::User.new(jid: jid))
     end
+  end
+
+  def component(jid)
+    stream = MiniTest::Mock.new
+    stream.expect(:stream_type, :component)
+    stream.expect(:remote_domain, jid)
+    stream.expect(:ready?, true)
+    def stream.count; @count || 0; end
+    def stream.write(stanza)
+      @count ||= 0
+      @count += 1
+    end
+    stream
+  end
+
+  def s2s(domain, remote_domain)
+    stream = MiniTest::Mock.new
+    stream.expect(:stream_type, :server)
+    stream.expect(:domain, domain)
+    stream.expect(:remote_domain, remote_domain)
+    stream.expect(:ready?, true)
+    def stream.count; @count || 0; end
+    def stream.write(stanza)
+      @count ||= 0
+      @count += 1
+    end
+    stream
   end
 end
