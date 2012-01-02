@@ -116,12 +116,12 @@ optgroup option {
 #navbar #logo {
   background: url(../images/logo-small.png) no-repeat;
   color: transparent;
-  height: 30px;
+  height: 40px;
   opacity: 0.2;
   position: absolute;
-  top: 15px;
+  top: 10px;
   right: 10px;
-  width: 117px;
+  width: 125px;
   text-shadow: none;
 }
 #navbar #current-user {
