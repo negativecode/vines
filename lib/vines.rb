@@ -55,7 +55,6 @@ module Vines
 end
 
 %w[
-  base64
   digest/sha1
   eventmachine
   fiber
