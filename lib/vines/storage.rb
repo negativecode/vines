@@ -119,6 +119,25 @@ module Vines
       !!ldap
     end
 
+    # use password hashing method
+    #
+    # For example:
+    # storage 'fs' do
+    #   passwd_type 'bcrypt'
+    #   passwd_type 'sha256', 'some_optional_salt'
+    #   passwd_type 'sha1'
+    # end
+    #
+    def passwd_hash(password)
+      case @passwd_type.to_s
+      when 'sha256'; Digest::SHA256.hexdigest(password + @passwd_salt.to_s)
+      when 'sha1';   Digest::SHA1  .hexdigest(password + @passwd_salt.to_s)
+      else
+        require 'bcrypt' unless defined?(BCrypt)
+        BCrypt::Password.new(password + @passwd_salt.to_s) rescue nil
+      end
+    end
+
     # Validate the username and password pair and return a Vines::User object
     # on success. Return nil on failure.
     #
@@ -131,8 +150,8 @@ module Vines
     # passwords must override this method.
     def authenticate(username, password)
       user = find_user(username)
-      hash = BCrypt::Password.new(user.password) rescue nil
-      (hash && hash == password) ? user : nil
+      hash = passwd_hash(password)
+      (hash && hash == user.password) ? user : nil
     end
     wrap_ldap :authenticate
 

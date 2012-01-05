@@ -24,6 +24,10 @@ module Vines
         dir ? @dir = File.expand_path(dir) : @dir
       end
 
+      def passwd_type(type=nil, salt=nil);
+        type ? (@passwd_type, @passwd_salt = type, salt) : @passwd_type
+      end
+
       def find_user(jid)
         jid = JID.new(jid).bare.to_s
         file = absolute_path("user/#{jid}") unless jid.empty?

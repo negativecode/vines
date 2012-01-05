@@ -56,7 +56,6 @@ end
 
 %w[
   base64
-  bcrypt
   digest/sha1
   eventmachine
   fiber
