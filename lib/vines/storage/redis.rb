@@ -1,5 +1,7 @@
 # encoding: UTF-8
 
+require 'em-hiredis'
+
 module Vines
   class Storage
     class Redis < Storage

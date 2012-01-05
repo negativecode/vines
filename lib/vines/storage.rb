@@ -4,18 +4,32 @@ module Vines
   class Storage
     include Vines::Log
 
+    autoload :Null,    'vines/storage/null'
+    autoload :Ldap,    'vines/storage/ldap'
+    autoload :Local,   'vines/storage/local'
+    autoload :CouchDB, 'vines/storage/couchdb'
+    autoload :MongoDB, 'vines/storage/mongodb'
+    autoload :Sql,     'vines/storage/sql'
+    autoload :Redis,   'vines/storage/redis'
+
     attr_accessor :ldap
 
-    @@nicks = {}
+    @@nicks = {
+      'fs'      => 'Local',
+      'couchdb' => 'CouchDB',
+      'mongodb' => 'MongoDB',
+      'sql'     => 'Sql',
+      'redis'   => 'Redis',
+    }
 
     # Register a nickname that can be used in the config file to specify this
-    # storage implementation.
+    # storage implementation. (not really used anymore, see autoload)
     def self.register(name)
       @@nicks[name.to_sym] = self
     end
 
     def self.from_name(name, &block)
-      klass = @@nicks[name.to_sym]
+      klass = (const_get(@@nicks[name]) rescue nil) || @@nicks[name.to_sym]
       raise "#{name} storage class not found" unless klass
       klass.new(&block)
     end

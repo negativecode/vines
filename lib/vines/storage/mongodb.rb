@@ -1,5 +1,7 @@
 # encoding: UTF-8
 
+require 'mongo'
+
 module Vines
   class Storage
     class MongoDB < Storage
