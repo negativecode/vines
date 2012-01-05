@@ -1,5 +1,7 @@
 # encoding: UTF-8
 
+require 'active_record'
+
 module Vines
   class Storage
     class Sql < Storage

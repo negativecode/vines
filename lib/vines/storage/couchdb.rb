@@ -1,5 +1,7 @@
 # encoding: UTF-8
 
+require 'em-http'
+
 module Vines
   class Storage
     class CouchDB < Storage

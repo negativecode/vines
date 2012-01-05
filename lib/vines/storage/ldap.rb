@@ -1,5 +1,7 @@
 # encoding: UTF-8
 
+require 'net/ldap'
+
 module Vines
   class Storage
 

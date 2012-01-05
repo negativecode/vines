@@ -4,18 +4,32 @@ module Vines
   class Storage
     include Vines::Log
 
+    autoload :Null,    'vines/storage/null'
+    autoload :Ldap,    'vines/storage/ldap'
+    autoload :Local,   'vines/storage/local'
+    autoload :CouchDB, 'vines/storage/couchdb'
+    autoload :MongoDB, 'vines/storage/mongodb'
+    autoload :Sql,     'vines/storage/sql'
+    autoload :Redis,   'vines/storage/redis'
+
     attr_accessor :ldap
 
-    @@nicks = {}
+    @@nicks = {
+      'fs'      => 'Local',
+      'couchdb' => 'CouchDB',
+      'mongodb' => 'MongoDB',
+      'sql'     => 'Sql',
+      'redis'   => 'Redis',
+    }
 
     # Register a nickname that can be used in the config file to specify this
-    # storage implementation.
+    # storage implementation. (not really used anymore, see autoload)
     def self.register(name)
       @@nicks[name.to_sym] = self
     end
 
     def self.from_name(name, &block)
-      klass = @@nicks[name.to_sym]
+      klass = (const_get(@@nicks[name]) rescue nil) || @@nicks[name.to_sym]
       raise "#{name} storage class not found" unless klass
       klass.new(&block)
     end
@@ -105,6 +119,25 @@ module Vines
       !!ldap
     end
 
+    # use password hashing method
+    #
+    # For example:
+    # storage 'fs' do
+    #   passwd_type 'bcrypt'
+    #   passwd_type 'sha256', 'some_optional_salt'
+    #   passwd_type 'sha1'
+    # end
+    #
+    def passwd_hash(password)
+      case @passwd_type.to_s
+      when 'sha256'; Digest::SHA256.hexdigest(password + @passwd_salt.to_s)
+      when 'sha1';   Digest::SHA1  .hexdigest(password + @passwd_salt.to_s)
+      else
+        require 'bcrypt' unless defined?(BCrypt)
+        BCrypt::Password.new(password + @passwd_salt.to_s) rescue nil
+      end
+    end
+
     # Validate the username and password pair and return a Vines::User object
     # on success. Return nil on failure.
     #
@@ -117,8 +150,8 @@ module Vines
     # passwords must override this method.
     def authenticate(username, password)
       user = find_user(username)
-      hash = BCrypt::Password.new(user.password) rescue nil
-      (hash && hash == password) ? user : nil
+      hash = passwd_hash(password)
+      (hash && hash == user.password) ? user : nil
     end
     wrap_ldap :authenticate
 

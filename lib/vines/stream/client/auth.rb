@@ -35,7 +35,7 @@ module Vines
         # Authenticate s2s streams by comparing their domain to
         # their SSL certificate.
         def external_auth(stanza)
-          domain = Base64.decode64(stanza.text)
+          domain = stanza.text.unpack("m0")[0]
           cert = OpenSSL::X509::Certificate.new(stream.get_peer_cert) rescue nil
           if (!OpenSSL::SSL.verify_certificate_identity(cert, domain) rescue false)
             send_auth_fail(SaslErrors::NotAuthorized.new)
@@ -51,7 +51,7 @@ module Vines
         # authentication module in a separate thread to avoid blocking stanza
         # processing for other users.
         def plain_auth(stanza)
-          jid, node, password = Base64.decode64(stanza.text).split("\000")
+          jid, node, password = stanza.text.unpack("m0")[0].split("\000")
           jid = [node, stream.domain].join('@') if jid.nil? || jid.empty?
           log.info("Authenticating user: %s" % jid)
           @outstanding = true

@@ -55,19 +55,11 @@ module Vines
 end
 
 %w[
-  active_record
-  base64
-  bcrypt
   digest/sha1
-  em-http
-  em-hiredis
   eventmachine
   fiber
   fileutils
-  http/parser
   logger
-  mongo
-  net/ldap
   nokogiri
   openssl
   resolv
@@ -110,13 +102,6 @@ end
   vines/stanza/pubsub/unsubscribe
 
   vines/storage
-  vines/storage/couchdb
-  vines/storage/ldap
-  vines/storage/local
-  vines/storage/mongodb
-  vines/storage/null
-  vines/storage/redis
-  vines/storage/sql
 
   vines/config
   vines/config/host

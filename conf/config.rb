@@ -29,6 +29,7 @@ Vines::Config.configure do
   #   private_storage false
   #   cross_domain_messages false
   #   storage 'fs' do
+  #     passwd_type 'sha256', 'some_optional_salt'
   #     dir 'data'
   #   end
   #   components 'tea'  => 'secr3t',
