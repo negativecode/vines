@@ -6,6 +6,7 @@ class ChatPage
     @session.onPresence (p) => this.presence(p)
     @chats = {}
     @currentContact = null
+    @layout = null
 
   datef: (millis) ->
     d = new Date(millis)
@@ -241,8 +242,9 @@ class ChatPage
       fn() if fn
       form.fadeIn 100
     else
-      form.fadeOut 100, ->
+      form.fadeOut 100, =>
         form[0].reset()
+        @layout.resize()
         fn() if fn
 
   draw: ->
@@ -333,11 +335,11 @@ class ChatPage
     $('#edit-contact-form').submit   => this.updateContact()
 
     $('#container').fadeIn 200
-    layout = this.resize()
+    @layout = this.resize()
 
-    fn = ->
-      layout.resize()
-      layout.resize() # not sure why two are needed
+    fn = =>
+      @layout.resize()
+      @layout.resize() # not sure why two are needed
 
     new Filter
       list: '#roster'
