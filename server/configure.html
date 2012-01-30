@@ -11,8 +11,10 @@ title: Vines - Config File
 Vines::Config.configure do
   host 'wonderland.lit' do
     storage 'fs' do
-      dir 'conf/users'
+      dir 'data'
     end
+    components 'tea'  => 'secr3t',
+               'cake' => 'passw0rd'
   end
 
   client '0.0.0.0', 5222 do
@@ -31,8 +33,11 @@ Vines::Config.configure do
 
   component '0.0.0.0', 5347 do
     max_stanza_size 131072
-    components 'tea.wonderland.lit'  => 'secr3t',
-               'cake.wonderland.lit' => 'passw0rd'
+  end
+
+  cluster do
+    host 'redis.wonderland.lit'
+    port 6379
   end
 end
 </pre>
@@ -52,7 +57,7 @@ end
   <p>
     In our example, we've configured the chat server to host the fictitious
     wonderland.lit domain and store user information in the file system under
-    the conf/users directory. This means we can chat with any user name in the
+    the data/ directory. This means we can chat with any user name in the
     wonderland.lit domain: alice@wonderland.lit, cat@wonderland.lit,
     hatter@wonderland.lit, etc.
   </p>
@@ -61,16 +66,17 @@ end
   <p>
     Vines can store user data in several databases out of the box:
     <a href="http://couchdb.apache.org/">Apache CouchDB</a>,
-    <a href="http://redis.io/">Redis</a>, any SQL database, or simply in the
-    local file system. It's easy to plug in custom databases through a simple
-    storage API. Each of these connectors is documented in the default
-    conf/config.rb file.
+    <a href="http://redis.io/">Redis</a>,
+    <a href="http://www.mongodb.org/">MongoDB</a>, any SQL database,
+    or simply in the local file system. It's easy to plug in custom databases
+    through a simple storage API. Each of these connectors is documented
+    in the default conf/config.rb file.
   </p>
   <p>
     Our example server is using the local file system storage database, which
-    stores data in one file per user under the conf/users directory. A user file
+    stores data in one file per user under the data/user directory. A user file
     is a simple YAML document describing the user and their roster. Let's look
-    at the conf/users/alice@wonderland.lit.user file.
+    at the data/user/alice@wonderland.lit.user file.
   </p>
 <pre>
 name: Alice
@@ -112,7 +118,7 @@ roster:
 <pre>
 host 'wonderland.lit' do
   storage 'fs' do
-    dir 'conf/users'
+    dir 'data'
    end
 
    ldap 'ldap.wonderland.lit', 636 do
@@ -131,7 +137,7 @@ end
     In this example we're storing user information, like rosters, in the file
     system, but not their passwords. When a user logs into the chat server, their
     password will be authenticated with the LDAP server at ldap.wonderland.lit,
-    listening on port 636. The user files under conf/users can have their password
+    listening on port 636. The user files under data/user can have their password
     field deleted. It's never used as long as the LDAP connector is in place.
   </p>
   <p>
@@ -211,13 +217,49 @@ end
     services, or bots.
   </p>
 <pre>
+host 'wonderland.lit' do
+  components 'tea' => 'secr3t', 'cake' => 'passw0rd'
+end
+
 component '0.0.0.0', 5347 do
   max_stanza_size 131072
-  components 'tea.wonderland.lit'  => 'secr3t',
-             'cake.wonderland.lit' => 'passw0rd'
 end
 </pre>
   <p>
     Each sub-domain listed in the <em>components</em> attribute is allowed to
     connect to the server if they provide the shared secret configured here.
+    In this example, we would have components at tea.wonderland.lit and
+    cake.wonderland.lit.
+  </p>
+
+  <h2>Clustering</h2>
+  <p>
+    Two or more Vines server instances can be clustered together to handle
+    load-balancing and high-availability. The instances use an in-memory Redis
+    database to communicate with one another.
+  </p>
+<pre>
+cluster do
+  host 'redis.wonderland.lit'
+  port 6379
+end
+</pre>
+  <p>
+    Make sure that all members of the cluster have identical conf/config.rb files.
+    We don't want one member serving different chat domains with different settings
+    than the others.
+  </p>
+  <p>
+    By using a common Redis database as the meeting place for all cluster nodes,
+    we don't need to configure each node to tell it the location of the others.
+    We just point them all at Redis and they discover each other automatically.
+  </p>
+  <p>
+    Also, each member doesn't need to open a connection to every other member to
+    route messages to them. They each open a single connection to Redis and send
+    messages to each other using pubsub channels.
+  </p>
+  <p>
+    Basically, Redis lets us build and configure a two dozen node cluster as
+    easily as two nodes.
   </p>
