@@ -48,6 +48,7 @@ class ChatPage
         node.click (event) => this.selectContact(event)
 
   message: (message) ->
+    return unless message.type == 'chat' && message.text
     this.queueMessage message
     me   = message.from == @session.jid()
     from = message.from.split('/')[0]
@@ -194,6 +195,7 @@ class ChatPage
         from: @session.jid()
         text: text
         to: jid
+        type: 'chat'
         received: new Date()
       @session.sendMessage jid, text
     input.val ''

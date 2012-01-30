@@ -191,17 +191,14 @@ class Session
     type   = node.attr 'type'
     thread = node.find('thread').first()
     body   = node.find('body').first()
-    html   = node.find('span').first()
-    if type == 'chat' && body.size() > 0
-      this.notify 'message',
-        to:   to
-        from: from
-        type: type
-        thread: thread.text()
-        text: body.text()
-        html: html.text()
-        received: new Date()
-        node: node
+    this.notify 'message',
+      to:   to
+      from: from
+      type: type
+      thread: thread.text()
+      text: body.text()
+      received: new Date()
+      node: node
     true # keep handler alive
 
   handlePresence: (node) ->
