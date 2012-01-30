@@ -24,17 +24,17 @@ is mandatory on all client and server connections."
 
   s.authors      = ["David Graham"]
   s.email        = %w[david@negativecode.com]
-  s.homepage     = "http://www.getvines.com"
+  s.homepage     = "http://www.getvines.org"
 
   s.test_files   = FileList["test/**/*"]
   s.executables  = %w[vines]
   s.require_path = "lib"
 
-  s.add_dependency "activerecord", "~> 3.1.0"
+  s.add_dependency "activerecord", "~> 3.2.1"
   s.add_dependency "bcrypt-ruby", "~> 3.0.1"
-  s.add_dependency "em-http-request", "~> 0.3.0"
+  s.add_dependency "em-http-request", "~> 1.0.1"
   s.add_dependency "em-hiredis", "~> 0.1.0"
-  s.add_dependency "eventmachine", "~> 0.12.10"
+  s.add_dependency "eventmachine", ">= 0.12.10"
   s.add_dependency "http_parser.rb", "~> 0.5.3"
   s.add_dependency "mongo", "~> 1.5.2"
   s.add_dependency "bson_ext", "~> 1.5.2"
