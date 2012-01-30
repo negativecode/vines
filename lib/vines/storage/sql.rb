@@ -153,24 +153,24 @@ module Vines
 
         ActiveRecord::Schema.define do
           create_table :users, force: args[:force] do |t|
-            t.string :jid,      limit: 2048, null: false
-            t.string :name,     limit: 1000, null: true
-            t.string :password, limit: 1000, null: true
+            t.string :jid,      limit: 512, null: false
+            t.string :name,     limit: 256, null: true
+            t.string :password, limit: 256, null: true
             t.text   :vcard,    null: true
           end
           add_index :users, :jid, unique: true
 
           create_table :contacts, force: args[:force] do |t|
             t.integer :user_id,      null: false
-            t.string  :jid,          limit: 2048, null: false
-            t.string  :name,         limit: 1000, null: true
-            t.string  :ask,          limit: 1000, null: true
-            t.string  :subscription, limit: 1000, null: false
+            t.string  :jid,          limit: 512, null: false
+            t.string  :name,         limit: 256, null: true
+            t.string  :ask,          limit: 128, null: true
+            t.string  :subscription, limit: 128, null: false
           end
           add_index :contacts, [:user_id, :jid], unique: true
 
           create_table :groups, force: args[:force] do |t|
-            t.string :name, limit: 1000, null: false
+            t.string :name, limit: 256, null: false
           end
           add_index :groups, :name, unique: true
 
@@ -182,8 +182,8 @@ module Vines
 
           create_table :fragments, force: args[:force] do |t|
             t.integer :user_id,   null: false
-            t.string  :root,      limit: 1000, null: false
-            t.string  :namespace, limit: 1000, null: false
+            t.string  :root,      limit: 256, null: false
+            t.string  :namespace, limit: 256, null: false
             t.text    :xml,       null: false
           end
           add_index :fragments, [:user_id, :root, :namespace], unique: true
