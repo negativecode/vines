@@ -1,28 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8"/>
-<meta content="Chat with large clusters of machines as easily as instant-messaging with a friend." name="description"/>
-<title>{{ page.title }}</title>
-<link rel="shortcut icon" type="image/png" href="/favicon.png"/>
-<link rel="stylesheet" href="/stylesheets/reset.css"/>
-<link rel="stylesheet" href="/stylesheets/text.css"/>
-<link rel="stylesheet" href="/stylesheets/960.css"/>
-<link rel="stylesheet" href="/stylesheets/style.css" type="text/css" media="screen"/>
-<script type="text/javascript" src="http://use.typekit.com/crf4oti.js"></script>
-<script type="text/javascript">try{Typekit.load();}catch(e){}</script>
-<script type="text/javascript">
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-23201080-2']);
-  _gaq.push(['_trackPageview']);
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-</script>
-</head>
-<body id="{{ page.page_id }}">
+{% include header.html %}
   <div id="wrap">
     <a href="https://github.com/negativecode/vines"><img style="position:absolute;top:0;right:0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"/></a>
     <div id="top"></div>
@@ -43,13 +19,4 @@
       <div class="clear"></div>
     </section>
   </div>
-  <footer>
-    <section class="container_12"> 
-      <div class="grid_4 prefix_8">
-        <p>Built with care by</p>
-        <a id="logo" href="http://www.negativecode.com/">Negative <span>Code</span></a>
-      </div>
-    </section>
-  </footer>
-</body>
-</html>
+{% include footer.html %}
