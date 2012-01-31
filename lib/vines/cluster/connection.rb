@@ -7,7 +7,7 @@ module Vines
       attr_accessor :host, :port, :database, :password
 
       def initialize
-        @redis = nil
+        @redis, @host, @port, @database, @password = nil, nil, nil, nil, nil
       end
 
       # Return a shared redis connection.
