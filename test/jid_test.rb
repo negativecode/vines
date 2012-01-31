@@ -115,10 +115,19 @@ class JidTest < MiniTest::Unit::TestCase
     assert_raises(ArgumentError) { Vines::JID.new(%q{alice>s@wonderland.lit}) }
     assert_raises(ArgumentError) { Vines::JID.new("alice\u0000s@wonderland.lit") }
     assert_raises(ArgumentError) { Vines::JID.new("alice\ts@wonderland.lit") }
+    assert_raises(ArgumentError) { Vines::JID.new("alice\rs@wonderland.lit") }
+    assert_raises(ArgumentError) { Vines::JID.new("alice\ns@wonderland.lit") }
+    assert_raises(ArgumentError) { Vines::JID.new("alice\vs@wonderland.lit") }
+    assert_raises(ArgumentError) { Vines::JID.new("alice\fs@wonderland.lit") }
     assert_raises(ArgumentError) { Vines::JID.new(" alice@wonderland.lit") }
     assert_raises(ArgumentError) { Vines::JID.new("alice@wonderland.lit ") }
     assert_raises(ArgumentError) { Vines::JID.new("alice s@wonderland.lit") }
     assert_raises(ArgumentError) { Vines::JID.new("alice@w onderland.lit") }
+    assert_raises(ArgumentError) { Vines::JID.new("alice@w\tonderland.lit") }
+    assert_raises(ArgumentError) { Vines::JID.new("alice@w\ronderland.lit") }
+    assert_raises(ArgumentError) { Vines::JID.new("alice@w\nonderland.lit") }
+    assert_raises(ArgumentError) { Vines::JID.new("alice@w\vonderland.lit") }
+    assert_raises(ArgumentError) { Vines::JID.new("alice@w\fonderland.lit") }
     assert_raises(ArgumentError) { Vines::JID.new("alice@wonderland.lit/ res") }
     assert_raises(ArgumentError) { Vines::JID.new("alice@w\u0000onderland.lit") }
     assert_raises(ArgumentError) { Vines::JID.new("alice@wonderland.lit/\u0000res") }

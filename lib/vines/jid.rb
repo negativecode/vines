@@ -4,13 +4,13 @@ module Vines
   class JID
     include Comparable
 
-    PATTERN = /^(?:([^@]*)@)??([^@\/]*)(?:\/(.*?))?$/.freeze
+    PATTERN = /\A(?:([^@]*)@)??([^@\/]*)(?:\/(.*?))?\Z/.freeze
 
     # http://tools.ietf.org/html/rfc6122#appendix-A
-    NODE_PREP = /[[:space:][:cntrl:]"&'\/:<>@]/.freeze
+    NODE_PREP = /[[:cntrl:] "&'\/:<>@]/.freeze
 
     # http://tools.ietf.org/html/rfc3454#appendix-C
-    NAME_PREP = /[[:space:][:cntrl:]]/.freeze
+    NAME_PREP = /[[:cntrl:] ]/.freeze
 
     attr_reader :node, :domain, :resource
     attr_writer :resource
