@@ -8,7 +8,7 @@ body {
   background: -o-radial-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0)) fixed no-repeat, url(../images/bg.png);
   background: -webkit-radial-gradient(rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0)) fixed no-repeat, url(../images/bg.png);
   color: #222;
-  font-family: proxima-nova-1, proxima-nova-2, "Helvetica Neue", Helvetica, sans-serif;
+  font-family: "proxima-nova", "Helvetica Neue", Helvetica, sans-serif;
   font-weight: 300;
   height: 100%;
 }
@@ -24,7 +24,7 @@ li {
 }
 h1, h2, h3, h4, h4, h6 {
   font-weight: 300;
-  font-family: pill-gothic-600mg-1, pill-gothic-600mg-2, "Helvetica Neue", Helvetica, sans-serif;
+  font-family: "pill-gothic-600mg", "Helvetica Neue", Helvetica, sans-serif;
   text-shadow: 0 1px 1px #222;
 }
 a {
@@ -58,7 +58,7 @@ header nav ul li a {
   display: inline-block;
   font-size: 18px;
   font-weight: normal;
-  font-family: pill-gothic-600mg-1, pill-gothic-600mg-2, "Helvetica Neue", Helvetica, sans-serif;
+  font-family: "pill-gothic-600mg", "Helvetica Neue", Helvetica, sans-serif;
   height: 75px;
   line-height: 75px;
   padding: 0 10px;
@@ -68,7 +68,7 @@ header nav ul li a {
 header h1 {
   color: #222;
   font-size: 76px;
-  font-family: ff-cocon-web-pro-1, ff-cocon-web-pro-2, Helvetica, sans-serif;
+  font-family: "ff-cocon-web-pro", Helvetica, sans-serif;
   font-weight: bold;
   letter-spacing: -0.04em;
   margin: 0;
@@ -89,7 +89,7 @@ header h1 a {
 }
 #home-page #intro p {
   color: #f8f8f8;
-  font-family: pill-gothic-600mg-1, pill-gothic-600mg-2, "Helvetica Neue", Helvetica, sans-serif;
+  font-family: "pill-gothic-600mg", "Helvetica Neue", Helvetica, sans-serif;
   font-size: 20px;
   padding: 20px;
   width: 460px;
@@ -132,14 +132,14 @@ footer {
 }
 footer p {
   color: rgba(255, 255, 255, 0.75);
-  font-family: pill-gothic-600mg-1, pill-gothic-600mg-2, "Helvetica Neue", Helvetica, sans-serif;
+  font-family: "pill-gothic-600mg", "Helvetica Neue", Helvetica, sans-serif;
   margin: 40px 0 0 0;
   text-transform: lowercase;
 }
 footer #logo {
   color: #fff;
   display: block;
-  font-family: "league-gothic-1","league-gothic-2", Helvetica, sans-serif;
+  font-family: "league-gothic", Helvetica, sans-serif;
   font-size: 76px;
   line-height: 1;
   text-decoration: none;
@@ -161,7 +161,7 @@ footer #logo span {
   color: #0d4078;
   cursor: pointer;
   display: inline-block;
-  font-family: ff-cocon-web-pro-1, ff-cocon-web-pro-2, Helvetica, sans-serif;
+  font-family: "ff-cocon-web-pro", Helvetica, sans-serif;
   font-weight: bold;
   font-size: 16px;
   line-height: 1.5;
@@ -202,7 +202,7 @@ pre {
   background: #222;
   color: #f8f8f8;
   display: block;
-  font-family: inconsolata-1, inconsolata-2, Menlo, monospace;
+  font-family: "inconsolata", Menlo, monospace;
   font-size: 14px;
   overflow-x: auto;
   padding: 10px 15px;
