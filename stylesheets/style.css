@@ -124,7 +124,7 @@ header h1 a {
   min-height: 100%;
 }
 footer {
-  background-color: #222;
+  background: url(/images/dark-mosaic.png);
   clear: both;
   height: 200px;
   margin-top: -200px;
