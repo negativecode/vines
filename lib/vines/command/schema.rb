@@ -7,7 +7,7 @@ module Vines
         raise 'vines schema <domain>' unless opts[:args].size == 1
         require opts[:config]
         domain = opts[:args].first
-        unless storage = Config.instance.vhosts[domain].storage rescue nil
+        unless storage = Config.instance.vhost(domain).storage rescue nil
           raise "#{domain} virtual host not found in conf/config.rb"
         end
         unless storage.respond_to?(:create_schema)

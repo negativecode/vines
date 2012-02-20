@@ -9,7 +9,7 @@ module Vines
   class Config
     LOG_LEVELS = %w[debug info warn error fatal].freeze
 
-    attr_reader :router, :vhosts
+    attr_reader :router
 
     @@instance = nil
     def self.configure(&block)
@@ -67,13 +67,19 @@ module Vines
 
     # Return true if the domain is virtual hosted by this server.
     def vhost?(domain)
-      @vhosts.key?(domain.to_s)
+      !!vhost(domain)
+    end
+
+    # Return the Host config object for this domain if it's hosted by this
+    # server.
+    def vhost(domain)
+      @vhosts[domain.to_s]
     end
 
     # Returns the storage system for the domain or a Storage::Null instance if
     # the domain is not hosted at this server.
     def storage(domain)
-      host = @vhosts[domain.to_s]
+      host = vhost(domain)
       host ? host.storage : @null
     end
 
@@ -112,7 +118,7 @@ module Vines
 
     # Return true if private XML fragment storage is enabled for this domain.
     def private_storage?(domain)
-      host = @vhosts[domain.to_s]
+      host = vhost(domain)
       host.private_storage? if host
     end
 
@@ -191,7 +197,7 @@ module Vines
     # Return true if all JIDs are allowed to exchange cross domain messages.
     def cross_domain?(*jids)
       !jids.flatten.index do |jid|
-        !@vhosts[jid.domain].cross_domain_messages?
+        !vhost(jid.domain).cross_domain_messages?
       end
     end
   end

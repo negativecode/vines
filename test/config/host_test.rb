@@ -46,7 +46,7 @@ class HostTest < MiniTest::Unit::TestCase
         end
       end
     end
-    refute_nil config.vhosts['wonderland.lit'].storage
+    refute_nil config.vhost('wonderland.lit').storage
   end
 
   def test_ldap_added_to_storage
@@ -81,8 +81,8 @@ class HostTest < MiniTest::Unit::TestCase
       end
     end
     %w[wonderland.lit verona.lit].each do |domain|
-      refute_nil config.vhosts[domain].storage.ldap
-      assert config.vhosts[domain].storage.ldap?
+      refute_nil config.vhost(domain).storage.ldap
+      assert config.vhost(domain).storage.ldap?
     end
   end
 
@@ -225,7 +225,7 @@ class HostTest < MiniTest::Unit::TestCase
         components 'TEA' => 'secr3t', CAKE: 'Passw0rd'
       end
     end
-    host = config.vhosts['wonderland.lit']
+    host = config.vhost('wonderland.lit')
     refute_nil host
     assert_equal 2, host.components.size
     assert_equal host.components['tea.wonderland.lit'], 'secr3t'
@@ -239,7 +239,7 @@ class HostTest < MiniTest::Unit::TestCase
         components 'tea' => 'secr3t', cake: 'passw0rd'
       end
     end
-    host = config.vhosts['wonderland.lit']
+    host = config.vhost('wonderland.lit')
     refute_nil host
     refute host.component?(nil)
     refute host.component?('tea')
@@ -309,7 +309,7 @@ class HostTest < MiniTest::Unit::TestCase
         pubsub 'TEA', :CAKE
       end
     end
-    host = config.vhosts['wonderland.lit']
+    host = config.vhost('wonderland.lit')
     refute_nil host
     assert_equal 2, host.pubsubs.size
     refute_nil host.pubsubs['tea.wonderland.lit']
@@ -323,7 +323,7 @@ class HostTest < MiniTest::Unit::TestCase
         pubsub 'tea', :cake
       end
     end
-    host = config.vhosts['wonderland.lit']
+    host = config.vhost('wonderland.lit')
     refute_nil host
     refute host.pubsub?(nil)
     refute host.pubsub?('tea')
@@ -348,7 +348,7 @@ class HostTest < MiniTest::Unit::TestCase
         storage(:fs) { dir Dir.tmpdir }
       end
     end
-    host = config.vhosts['wonderland.lit']
+    host = config.vhost('wonderland.lit')
     refute_nil host
     refute host.private_storage?
   end
@@ -360,7 +360,7 @@ class HostTest < MiniTest::Unit::TestCase
         storage(:fs) { dir Dir.tmpdir }
       end
     end
-    host = config.vhosts['wonderland.lit']
+    host = config.vhost('wonderland.lit')
     refute_nil host
     assert host.private_storage?
     assert config.private_storage?('wonderland.lit')

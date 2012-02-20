@@ -71,7 +71,7 @@ module Vines
 
     # Returns the Vines::Config::Host virtual host for the stream's domain.
     def vhost
-      @config.vhosts[domain]
+      @config.vhost(domain)
     end
 
     # Reload the user's information into their active connections. Call this

@@ -52,7 +52,7 @@ class ConfigPubSubTest < MiniTest::Unit::TestCase
   def test_subscribe_remote_jid_is_allowed
     topic = 'remote_jids_allowed'
     jid = 'romeo@verona.lit'
-    @config.vhosts['wonderland.lit'].cross_domain_messages true
+    @config.vhost('wonderland.lit').cross_domain_messages true
     @pubsub.add_node(topic)
     @pubsub.subscribe(topic, jid)
     assert @pubsub.subscribed?(topic, jid)
@@ -105,7 +105,7 @@ class ConfigPubSubTest < MiniTest::Unit::TestCase
     alice = Vines::JID.new('alice@wonderland.lit')
     romeo = Vines::JID.new('romeo@verona.lit')
 
-    @config.vhosts['wonderland.lit'].cross_domain_messages true
+    @config.vhost('wonderland.lit').cross_domain_messages true
     def @config.router
       unless @mock_router
         @mock_router = MiniTest::Mock.new

@@ -20,7 +20,7 @@ class PrivateStorageTest < MiniTest::Unit::TestCase
     query = %q{<query xmlns="jabber:iq:private"><one xmlns="a"/></query>}
     node = node(%Q{<iq id="42" type="get">#{query}</iq>})
 
-    @config.vhosts['wonderland.lit'].private_storage false
+    @config.vhost('wonderland.lit').private_storage false
     @stream.expect(:domain, 'wonderland.lit')
     @stream.expect(:config, @config)
 

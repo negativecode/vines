@@ -36,7 +36,7 @@ class DiscoInfoTest < MiniTest::Unit::TestCase
       </iq>
     }.strip.gsub(/\n|\s{2,}/, ''))
 
-    @config.vhosts['wonderland.lit'].private_storage false
+    @config.vhost('wonderland.lit').private_storage false
     @stream.expect(:write, nil, [expected])
 
     stanza = Vines::Stanza::Iq::DiscoInfo.new(node, @stream)
@@ -62,7 +62,7 @@ class DiscoInfoTest < MiniTest::Unit::TestCase
       </iq>
     }.strip.gsub(/\n|\s{2,}/, ''))
 
-    @config.vhosts['wonderland.lit'].private_storage true
+    @config.vhost('wonderland.lit').private_storage true
     @stream.expect(:write, nil, [expected])
 
     stanza = Vines::Stanza::Iq::DiscoInfo.new(node, @stream)

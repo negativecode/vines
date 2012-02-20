@@ -196,7 +196,7 @@ module Vines
 
         def unsubscribe_pubsub
           if connected?
-            @config.vhosts[@user.jid.domain].unsubscribe_pubsub(@user.jid)
+            @config.vhost(@user.jid.domain).unsubscribe_pubsub(@user.jid)
           end
         end
 

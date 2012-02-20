@@ -60,8 +60,10 @@ class ConfigTest < MiniTest::Unit::TestCase
         storage(:fs) { dir Dir.tmpdir }
       end
     end
-    assert_equal ['wonderland.lit'], config.vhosts.keys
+    refute_nil config.vhost('wonderland.lit')
+    refute_nil config.vhost(Vines::JID.new('wonderland.lit'))
     assert config.vhost?('wonderland.lit')
+    assert config.vhost?(Vines::JID.new('wonderland.lit'))
     refute config.vhost?('alice@wonderland.lit')
     refute config.vhost?('tea.wonderland.lit')
     refute config.vhost?('bogus')
@@ -394,8 +396,8 @@ class ConfigTest < MiniTest::Unit::TestCase
         storage(:fs) { dir Dir.tmpdir }
       end
     end
-    refute config.vhosts['wonderland.lit'].cross_domain_messages?
-    assert config.vhosts['verona.lit'].cross_domain_messages?
+    refute config.vhost('wonderland.lit').cross_domain_messages?
+    assert config.vhost('verona.lit').cross_domain_messages?
   end
 
   def test_local_jid?

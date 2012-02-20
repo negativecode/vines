@@ -46,7 +46,7 @@ class RouterTest < MiniTest::Unit::TestCase
 
     assert_equal 2, @router.size
     assert_equal 0, @router.connected_resources(@alice, romeo).size
-    @config.vhosts['wonderland.lit'].cross_domain_messages true
+    @config.vhost('wonderland.lit').cross_domain_messages true
     assert_equal 1, @router.connected_resources(@alice, romeo).size
 
     assert stream1.verify
@@ -148,7 +148,7 @@ class RouterTest < MiniTest::Unit::TestCase
   end
 
   def test_multiple_s2s_streams_are_load_balanced
-    @config.vhosts['wonderland.lit'].cross_domain_messages true
+    @config.vhost('wonderland.lit').cross_domain_messages true
     stream1 = s2s('wonderland.lit', 'verona.lit')
     stream2 = s2s('wonderland.lit', 'verona.lit')
     @router << stream1
