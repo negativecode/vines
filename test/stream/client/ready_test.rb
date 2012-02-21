@@ -13,12 +13,12 @@ class ClientReadyTest < MiniTest::Unit::TestCase
       if node.name == 'bogus'
         nil
       else
-        MiniTest::Mock.new.tap do |stanza|
-          stanza.expect(:process, nil)
-          stanza.expect(:validate_to, nil)
-          stanza.expect(:validate_from, nil)
-          ClientReadyTest::STANZAS << stanza
-        end
+        stanza = MiniTest::Mock.new
+        stanza.expect(:process, nil)
+        stanza.expect(:validate_to, nil)
+        stanza.expect(:validate_from, nil)
+        ClientReadyTest::STANZAS << stanza
+        stanza
       end
     end
   end

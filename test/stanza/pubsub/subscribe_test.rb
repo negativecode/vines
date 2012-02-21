@@ -113,7 +113,7 @@ class SubscribePubSubTest < MiniTest::Unit::TestCase
       unless @mock_pubsub
         @mock_pubsub = MiniTest::Mock.new
         @mock_pubsub.expect(:node?, true, ['game_13'])
-        @mock_pubsub.expect(:subscribed?, true, ['game_13', 'alice@wonderland.lit/tea'])
+        @mock_pubsub.expect(:subscribed?, true, ['game_13', Vines::JID.new('alice@wonderland.lit/tea')])
       end
       @mock_pubsub
     end
@@ -157,8 +157,8 @@ class SubscribePubSubTest < MiniTest::Unit::TestCase
       unless @mock_pubsub
         @mock_pubsub = MiniTest::Mock.new
         @mock_pubsub.expect(:node?, true, ['game_13'])
-        @mock_pubsub.expect(:subscribed?, false, ['game_13', 'alice@wonderland.lit/tea'])
-        @mock_pubsub.expect(:subscribe, nil, ['game_13', 'alice@wonderland.lit/tea'])
+        @mock_pubsub.expect(:subscribed?, false, ['game_13', Vines::JID.new('alice@wonderland.lit/tea')])
+        @mock_pubsub.expect(:subscribe, nil, ['game_13', Vines::JID.new('alice@wonderland.lit/tea')])
       end
       @mock_pubsub
     end

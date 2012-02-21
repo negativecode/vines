@@ -166,11 +166,11 @@ class RouterTest < MiniTest::Unit::TestCase
   private
 
   def stream(jid)
-    MiniTest::Mock.new.tap do |stream|
-      stream.expect(:connected?, true)
-      stream.expect(:stream_type, :client)
-      stream.expect(:user, Vines::User.new(jid: jid))
-    end
+    stream = MiniTest::Mock.new
+    stream.expect(:connected?, true)
+    stream.expect(:stream_type, :client)
+    stream.expect(:user, Vines::User.new(jid: jid))
+    stream
   end
 
   def component(jid)

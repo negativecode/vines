@@ -13,7 +13,14 @@ class StorageTest < MiniTest::Unit::TestCase
     def initialize(found_user=nil)
       @found_user = found_user
       @authenticate_calls = @find_user_calls = @save_user_calls = 0
-      @ldap = MiniTest::Mock.new
+      @ldap = Class.new do
+        attr_accessor :user, :auth
+        def authenticate(username, password)
+          @auth ||= []
+          @auth << [username, password]
+          @user
+        end
+      end.new
     end
 
     def authenticate(username, password)
@@ -40,20 +47,20 @@ class StorageTest < MiniTest::Unit::TestCase
       assert_equal 0, storage.authenticate_calls
       assert_equal 0, storage.find_user_calls
       assert_equal 0, storage.save_user_calls
-      assert storage.ldap.verify
+      assert_nil storage.ldap.auth # ldap never called
     end
   end
 
   def test_authenticate_with_ldap_bad_password
     StorageTests::EMLoop.new do
       storage = MockLdapStorage.new
-      storage.ldap.expect(:authenticate, nil, [ALICE, 'bogus'])
+      storage.ldap.user = nil
       user = storage.authenticate(ALICE, 'bogus')
       assert_nil user
       assert_equal 0, storage.authenticate_calls
       assert_equal 0, storage.find_user_calls
       assert_equal 0, storage.save_user_calls
-      assert storage.ldap.verify
+      assert_equal [ALICE, 'bogus'], storage.ldap.auth.first
     end
   end
 
@@ -61,14 +68,14 @@ class StorageTest < MiniTest::Unit::TestCase
     StorageTests::EMLoop.new do
       alice = Vines::User.new(:jid => ALICE)
       storage = MockLdapStorage.new(alice)
-      storage.ldap.expect(:authenticate, alice, [ALICE, 'secr3t'])
+      storage.ldap.user = alice
       user = storage.authenticate(ALICE, 'secr3t')
       refute_nil user
       assert_equal ALICE, user.jid.to_s
       assert_equal 0, storage.authenticate_calls
       assert_equal 1, storage.find_user_calls
       assert_equal 0, storage.save_user_calls
-      assert storage.ldap.verify
+      assert_equal [ALICE, 'secr3t'], storage.ldap.auth.first
     end
   end
 
@@ -76,14 +83,14 @@ class StorageTest < MiniTest::Unit::TestCase
     StorageTests::EMLoop.new do
       alice = Vines::User.new(:jid => ALICE)
       storage = MockLdapStorage.new
-      storage.ldap.expect(:authenticate, alice, [ALICE, 'secr3t'])
+      storage.ldap.user = alice
       user = storage.authenticate(ALICE, 'secr3t')
       refute_nil user
       assert_equal ALICE, user.jid.to_s
       assert_equal 0, storage.authenticate_calls
       assert_equal 1, storage.find_user_calls
       assert_equal 1, storage.save_user_calls
-      assert storage.ldap.verify
+      assert_equal [ALICE, 'secr3t'], storage.ldap.auth.first
     end
   end
 end

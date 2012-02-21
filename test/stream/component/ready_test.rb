@@ -73,7 +73,7 @@ class ComponentReadyTest < MiniTest::Unit::TestCase
     @recipient.expect(:user, Vines::User.new(:jid => 'hatter@wonderland.lit'))
     @recipient.expect(:write, nil, [node])
 
-    @stream.expect(:connected_resources, [@recipient], ['hatter@wonderland.lit'])
+    @stream.expect(:connected_resources, [@recipient], [Vines::JID.new('hatter@wonderland.lit')])
 
     @state.node(node)
     assert @stream.verify

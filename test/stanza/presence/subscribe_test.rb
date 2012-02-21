@@ -13,7 +13,7 @@ class SubscribeTest < MiniTest::Unit::TestCase
 
     user = MiniTest::Mock.new
     user.expect(:jid, alice)
-    user.expect(:request_subscription, nil, [hatter.to_s])
+    user.expect(:request_subscription, nil, [hatter])
     user.expect(:contact, contact, [hatter])
 
     storage = MiniTest::Mock.new

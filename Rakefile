@@ -41,7 +41,7 @@ is mandatory on all client and server connections."
   s.add_dependency "net-ldap", "~> 0.2.2"
   s.add_dependency "nokogiri", "~> 1.4.7"
 
-  s.add_development_dependency "minitest", "= 2.2.2"
+  s.add_development_dependency "minitest", "~> 2.11.2"
   s.add_development_dependency "rake"
   s.add_development_dependency "sqlite3"
 

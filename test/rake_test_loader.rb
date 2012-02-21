@@ -2,7 +2,7 @@ require 'rake'
 
 # Use the latest MiniTest gem instead of the buggy
 # version included with Ruby 1.9.2.
-gem 'minitest', '2.2.2'
+gem 'minitest', '~> 2.11.2'
 
 # Load the test files from the command line.
 

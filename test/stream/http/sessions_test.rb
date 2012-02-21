@@ -15,7 +15,7 @@ class SessionsTest < MiniTest::Unit::TestCase
   end
 
   def test_session_add_and_delete
-    session = MiniTest::Mock.new
+    session = "session"
     assert_nil @sessions['42']
     @sessions['42'] = session
     assert_equal session, @sessions['42']
@@ -24,7 +24,7 @@ class SessionsTest < MiniTest::Unit::TestCase
   end
 
   def test_access_singleton_through_class_methods
-    session = MiniTest::Mock.new
+    session = "session"
     assert_nil MockSessions['42']
     MockSessions['42'] = session
     assert_equal session, MockSessions['42']

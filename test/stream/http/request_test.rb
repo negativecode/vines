@@ -53,8 +53,14 @@ class RequestTest < MiniTest::Unit::TestCase
   end
 
   def test_reply_with_file_directory_traversal
-    @parser.expect(:request_path, '../passwords')
-    request = Vines::Stream::Http::Request.new(@stream, @parser, '<html></html>')
+    parser = MiniTest::Mock.new
+    parser.expect(:headers, {'Content-Type' => 'text/html', 'Host' => 'wonderland.lit'})
+    parser.expect(:http_method, 'GET')
+    parser.expect(:request_path, '/../passwords')
+    parser.expect(:request_url, '/../passwords')
+    parser.expect(:query_string, '')
+
+    request = Vines::Stream::Http::Request.new(@stream, parser, '<html></html>')
 
     headers = [
       "HTTP/1.1 404 Not Found",
@@ -65,13 +71,18 @@ class RequestTest < MiniTest::Unit::TestCase
 
     request.reply_with_file(Dir.pwd)
     assert @stream.verify
-    assert @parser.verify
+    assert parser.verify
   end
 
   def test_reply_with_file_for_directory_serves_index_html
-    @parser.expect(:request_path, '/')
-    @parser.expect(:request_url, '/?ok=true')
-    request = Vines::Stream::Http::Request.new(@stream, @parser, '<html></html>')
+    parser = MiniTest::Mock.new
+    parser.expect(:headers, {'Content-Type' => 'text/html', 'Host' => 'wonderland.lit'})
+    parser.expect(:http_method, 'GET')
+    parser.expect(:request_path, '/')
+    parser.expect(:request_url, '/?ok=true')
+    parser.expect(:query_string, 'ok=true')
+
+    request = Vines::Stream::Http::Request.new(@stream, parser, '<html></html>')
 
     mtime = File.mtime(INDEX).utc.strftime('%a, %d %b %Y %H:%M:%S GMT')
     headers = [
@@ -86,13 +97,18 @@ class RequestTest < MiniTest::Unit::TestCase
 
     request.reply_with_file(Dir.pwd)
     assert @stream.verify
-    assert @parser.verify
+    assert parser.verify
   end
 
   def test_reply_with_file_redirects_for_missing_slash
-    @parser.expect(:request_path, '/http')
-    @parser.expect(:request_url, '/http?ok=true')
-    request = Vines::Stream::Http::Request.new(@stream, @parser, '<html></html>')
+    parser = MiniTest::Mock.new
+    parser.expect(:headers, {'Content-Type' => 'text/html', 'Host' => 'wonderland.lit'})
+    parser.expect(:http_method, 'GET')
+    parser.expect(:request_path, '/http')
+    parser.expect(:request_url, '/http?ok=true')
+    parser.expect(:query_string, 'ok=true')
+
+    request = Vines::Stream::Http::Request.new(@stream, parser, '<html></html>')
 
     headers = [
       "HTTP/1.1 301 Moved Permanently",
@@ -104,6 +120,6 @@ class RequestTest < MiniTest::Unit::TestCase
     # so the /http url above will work
     request.reply_with_file(File.expand_path('../../', __FILE__))
     assert @stream.verify
-    assert @parser.verify
+    assert parser.verify
   end
 end

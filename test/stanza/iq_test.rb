@@ -44,7 +44,7 @@ class IqTest < MiniTest::Unit::TestCase
 
     @stream.expect(:config, @config)
     @stream.expect(:user, hatter)
-    @stream.expect(:connected_resources, [recipient], [alice.jid.to_s])
+    @stream.expect(:connected_resources, [recipient], [alice.jid])
 
     stanza = Vines::Stanza::Iq.new(node, @stream)
     stanza.process
