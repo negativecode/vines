@@ -40,7 +40,9 @@ module Vines
       end
 
       def process_request(request)
-        if request.path == self.bind
+        if request.path == self.bind && request.options?
+          request.reply_to_options
+        elsif request.path == self.bind
           body = Nokogiri::XML(request.body).root
           if session = Sessions[body['sid']]
             @session = session

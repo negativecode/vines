@@ -11,6 +11,7 @@ module Vines
         NOT_MODIFIED  = 'Not Modified'.freeze
         IF_MODIFIED   = 'If-Modified-Since'.freeze
         TEXT_PLAIN    = 'text/plain'.freeze
+        OPTIONS       = 'OPTIONS'.freeze
         CONTENT_TYPES = {
           'html'     => 'text/html; charset="utf-8"',
           'js'       => 'application/javascript; charset="utf-8"',
@@ -72,10 +73,31 @@ module Vines
           body = node.to_s
           header = [
             "HTTP/1.1 200 OK",
+            "Access-Control-Allow-Origin: *",
             "Content-Type: #{content_type}",
             "Content-Length: #{body.bytesize}"
           ].join("\r\n")
           @stream.stream_write([header, body].join("\r\n\r\n"))
+        end
+
+        # Return true if the request method is OPTIONS, signaling a
+        # CORS preflight check.
+        def options?
+          @method == OPTIONS
+        end
+
+        # Send a 200 OK response, allowing any origin domain to connect to the
+        # server, in response to CORS preflight OPTIONS requests. This allows
+        # any web application using strophe.js to connect to our BOSH port.
+        def reply_to_options
+          allow = @headers['Access-Control-Request-Headers']
+          headers = [
+            "Access-Control-Allow-Origin: *",
+            "Access-Control-Allow-Methods: POST, GET, OPTIONS",
+            "Access-Control-Allow-Headers: #{allow}",
+            "Access-Control-Max-Age: #{60 * 60 * 24 * 30}"
+          ]
+          send_status(200, 'OK', headers)
         end
 
         private

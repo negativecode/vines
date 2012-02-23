@@ -122,4 +122,60 @@ class RequestTest < MiniTest::Unit::TestCase
     assert @stream.verify
     assert parser.verify
   end
+
+  def test_reply_to_options
+    parser = MiniTest::Mock.new
+    parser.expect(:headers, {
+      'Content-Type' => 'text/xml',
+      'Host' => 'wonderland.lit',
+      'Origin' => 'remote.wonderland.lit',
+      'Access-Control-Request-Headers' => 'Content-Type, Origin'})
+    parser.expect(:http_method, 'OPTIONS')
+    parser.expect(:request_path, '/xmpp')
+    parser.expect(:request_url, '/xmpp')
+    parser.expect(:query_string, '')
+
+    request = Vines::Stream::Http::Request.new(@stream, parser, '')
+
+    headers = [
+      "HTTP/1.1 200 OK",
+      "Content-Length: 0",
+      "Access-Control-Allow-Origin: *",
+      "Access-Control-Allow-Methods: POST, GET, OPTIONS",
+      "Access-Control-Allow-Headers: Content-Type, Origin",
+      "Access-Control-Max-Age: 2592000"
+    ].join("\r\n")
+
+    @stream.expect(:stream_write, nil, ["#{headers}\r\n\r\n"])
+    request.reply_to_options
+    assert @stream.verify
+    assert parser.verify
+  end
+
+  def test_reply
+    parser = MiniTest::Mock.new
+    parser.expect(:headers, {
+      'Content-Type' => 'text/xml',
+      'Host' => 'wonderland.lit',
+      'Origin' => 'remote.wonderland.lit'})
+    parser.expect(:http_method, 'POST')
+    parser.expect(:request_path, '/xmpp')
+    parser.expect(:request_url, '/xmpp')
+    parser.expect(:query_string, '')
+
+    request = Vines::Stream::Http::Request.new(@stream, parser, '')
+    message = '<message>hello</message>'
+
+    headers = [
+      "HTTP/1.1 200 OK",
+      "Access-Control-Allow-Origin: *",
+      "Content-Type: application/xml",
+      "Content-Length: 24"
+    ].join("\r\n")
+
+    @stream.expect(:stream_write, nil, ["#{headers}\r\n\r\n#{message}"])
+    request.reply(message, 'application/xml')
+    assert @stream.verify
+    assert parser.verify
+  end
 end
