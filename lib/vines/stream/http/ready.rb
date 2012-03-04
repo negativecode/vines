@@ -11,7 +11,11 @@ module Vines
             raise StreamErrors::NotAuthorized
           end
           stream.parse_body(node).each do |child|
-            super(child)
+            begin
+              super(child)
+            rescue StanzaError => e
+              stream.error(e)
+            end
           end
           stream.terminate if terminate?(node)
         end
