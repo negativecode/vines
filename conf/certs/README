@@ -21,12 +21,19 @@ directory: <vhost_domain>.key and <vhost_domain>.crt.  The key file must contain
 a PEM encoded private key.  Do not give this file to anyone.  This is your
 private key so keep it private. The crt file must contain a PEM encoded TLS
 certificate. This contains your public key so feel free to share it with other
-servers. For example, you add a new virtual host named wonderland.lit to
-the XMPP server. You need to run the 'vines cert wonderland.lit' command to
+servers.
+
+For example, when you add a new virtual host named wonderland.lit to
+the XMPP server, you need to run the 'vines cert wonderland.lit' command to
 generate the private key file and the self-signed certificate file in this
 directory. After running that command you will have a certs/wonderland.lit.key
 and a certs/wonderland.lit.crt file.
 
-Alternatively, you can purchase a TLS certificate from a CA (e.g. Go Daddy,
+Alternatively, you can purchase a TLS certificate from a CA (e.g. RapidSSL,
 VeriSign, etc.) and place it in this directory. This will avoid the hassles
 of managing self-signed certificates.
+
+Certificates for wildcard domains, like *.wonderland.lit, can be placed in this
+directory with a name of wonderland.lit.crt with a matching wonderland.lit.key
+file. The wildcard files will be used to secure connections to any subdomain
+under wonderland.lit (tea.wonderland.lit, party.wonderland.lit, etc).

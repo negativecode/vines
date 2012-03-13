@@ -21,7 +21,7 @@ module Vines
       @remote_addr, @local_addr = addresses
       @user, @closed, @stanza_size = nil, false, 0
       @bucket = TokenBucket.new(100, 10)
-      @store = Store.new
+      @store = Store.new(File.join(VINES_ROOT, 'conf', 'certs'))
       @nodes = EM::Queue.new
       process_node_queue
       create_parser
@@ -118,14 +118,14 @@ module Vines
     end
 
     def encrypt
-      cert, key = tls_files
-      start_tls(:private_key_file => key, :cert_chain_file => cert, :verify_peer => true)
+      cert, key = @store.files_for_domain(domain)
+      start_tls(cert_chain_file: cert, private_key_file: key, verify_peer: true)
     end
 
     # Returns true if the TLS certificate and private key files for this domain
     # exist and can be used to encrypt this stream.
     def encrypt?
-      tls_files.all? {|f| File.exists?(f) }
+      !@store.files_for_domain(domain).nil?
     end
 
     def unbind
@@ -233,10 +233,6 @@ module Vines
     # method so subclasses can override the behavior.
     def state
       @state
-    end
-
-    def tls_files
-      %w[crt key].map {|ext| File.join(VINES_ROOT, 'conf', 'certs', "#{domain}.#{ext}") }
     end
 
     # Return true if this is a valid domain-only JID that can be used in
