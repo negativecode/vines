@@ -1,4 +1,4 @@
-class Notification
+class @Notification
   constructor: (@text) ->
     this.draw()
 

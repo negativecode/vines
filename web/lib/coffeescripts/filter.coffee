@@ -1,4 +1,4 @@
-class Filter
+class @Filter
   constructor: (options) ->
     @list  = options.list
     @icon  = options.icon

@@ -1,4 +1,4 @@
-class Button
+class @Button
   constructor: (node, path, options) ->
     @node = $ node
     @path = path

@@ -1,4 +1,4 @@
-class NavBar
+class @NavBar
   constructor: (@session) ->
     @session.onCard (card) =>
       if card.jid == @session.bareJid()

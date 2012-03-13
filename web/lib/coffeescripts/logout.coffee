@@ -1,4 +1,4 @@
-class LogoutPage
+class @LogoutPage
   constructor: (@session) ->
   draw: ->
     window.location.hash = ''

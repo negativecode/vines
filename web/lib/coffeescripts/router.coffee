@@ -1,4 +1,4 @@
-class Router
+class @Router
   constructor: (@pages) ->
     @routes = this.build()
     $(window).bind 'hashchange', => this.draw()

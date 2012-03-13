@@ -1,4 +1,4 @@
-class Session
+class @Session
   constructor: ->
     @xmpp = new Strophe.Connection '/xmpp'
     @roster = {}

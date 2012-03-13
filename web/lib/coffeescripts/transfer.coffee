@@ -1,4 +1,4 @@
-class Transfer
+class @Transfer
   constructor: (options) ->
     @session  = options.session
     @file     = options.file

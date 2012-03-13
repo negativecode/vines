@@ -1,4 +1,4 @@
-class LoginPage
+class @LoginPage
   constructor: (@session, @startPage) ->
 
   start: ->

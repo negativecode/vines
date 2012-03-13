@@ -1,4 +1,4 @@
-class ChatPage
+class @ChatPage
   constructor: (@session) ->
     @session.onRoster   ( ) => this.roster()
     @session.onCard     (c) => this.card(c)

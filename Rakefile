@@ -1,8 +1,11 @@
+# encoding: UTF-8
+
 require 'rake'
 require 'rake/clean'
 require 'rake/testtask'
 require 'rubygems/package_task'
-require 'nokogiri'
+require 'coffee-script'
+require 'uglifier'
 require_relative 'lib/vines/version'
 
 ignore = File.read('web/lib/javascripts/.gitignore')
@@ -42,15 +45,18 @@ is mandatory on all client and server connections."
   s.add_dependency "nokogiri", "~> 1.4.7"
 
   s.add_development_dependency "minitest", "~> 2.11.2"
+  s.add_development_dependency "coffee-script", "~> 2.2.0"
+  s.add_development_dependency "coffee-script-source", "~> 1.2.0"
+  s.add_development_dependency "uglifier", "~> 1.2.3"
   s.add_development_dependency "rake"
   s.add_development_dependency "sqlite3"
 
   s.required_ruby_version = '>= 1.9.2'
 end
 
-# Set gem file list after CoffeeScripts have been compiled, so web/lib/javascripts/
-# is included in the gem.
-task :gemprep do
+desc 'Build distributable packages'
+task :build => :assets do
+  # create package task after assets are generated so they're included in FileList
   spec.files = FileList['[A-Z]*', '{bin,lib,conf,web}/**/*']
   Gem::PackageTask.new(spec).define
   Rake::Task['gem'].invoke
@@ -72,58 +78,32 @@ Rake::TestTask.new(:test) do |test|
   test.warning = false
 end
 
-# Find lib and chat js includes and return them as two arrays.
-def scripts(doc)
-  lib, chat = [], []
-  doc.css('script').each do |node|
-    file = node['src'].split('/').last()
-    if node['src'].start_with?('/lib')
-      lib << file
-    elsif node['src'].start_with?('javascripts')
-      chat << file
+desc 'Compile and minimize web assets'
+task :assets do
+  # combine and compile library coffeescripts
+  File.open('web/lib/javascripts/base.js', 'w') do |basejs|
+    assets = %w[layout button contact filter session transfer router navbar notification login logout]
+    coffee = assets.inject('') do |sum, name|
+      sum + File.read("web/lib/coffeescripts/#{name}.coffee")
     end
-  end
-  [lib, chat]
-end
-
-# Replace script tags with combined and minimized files.
-def rewrite_js(doc)
-  doc.css('script').each {|node| node.remove }
-  doc.css('head').each do |node|
-    %w[/lib/javascripts/base.js javascripts/app.js].each do |src|
-      script = doc.create_element('script',
-        'type' => 'text/javascript',
-        'src' => src)
-      node.add_child(script)
-      node.add_child(doc.create_text_node("\n"))
+    js = %w[jquery jquery.cookie raphael icons strophe].inject('') do |sum, name|
+      sum + File.read("web/lib/javascripts/#{name}.js")
     end
+    compiled = js + CoffeeScript.compile(coffee)
+    compressed = Uglifier.compile(compiled)
+    basejs.write(compressed)
+  end
+
+  # combine and compile chat application's coffeescripts
+  Dir.mkdir('web/chat/javascripts') unless File.exists?('web/chat/javascripts')
+  File.open('web/chat/javascripts/app.js', 'w') do |appjs|
+    coffee = %w[chat init].inject('') do |sum, name|
+      sum + File.read("web/chat/coffeescripts/#{name}.coffee")
+    end
+    compiled = CoffeeScript.compile(coffee)
+    compressed = Uglifier.compile(compiled)
+    appjs.write(compressed)
   end
 end
 
-task :compile do
-  index = 'web/chat/index.html'
-  doc = Nokogiri::HTML(File.read(index))
-  lib, chat = scripts(doc)
-
-  rewrite_js(doc)
-  # save index.html before rewriting
-  FileUtils.cp(index, '/tmp/index.html')
-  File.open(index, 'w') {|f| f.write(doc.to_xml(:indent => 2)) }
-
-  lib = lib.map {|f| "web/lib/javascripts/#{f}"}.join(' ')
-  chat = chat.map {|f| "web/chat/javascripts/#{f}"}.join(' ')
-
-  sh %{coffee -c -b -o web/chat/javascripts web/chat/coffeescripts/*.coffee}
-  sh %{cat #{chat} | uglifyjs -nc > web/chat/javascripts/app.js}
-
-  sh %{coffee -c -b -o web/lib/javascripts web/lib/coffeescripts/*.coffee}
-  sh %{cat #{lib} | uglifyjs -nc > web/lib/javascripts/base.js}
-end
-
-task :cleanup do
-  # move index.html back into place after gem packaging
-  FileUtils.cp('/tmp/index.html', 'web/chat/index.html')
-  File.delete('/tmp/index.html')
-end
-
-task :default => [:clobber, :test, :compile, :gemprep, :cleanup]
+task :default => [:clobber, :test, :build]

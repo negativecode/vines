@@ -1,4 +1,4 @@
-class Contact
+class @Contact
   constructor: (node) ->
     node  = $(node)
     @jid  = node.attr 'jid'

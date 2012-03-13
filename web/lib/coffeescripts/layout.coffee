@@ -1,4 +1,4 @@
-class Layout
+class @Layout
   constructor: (@fn) ->
     this.resize()
     this.listen()
