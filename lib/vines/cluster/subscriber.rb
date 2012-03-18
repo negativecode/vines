@@ -52,7 +52,7 @@ module Vines
         when ALL      then to_all(doc)
         when @channel then to_node(doc)
         end
-      rescue Exception => e
+      rescue => e
         log.error("Cluster subscription message failed: #{e}")
       end
 

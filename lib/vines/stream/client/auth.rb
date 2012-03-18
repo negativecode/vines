@@ -58,7 +58,7 @@ module Vines
           begin
             user = stream.storage.authenticate(jid, password)
             finish(user || SaslErrors::NotAuthorized.new)
-          rescue Exception => e
+          rescue => e
             log.error("Failed to authenticate: #{e.to_s}")
             finish(SaslErrors::TemporaryAuthFailure.new)
           end

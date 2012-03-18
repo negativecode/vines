@@ -56,7 +56,7 @@ module Vines
           @sessions.each_value do |session|
             session.close if session.expired?
           end
-        rescue Exception => e
+        rescue => e
           log.error("Expired session cleanup failed: #{e}")
         end
       end

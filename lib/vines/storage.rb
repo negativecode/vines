@@ -42,7 +42,7 @@ module Vines
         op = proc do
           begin
             method(old).call(*args)
-          rescue Exception => e
+          rescue => e
             log.error("Thread pool operation failed: #{e.message}")
             nil
           end
@@ -218,7 +218,7 @@ module Vines
       op = proc do
         begin
           ldap.authenticate(username, password)
-        rescue Exception => e
+        rescue => e
           log.error("LDAP authentication failed: #{e.message}")
           nil
         end

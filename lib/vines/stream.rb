@@ -210,7 +210,7 @@ module Vines
       else
         state.node(node)
       end
-    rescue Exception => e
+    rescue => e
       error(e)
     end
 

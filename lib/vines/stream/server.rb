@@ -42,7 +42,7 @@ module Vines
             rr = srv.shift
             opts = {to: to, from: from, srv: srv, callback: callback}
             EM.connect(rr.target.to_s, rr.port, Server, config, opts)
-          rescue Exception => e
+          rescue => e
             connect(config, to, from, srv, callback)
           end
         end

@@ -192,7 +192,7 @@ module Vines
     def heartbeat
       @publisher.broadcast(:heartbeat)
       @sessions.expire
-    rescue Exception => e
+    rescue => e
       log.error("Cluster session cleanup failed: #{e}")
     end
 

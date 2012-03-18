@@ -15,7 +15,7 @@ module Vines
         end
         begin
           storage.create_schema
-        rescue Exception => e
+        rescue => e
           raise "Schema creation failed: #{e.message}"
         end
       end

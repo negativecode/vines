@@ -24,7 +24,7 @@ module Vines
 
         begin
           user = storage.ldap.authenticate(jid, password)
-        rescue Exception => e
+        rescue => e
           raise "LDAP connection failed: #{e.message}"
         end
 
