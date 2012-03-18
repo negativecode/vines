@@ -29,7 +29,7 @@ is mandatory on all client and server connections."
   s.email        = %w[david@negativecode.com]
   s.homepage     = "http://www.getvines.org"
 
-  s.test_files   = FileList["test/**/*"]
+  s.test_files   = FileList["test/**/*"].to_a
   s.executables  = %w[vines]
   s.require_path = "lib"
 
@@ -57,7 +57,7 @@ end
 desc 'Build distributable packages'
 task :build => :assets do
   # create package task after assets are generated so they're included in FileList
-  spec.files = FileList['[A-Z]*', '{bin,lib,conf,web}/**/*']
+  spec.files = FileList['[A-Z]*', '{bin,lib,conf,web}/**/*'].to_a
   Gem::PackageTask.new(spec).define
   Rake::Task['gem'].invoke
 end
