@@ -90,14 +90,24 @@ Vines::Config.configure do
 
   # Configure the built-in HTTP server that serves static files and responds to
   # XEP-0124 BOSH requests. This allows HTTP clients to connect to
-  # the XMPP server. The root attribute defines the web server's document root.
-  # It will only serve files out of this directory. The bind attribute defines
-  # the URL to which BOSH clients must POST their XMPP stanza requests.
+  # the XMPP server.
+  #
+  # The root attribute defines the web server's document root (default 'web/').
+  # It will only serve files out of this directory.
+  #
+  # The bind attribute defines the URL to which BOSH clients must POST their
+  # XMPP stanza requests (default /xmpp).
+  #
+  # The vroute attribute defines the value of the vroute cookie sent in each
+  # response that uniquely identifies this HTTP server. Reverse proxy servers
+  # (nginx/apache) can use this cookie to implement sticky sessions. This is
+  # only needed if the server is clustered behind a reverse proxy.
   http '0.0.0.0', 5280 do
     bind '/xmpp'
     max_stanza_size 65536
     max_resources_per_account 5
     root 'web'
+    vroute ''
   end
 
   # Configure the XEP-0114 external component port. Component sub-domains and

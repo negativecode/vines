@@ -75,8 +75,9 @@ module Vines
             "HTTP/1.1 200 OK",
             "Access-Control-Allow-Origin: *",
             "Content-Type: #{content_type}",
-            "Content-Length: #{body.bytesize}"
-          ].join("\r\n")
+            "Content-Length: #{body.bytesize}",
+            vroute_cookie
+          ].compact.join("\r\n")
           @stream.stream_write([header, body].join("\r\n\r\n"))
         end
 
@@ -155,6 +156,15 @@ module Vines
         def content_type(path)
           ext = File.extname(path).sub('.', '')
           CONTENT_TYPES[ext] || TEXT_PLAIN
+        end
+
+        # Provide a vroute cookie in each response that uniquely identifies this
+        # HTTP server. Reverse proxy servers (nginx/apache) can use this cookie
+        # to implement sticky sessions. Return nil if vroute was not set in
+        # config.rb and no cookie should be sent.
+        def vroute_cookie
+          route = @stream.config[:http].vroute
+          route ? "Set-Cookie: vroute=#{route}; path=/; HttpOnly" : nil
         end
       end
     end

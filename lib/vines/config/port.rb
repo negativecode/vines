@@ -104,6 +104,22 @@ module Vines
           @settings[:bind]
         end
       end
+
+      def vroute(id=nil)
+        if id
+          id = id.to_s.strip
+          @settings[:vroute] = id.empty? ? nil : id
+        else
+          @settings[:vroute]
+        end
+      end
+
+      def start
+        super
+        if config.cluster? && vroute.nil?
+          log.warn("vroute sticky session cookie not set")
+        end
+      end
     end
 
     class ComponentPort < Port
