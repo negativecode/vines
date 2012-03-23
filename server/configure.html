@@ -102,7 +102,7 @@ roster:
     to him yet so she can't see when he goes on and offline.
   </p>
   <p>
-    To add a new user, the Red Queen, to our chat server, we just copy this
+    To add a new user, the Red Queen, to the chat server, we just copy this
     file and rename it to red.queen@wonderland.lit.user.
   </p>
   <p>
@@ -112,7 +112,7 @@ roster:
   <p>
     Storing users in the file system is simple and fast, but maybe we're already
     using an LDAP directory to store passwords. We can add an LDAP
-    connector to our chat server so authentication is performed against our
+    connector to the chat server so authentication is performed against our
     corporate directory instead of the file system.
   </p>
 <pre>
@@ -201,7 +201,7 @@ end
 
   <h2>BOSH/HTTP</h2>
   <p>
-    Web applications can connect to our chat server by tunneling the XMPP
+    Web applications can connect to the chat server by tunneling the XMPP
     protocol through HTTP. This connector allows our web apps to chat just like
     normal XMPP clients.
   </p>
@@ -213,7 +213,7 @@ end
 
   <h2>Components</h2>
   <p>
-    The XMPP component protocol allows us to extend our chat server with trusted
+    The XMPP component protocol allows us to extend the chat server with trusted
     services, or bots.
   </p>
 <pre>
@@ -227,7 +227,7 @@ end
 </pre>
   <p>
     Each sub-domain listed in the <em>components</em> attribute is allowed to
-    connect to the server if they provide the shared secret configured here.
+    connect to the server if it provides the shared secret configured here.
     In this example, we would have components at tea.wonderland.lit and
     cake.wonderland.lit.
   </p>
@@ -245,21 +245,6 @@ cluster do
 end
 </pre>
   <p>
-    Make sure that all members of the cluster have identical conf/config.rb files.
-    We don't want one member serving different chat domains with different settings
-    than the others.
-  </p>
-  <p>
-    By using a common Redis database as the meeting place for all cluster nodes,
-    we don't need to configure each node to tell it the location of the others.
-    We just point them all at Redis and they discover each other automatically.
-  </p>
-  <p>
-    Also, each member doesn't need to open a connection to every other member to
-    route messages to them. They each open a single connection to Redis and send
-    messages to each other using pubsub channels.
-  </p>
-  <p>
-    Basically, Redis lets us build and configure a two dozen node cluster as
-    easily as two nodes.
+    See the <a href="/server/cluster/">clustering guide</a> for details on how to
+    configure cluster nodes.
   </p>

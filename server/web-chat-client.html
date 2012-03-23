@@ -31,7 +31,6 @@ happens to be hosted inside a web browser.
 <pre>
 http '0.0.0.0', 5280 do
   bind '/xmpp'
-  private_storage true
   max_stanza_size 65536
   max_resources_per_account 5
   root 'web'
@@ -51,7 +50,7 @@ end
 <p>
   The <em>root</em> attribute defines the web server's document root. This
   directory must be readable by the user running the vines server process. If the
-  directory is not absolute, like /var/www, it's treated as relative to the vines
+  directory is not absolute, like /var/www, it's treated as relative to the Vines
   instance directory.
 </p>
 <p>
@@ -61,4 +60,8 @@ end
   the document root. BOSH is the protocol that tunnels XMPP inside HTTP requests.
   Vines Web uses the <a href="http://strophe.im/">Strophe</a> JavaScript library
   for this tunneling.
+</p>
+<p>
+  See the <a href="/server/cluster/">clustering guide</a> for details on how to
+  run multiple Vines HTTP servers behind a reverse web proxy for high-availabilty.
 </p>
