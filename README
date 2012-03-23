@@ -2,9 +2,10 @@
 
 Vines is an XMPP chat server that supports thousands of simultaneous connections
 by using EventMachine for asynchronous IO. User data is stored in a SQL database,
-CouchDB, Redis, the file system, or a custom storage implementation that you provide.
-LDAP authentication can be used so user names and passwords aren't stored in the chat
-database. SSL encryption is mandatory on all client and server connections.
+CouchDB, MongoDB, Redis, the file system, or a custom storage implementation
+that you provide. LDAP authentication can be used so user names and passwords
+aren't stored in the chat database. SSL encryption is mandatory on all client
+and server connections.
 
 The Vines XMPP server includes a web chat client. The web application is available
 immediately after starting the chat server at http://localhost:5280/chat/.
