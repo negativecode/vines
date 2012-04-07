@@ -17,6 +17,7 @@ is mandatory on all client and server connections."
   s.email        = %w[david@negativecode.com]
   s.homepage     = "http://www.getvines.org"
 
+  s.files        = FileList['[A-Z]*', '{bin,lib,conf,web}/**/*'].to_a
   s.test_files   = FileList["test/**/*"].to_a
   s.executables  = %w[vines]
   s.require_path = "lib"

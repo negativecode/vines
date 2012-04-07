@@ -14,10 +14,7 @@ CLOBBER.include('pkg', 'web/chat/javascripts', *ignore)
 
 desc 'Build distributable packages'
 task :build => :assets do
-  # create package task after assets are generated so they're included in FileList
-  spec.files = FileList['[A-Z]*', '{bin,lib,conf,web}/**/*'].to_a
-  Gem::PackageTask.new(spec).define
-  Rake::Task['gem'].invoke
+  system "gem build vines.gemspec"
 end
 
 module Rake
