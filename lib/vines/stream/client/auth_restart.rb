@@ -15,17 +15,13 @@ module Vines
           features = doc.create_element('stream:features') do |el|
             el << doc.create_element('mechanisms') do |parent|
               parent.default_namespace = NAMESPACES[:sasl]
-              mechanisms.each {|name| parent << doc.create_element('mechanism', name) }
+              stream.authentication_mechanisms.each do |name|
+                parent << doc.create_element('mechanism', name)
+              end
             end
           end
           stream.write(features)
           advance
-        end
-
-        private
-
-        def mechanisms
-          ['EXTERNAL', 'PLAIN']
         end
       end
     end

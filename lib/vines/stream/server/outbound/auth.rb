@@ -13,8 +13,8 @@ module Vines
 
           def node(node)
             raise StreamErrors::NotAuthorized unless external?(node)
-            authz = Base64.encode64(stream.domain).chomp
-            stream.write(%Q{<auth xmlns="#{NS}" mechanism="EXTERNAL">#{authz}</auth>})
+            authzid = Base64.strict_encode64(stream.domain)
+            stream.write(%Q{<auth xmlns="#{NS}" mechanism="EXTERNAL">#{authzid}</auth>})
             advance
           end
 

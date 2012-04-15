@@ -41,6 +41,9 @@ module Vines
       end
     end
 
+    # Advance the state machine into the +Closed+ state so any remaining queued
+    # nodes are not processed while we're waiting for EM to actually close the
+    # connection.
     def close_connection(after_writing=false)
       super
       @closed = true
@@ -189,9 +192,9 @@ module Vines
       node.name == ERROR && ns == NAMESPACES[:stream]
     end
 
-    # Schedule a queue pop on the EM thread to handle the next element.
-    # This provides the in-order stanza processing guarantee required by
-    # RFC 6120 section 10.1.
+    # Schedule a queue pop on the EM thread to handle the next element. This
+    # guarantees all stanzas received on this stream are processed in order.
+    # http://tools.ietf.org/html/rfc6120#section-10.1
     def process_node_queue
       @nodes.pop do |node|
         Fiber.new do
@@ -229,13 +232,13 @@ module Vines
         ["#{label} stanza:".ljust(PAD), from, to, node])
     end
 
-    # Returns the current state of the stream's state machine. Provided as a
+    # Returns the current +State+ of the stream's state machine. Provided as a
     # method so subclasses can override the behavior.
     def state
       @state
     end
 
-    # Return true if this is a valid domain-only JID that can be used in
+    # Return +true+ if this is a valid domain-only JID that can be used in
     # stream initiation stanza headers.
     def valid_address?(jid)
       JID.new(jid).domain? rescue false

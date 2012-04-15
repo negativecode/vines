@@ -7,12 +7,6 @@ module Vines
         def initialize(stream, success=Auth)
           super
         end
-
-        private
-
-        def mechanisms
-          ['EXTERNAL']
-        end
       end
     end
   end

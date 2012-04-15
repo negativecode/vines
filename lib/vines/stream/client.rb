@@ -2,10 +2,11 @@
 
 module Vines
   class Stream
-
     # Implements the XMPP protocol for client-to-server (c2s) streams. This
     # serves connected streams using the jabber:client namespace.
     class Client < Stream
+      MECHANISMS = %w[PLAIN].freeze
+
       def initialize(config)
         super
         @session = Client::Session.new(self)
@@ -26,6 +27,12 @@ module Vines
         define_method name do |*args|
           config[:client].send(name, *args)
         end
+      end
+
+      # Return an array of allowed authentication mechanisms advertised as
+      # client stream features.
+      def authentication_mechanisms
+        MECHANISMS
       end
 
       def ssl_handshake_completed

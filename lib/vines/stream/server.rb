@@ -2,12 +2,12 @@
 
 module Vines
   class Stream
-
     # Implements the XMPP protocol for server-to-server (s2s) streams. This
     # serves connected streams using the jabber:server namespace. This handles
     # both accepting incoming s2s streams and initiating outbound s2s streams
     # to other servers.
     class Server < Stream
+      MECHANISMS = %w[EXTERNAL].freeze
 
       # Starts the connection to the remote server. When the stream is
       # connected and ready to send stanzas it will yield to the callback
@@ -74,6 +74,12 @@ module Vines
 
       def ssl_handshake_completed
         close_connection unless cert_domain_matches?(@remote_domain)
+      end
+
+      # Return an array of allowed authentication mechanisms advertised as
+      # server stream features.
+      def authentication_mechanisms
+        MECHANISMS
       end
 
       def stream_type

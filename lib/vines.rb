@@ -142,6 +142,7 @@ end
   vines/cluster/subscriber
 
   vines/stream
+  vines/stream/sasl
   vines/stream/state
   vines/stream/parser
 

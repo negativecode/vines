@@ -4,75 +4,54 @@ module Vines
   class Stream
     class Client
       class Auth < State
-        NS = NAMESPACES[:sasl]
-        AUTH = 'auth'.freeze
-        SUCCESS = %Q{<success xmlns="#{NS}"/>}.freeze
+        NS        = NAMESPACES[:sasl]
+        MECHANISM = 'mechanism'.freeze
+        AUTH      = 'auth'.freeze
+        PLAIN     = 'PLAIN'.freeze
+        EXTERNAL  = 'EXTERNAL'.freeze
+        SUCCESS   = %Q{<success xmlns="#{NS}"/>}.freeze
         MAX_AUTH_ATTEMPTS = 3
-        AUTH_MECHANISMS = {'PLAIN' => :plain_auth, 'EXTERNAL' => :external_auth}.freeze
 
         def initialize(stream, success=BindRestart)
           super
-          @attempts, @outstanding = 0, false
+          @attempts = 0
+          @sasl = SASL.new(stream)
         end
 
         def node(node)
           raise StreamErrors::NotAuthorized unless auth?(node)
-          unless node.text.empty?
-            (name = AUTH_MECHANISMS[node['mechanism']]) ?
-                method(name).call(node) :
-                send_auth_fail(SaslErrors::InvalidMechanism.new)
-          else
+          if node.text.empty?
             send_auth_fail(SaslErrors::MalformedRequest.new)
+          elsif stream.authentication_mechanisms.include?(node[MECHANISM])
+            case node[MECHANISM]
+            when PLAIN    then plain_auth(node)
+            when EXTERNAL then external_auth(node)
+            end
+          else
+            send_auth_fail(SaslErrors::InvalidMechanism.new)
           end
         end
 
         private
 
         def auth?(node)
-          node.name == AUTH && namespace(node) == NS && !@outstanding
+          node.name == AUTH && namespace(node) == NS
         end
 
-        # Authenticate s2s streams by comparing their domain to
-        # their SSL certificate.
-        def external_auth(stanza)
-          domain = Base64.decode64(stanza.text)
-          cert = OpenSSL::X509::Certificate.new(stream.get_peer_cert) rescue nil
-          if (!OpenSSL::SSL.verify_certificate_identity(cert, domain) rescue false)
-            send_auth_fail(SaslErrors::NotAuthorized.new)
-            stream.write('</stream:stream>')
-            stream.close_connection_after_writing
-          else
-            stream.remote_domain = domain
-            send_auth_success
-          end
+        def plain_auth(node)
+          stream.user = @sasl.plain_auth(node.text)
+          send_auth_success
+        rescue => e
+          send_auth_fail(e)
         end
 
-        # Authenticate c2s streams using a username and password. Call the
-        # authentication module in a separate thread to avoid blocking stanza
-        # processing for other users.
-        def plain_auth(stanza)
-          jid, node, password = Base64.decode64(stanza.text).split("\000")
-          jid = [node, stream.domain].join('@') if jid.nil? || jid.empty?
-          log.info("Authenticating user: %s" % jid)
-          @outstanding = true
-          begin
-            user = stream.storage.authenticate(jid, password)
-            finish(user || SaslErrors::NotAuthorized.new)
-          rescue => e
-            log.error("Failed to authenticate: #{e.to_s}")
-            finish(SaslErrors::TemporaryAuthFailure.new)
-          end
-        end
-
-        def finish(result)
-          @outstanding = false
-          if result.kind_of?(Exception)
-            send_auth_fail(result)
-          else
-            stream.user = result
-            log.info("Authentication succeeded: %s" % stream.user.jid)
-            send_auth_success
-          end
+        def external_auth(node)
+          @sasl.external_auth(node.text)
+          send_auth_success
+        rescue => e
+          send_auth_fail(e)
+          stream.write('</stream:stream>')
+          stream.close_connection_after_writing
         end
 
         def send_auth_success
