@@ -111,8 +111,10 @@ module Vines
 
       def start(node)
         if @outbound then send_stream_header; return end
-        @domain, @remote_domain = %w[to from].map {|a| node[a] }
+        to, from = %w[to from].map {|a| node[a] }
+        @domain, @remote_domain = to, from unless @domain
         send_stream_header
+        raise StreamErrors::NotAuthorized if domain_change?(to, from)
         raise StreamErrors::UnsupportedVersion unless node['version'] == '1.0'
         raise StreamErrors::ImproperAddressing unless valid_address?(@domain) && valid_address?(@remote_domain)
         raise StreamErrors::HostUnknown unless config.vhost?(@domain) || config.pubsub?(@domain) || config.component?(@domain)
@@ -122,6 +124,14 @@ module Vines
       end
 
       private
+
+      # The +to+ and +from+ domain addresses set on the initial stream header
+      # must not change during stream restarts. This prevents a server from
+      # authenticating as one domain, then sending stanzas from users in a
+      # different domain.
+      def domain_change?(to, from)
+        to != @domain || from != @remote_domain
+      end
 
       def send_stream_header
         attrs = {

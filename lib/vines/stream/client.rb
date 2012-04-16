@@ -48,8 +48,9 @@ module Vines
 
       def start(node)
         to, from = %w[to from].map {|a| node[a] }
-        @session.domain = to
+        @session.domain = to unless @session.domain
         send_stream_header(from)
+        raise StreamErrors::NotAuthorized if domain_change?(to)
         raise StreamErrors::UnsupportedVersion unless node['version'] == '1.0'
         raise StreamErrors::ImproperAddressing unless valid_address?(@session.domain)
         raise StreamErrors::HostUnknown unless config.vhost?(@session.domain)
@@ -58,6 +59,13 @@ module Vines
       end
 
       private
+
+      # The +to+ domain address set on the initial stream header must not change
+      # during stream restarts. This prevents a user from authenticating in one
+      # domain, then using a stream in a different domain.
+      def domain_change?(to)
+        to != @session.domain
+      end
 
       def send_stream_header(to)
         attrs = {
