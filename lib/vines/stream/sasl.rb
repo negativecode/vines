@@ -56,9 +56,9 @@ module Vines
       # http://tools.ietf.org/html/rfc4616
       def decode_credentials(encoded)
         authzid, node, password = decode64(encoded).split("\x00")
-        raise SaslErrors::InvalidAuthzid unless authzid.nil? || authzid.empty?
         raise SaslErrors::NotAuthorized if node.nil? || node.empty? || password.nil? || password.empty?
         jid = JID.new(node, @stream.domain) rescue (raise SaslErrors::NotAuthorized)
+        raise SaslErrors::InvalidAuthzid unless authzid.nil? || authzid.empty? || authzid.downcase == jid.to_s
         [jid, password]
       end
 

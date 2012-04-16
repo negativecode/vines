@@ -25,30 +25,34 @@ describe Vines::Stream::SASL do
       proc { @sasl.plain_auth("dmVyb25hLmxpdA==\n") }.must_raise Vines::SaslErrors::IncorrectEncoding
     end
 
-    it 'fails when authzid is present' do
-      authzid = Base64.strict_encode64("romeo@verona.lit\x00romeo\x00secr3t")
-      proc { @sasl.plain_auth(authzid) }.must_raise Vines::SaslErrors::InvalidAuthzid
+    it 'fails when authzid does not match authcid' do
+      @stream.expect(:domain, 'verona.lit')
+      encoded = Base64.strict_encode64("juliet@verona.lit\x00romeo\x00secr3t")
+      proc { @sasl.plain_auth(encoded) }.must_raise Vines::SaslErrors::InvalidAuthzid
+      encoded = Base64.strict_encode64("romeo@wonderland.lit\x00romeo\x00secr3t")
+      proc { @sasl.plain_auth(encoded) }.must_raise Vines::SaslErrors::InvalidAuthzid
+      @stream.verify.must_equal true
     end
 
     it 'fails when username is missing' do
-      authzid = Base64.strict_encode64("\x00\x00secr3t")
-      proc { @sasl.plain_auth(authzid) }.must_raise Vines::SaslErrors::NotAuthorized
-      authzid = Base64.strict_encode64("\x00\x00")
-      proc { @sasl.plain_auth(authzid) }.must_raise Vines::SaslErrors::NotAuthorized
+      encoded = Base64.strict_encode64("\x00\x00secr3t")
+      proc { @sasl.plain_auth(encoded) }.must_raise Vines::SaslErrors::NotAuthorized
+      encoded = Base64.strict_encode64("\x00\x00")
+      proc { @sasl.plain_auth(encoded) }.must_raise Vines::SaslErrors::NotAuthorized
     end
 
     it 'fails when password is missing' do
-      authzid = Base64.strict_encode64("\x00romeo\x00")
-      proc { @sasl.plain_auth(authzid) }.must_raise Vines::SaslErrors::NotAuthorized
-      authzid = Base64.strict_encode64("\x00romeo")
-      proc { @sasl.plain_auth(authzid) }.must_raise Vines::SaslErrors::NotAuthorized
+      encoded = Base64.strict_encode64("\x00romeo\x00")
+      proc { @sasl.plain_auth(encoded) }.must_raise Vines::SaslErrors::NotAuthorized
+      encoded = Base64.strict_encode64("\x00romeo")
+      proc { @sasl.plain_auth(encoded) }.must_raise Vines::SaslErrors::NotAuthorized
     end
 
     it 'fails with invalid jid' do
       @stream.expect(:domain, 'verona.lit')
       jid = 'a' * 1024
-      authzid = Base64.strict_encode64("\x00#{jid}\x00secr3t")
-      proc { @sasl.plain_auth(authzid) }.must_raise Vines::SaslErrors::NotAuthorized
+      encoded = Base64.strict_encode64("\x00#{jid}\x00secr3t")
+      proc { @sasl.plain_auth(encoded) }.must_raise Vines::SaslErrors::NotAuthorized
       @stream.verify.must_equal true
     end
 
@@ -59,8 +63,8 @@ describe Vines::Stream::SASL do
       @stream.expect(:domain, 'verona.lit')
       @stream.expect(:storage, storage)
 
-      authzid = Base64.strict_encode64("\x00romeo\x00secr3t")
-      proc { @sasl.plain_auth(authzid) }.must_raise Vines::SaslErrors::NotAuthorized
+      encoded = Base64.strict_encode64("\x00romeo\x00secr3t")
+      proc { @sasl.plain_auth(encoded) }.must_raise Vines::SaslErrors::NotAuthorized
       @stream.verify.must_equal true
       storage.verify.must_equal true
     end
@@ -72,8 +76,21 @@ describe Vines::Stream::SASL do
       @stream.expect(:domain, 'verona.lit')
       @stream.expect(:storage, storage)
 
-      authzid = Base64.strict_encode64("\x00romeo\x00secr3t")
-      @sasl.plain_auth(authzid).must_equal Vines::User.new(jid: romeo)
+      encoded = Base64.strict_encode64("\x00romeo\x00secr3t")
+      @sasl.plain_auth(encoded).must_equal Vines::User.new(jid: romeo)
+      @stream.verify.must_equal true
+      storage.verify.must_equal true
+    end
+
+    it 'passes with valid password and authzid' do
+      romeo = Vines::JID.new('romeo@verona.lit')
+      storage = MiniTest::Mock.new
+      storage.expect(:authenticate, Vines::User.new(jid: romeo), [romeo, 'secr3t'])
+      @stream.expect(:domain, 'verona.lit')
+      @stream.expect(:storage, storage)
+
+      encoded = Base64.strict_encode64("romeo@Verona.LIT\x00romeo\x00secr3t")
+      @sasl.plain_auth(encoded).must_equal Vines::User.new(jid: romeo)
       @stream.verify.must_equal true
       storage.verify.must_equal true
     end
@@ -87,8 +104,8 @@ describe Vines::Stream::SASL do
       @stream.expect(:domain, 'verona.lit')
       @stream.expect(:storage, storage)
 
-      authzid = Base64.strict_encode64("\x00romeo\x00secr3t")
-      proc { @sasl.plain_auth(authzid) }.must_raise Vines::SaslErrors::TemporaryAuthFailure
+      encoded = Base64.strict_encode64("\x00romeo\x00secr3t")
+      proc { @sasl.plain_auth(encoded) }.must_raise Vines::SaslErrors::TemporaryAuthFailure
       @stream.verify.must_equal true
     end
   end
