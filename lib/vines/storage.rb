@@ -95,8 +95,8 @@ module Vines
       !!ldap
     end
 
-    # Validate the username and password pair and return a Vines::User object
-    # on success. Return nil on failure.
+    # Validate the username and password pair and return a +Vines::User+ object
+    # on success. Return +nil+ on failure.
     #
     # For example:
     # user = storage.authenticate('alice@wonderland.lit', 'secr3t')
@@ -112,7 +112,7 @@ module Vines
     end
     wrap_ldap :authenticate
 
-    # Return the Vines::User associated with the JID. Return nil if the user
+    # Return the +Vines::User+ associated with the JID. Return +nil+ if the user
     # could not be found. JID may be +nil+, a +String+, or a +Vines::JID+
     # object. It may be a bare JID or a full JID. Implementations of this method
     # must convert the JID to a bare JID before searching for the user in the
@@ -124,7 +124,7 @@ module Vines
       raise 'subclass must implement'
     end
 
-    # Persist the Vines::User object to the database and return when the save
+    # Persist the +Vines::User+ object to the database and return when the save
     # is complete.
     #
     # alice = Vines::User.new(:jid => 'alice@wonderland.lit')
@@ -209,14 +209,11 @@ module Vines
       end
     end
 
-    # Return a Vines::User object if we are able to bind to the LDAP server
-    # using the username and password. Return nil if authentication failed. If
+    # Return a +Vines::User+ object if we are able to bind to the LDAP server
+    # using the username and password. Return +nil+ if authentication failed. If
     # authentication succeeds, but the user is not yet stored in our database,
     # save the user to the database.
     def authenticate_with_ldap(username, password, &block)
-      if empty?(username, password)
-        block.call; return
-      end
       op = operation { ldap.authenticate(username, password) }
       cb = proc {|user| save_ldap_user(user, &block) }
       EM.defer(op, cb)

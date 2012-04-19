@@ -17,7 +17,7 @@ module Vines
       end
 
       def initialize(host='localhost', port=636, &block)
-        @config = {:host => host, :port => port}
+        @config = {host: host, port: port}
         instance_eval(&block)
         @@required.each {|key| raise "Must provide #{key}" if @config[key].nil? }
       end
@@ -26,17 +26,18 @@ module Vines
       # those credentials. If the bind succeeds, the user's attributes are
       # retrieved.
       def authenticate(username, password)
+        username = JID.new(username).to_s rescue nil
         return if [username, password].any? {|arg| (arg || '').strip.empty? }
 
         ldap = connect(@config[:dn], @config[:password])
         entries = ldap.search(
-          :attributes => [@config[:name_attr], 'mail'],
-          :filter => filter(username))
+          attributes: [@config[:name_attr], 'mail'],
+          filter: filter(username))
         return unless entries && entries.size == 1
 
         user = if connect(entries.first.dn, password).bind
           name = entries.first[@config[:name_attr]].first
-          User.new(:jid => username, :name => name.to_s, :roster => [])
+          User.new(jid: username, name: name.to_s, roster: [])
         end
         user
       end

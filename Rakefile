@@ -41,7 +41,7 @@ is mandatory on all client and server connections."
   s.add_dependency "http_parser.rb", "~> 0.5.3"
   s.add_dependency "mongo", "~> 1.5.2"
   s.add_dependency "bson_ext", "~> 1.5.2"
-  s.add_dependency "net-ldap", "~> 0.2.2"
+  s.add_dependency "net-ldap", "~> 0.3.1"
   s.add_dependency "nokogiri", "~> 1.4.7"
 
   s.add_development_dependency "minitest", "~> 2.12.1"
