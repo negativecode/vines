@@ -35,18 +35,10 @@ module Vines
     # enabled library like em-http-request or em-redis) don't need any special
     # consideration and must not use this method.
     def self.defer(method)
-      old = "_deferred_#{method}"
-      alias_method old, method
+      old = instance_method(method)
       define_method method do |*args|
         fiber = Fiber.current
-        op = proc do
-          begin
-            method(old).call(*args)
-          rescue => e
-            log.error("Thread pool operation failed: #{e.message}")
-            nil
-          end
-        end
+        op = operation { old.bind(self).call(*args) }
         cb = proc {|result| fiber.resume(result) }
         EM.defer(op, cb)
         Fiber.yield
@@ -64,10 +56,9 @@ module Vines
     # end
     # wrap_ldap :authenticate
     def self.wrap_ldap(method)
-      old = "_ldap_#{method}"
-      alias_method old, method
+      old = instance_method(method)
       define_method method do |*args|
-        ldap? ? authenticate_with_ldap(*args) : method(old).call(*args)
+        ldap? ? authenticate_with_ldap(*args) : old.bind(self).call(*args)
       end
     end
 
@@ -89,18 +80,17 @@ module Vines
     # user = storage.find_user('alice@wonderland.lit')
     # puts user.nil?
     def self.fiber(method)
-      old = "_fiber_#{method}"
-      alias_method old, method
+      old = instance_method(method)
       define_method method do |*args|
         fiber, yielding = Fiber.current, true
-        method(old).call(*args) do |user|
+        old.bind(self).call(*args) do |user|
           fiber.resume(user) rescue yielding = false
         end
         Fiber.yield if yielding
       end
     end
 
-    # Return true if users are authenticated against an LDAP directory.
+    # Return +true+ if users are authenticated against an LDAP directory.
     def ldap?
       !!ldap
     end
@@ -206,6 +196,19 @@ module Vines
       args.flatten.any? {|arg| (arg || '').strip.empty? }
     end
 
+    # Return a +proc+ suitable for running on the +EM.defer+ thread pool that traps
+    # and logs any errors thrown by the provided block.
+    def operation
+      proc do
+        begin
+          yield
+        rescue => e
+          log.error("Thread pool operation failed: #{e.message}")
+          nil
+        end
+      end
+    end
+
     # Return a Vines::User object if we are able to bind to the LDAP server
     # using the username and password. Return nil if authentication failed. If
     # authentication succeeds, but the user is not yet stored in our database,
@@ -214,20 +217,15 @@ module Vines
       if empty?(username, password)
         block.call; return
       end
-
-      op = proc do
-        begin
-          ldap.authenticate(username, password)
-        rescue => e
-          log.error("LDAP authentication failed: #{e.message}")
-          nil
-        end
-      end
+      op = operation { ldap.authenticate(username, password) }
       cb = proc {|user| save_ldap_user(user, &block) }
       EM.defer(op, cb)
     end
     fiber :authenticate_with_ldap
 
+    # Save missing users to the storage database after they're authenticated with
+    # LDAP. This allows admins to define users once in LDAP and have them sync
+    # to the chat database the first time they successfully sign in.
     def save_ldap_user(user, &block)
       Fiber.new do
         if user.nil?
