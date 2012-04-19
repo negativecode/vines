@@ -23,11 +23,10 @@ module Vines
       # ActiveRecord uses blocking IO.
       def self.with_connection(method, args={})
         deferrable = args.key?(:defer) ? args[:defer] : true
-        old = "_with_connection_#{method}"
-        alias_method old, method
+        old = instance_method(method)
         define_method method do |*args|
           ActiveRecord::Base.connection_pool.with_connection do
-            method(old).call(*args)
+            old.bind(self).call(*args)
           end
         end
         defer(method) if deferrable

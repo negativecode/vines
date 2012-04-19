@@ -6,10 +6,9 @@ class MockRedis
 
   # Mimic em-hiredis behavior.
   def self.defer(method)
-    old = "_deferred_#{method}"
-    alias_method old, method
+    old = instance_method(method)
     define_method method do |*args, &block|
-      result = method(old).call(*args)
+      result = old.bind(self).call(*args)
       deferred = EM::DefaultDeferrable.new
       deferred.callback(&block) if block
       EM.next_tick { deferred.succeed(result) }
