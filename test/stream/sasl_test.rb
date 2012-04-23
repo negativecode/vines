@@ -82,7 +82,7 @@ describe Vines::Stream::SASL do
       storage.verify.must_equal true
     end
 
-    it 'passes with valid password and authzid' do
+    it 'passes with valid password and authzid provided by strophe' do
       romeo = Vines::JID.new('romeo@verona.lit')
       storage = MiniTest::Mock.new
       storage.expect(:authenticate, Vines::User.new(jid: romeo), [romeo, 'secr3t'])
@@ -90,6 +90,19 @@ describe Vines::Stream::SASL do
       @stream.expect(:storage, storage)
 
       encoded = Base64.strict_encode64("romeo@Verona.LIT\x00romeo\x00secr3t")
+      @sasl.plain_auth(encoded).must_equal Vines::User.new(jid: romeo)
+      @stream.verify.must_equal true
+      storage.verify.must_equal true
+    end
+
+    it 'passes with valid password and authzid provided by smack' do
+      romeo = Vines::JID.new('romeo@verona.lit')
+      storage = MiniTest::Mock.new
+      storage.expect(:authenticate, Vines::User.new(jid: romeo), [romeo, 'secr3t'])
+      @stream.expect(:domain, 'verona.lit')
+      @stream.expect(:storage, storage)
+
+      encoded = Base64.strict_encode64("romeo\x00romeo\x00secr3t")
       @sasl.plain_auth(encoded).must_equal Vines::User.new(jid: romeo)
       @stream.verify.must_equal true
       storage.verify.must_equal true

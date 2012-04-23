@@ -58,8 +58,26 @@ module Vines
         authzid, node, password = decode64(encoded).split("\x00")
         raise SaslErrors::NotAuthorized if node.nil? || node.empty? || password.nil? || password.empty?
         jid = JID.new(node, @stream.domain) rescue (raise SaslErrors::NotAuthorized)
-        raise SaslErrors::InvalidAuthzid unless authzid.nil? || authzid.empty? || authzid.downcase == jid.to_s
+        validate_authzid!(authzid, jid)
         [jid, password]
+      end
+
+      # An optional SASL authzid allows a user to authenticate with one
+      # user name and password and then have their connection authorized as a
+      # different ID (the authzid). We don't support that, so raise an error if
+      # the authzid is provided and different than the authcid.
+      #
+      # Most clients don't send an authzid at all because it's optional and not
+      # widely supported. However, Strophe sends a bare JID, in compliance with
+      # RFC 6120, but Smack sends just the user name as the authzid. So, take
+      # care to handle non-compliant clients here.
+      # http://tools.ietf.org/html/rfc6120#section-6.3.8
+      def validate_authzid!(authzid, jid)
+        return if authzid.nil? || authzid.empty?
+        authzid.downcase!
+        smack = authzid == jid.node
+        strophe = authzid == jid.to_s
+        raise SaslErrors::InvalidAuthzid unless strophe || smack
       end
 
       # Decode the base64 encoded string, raising an error for invalid data.
