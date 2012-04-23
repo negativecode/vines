@@ -47,7 +47,8 @@ module Vines
         def resource(node)
           el = node.xpath('ns:bind/ns:resource', 'ns' => NS).first
           resource = el ? el.text.strip : ''
-          resource.empty? || resource_used?(resource) ? Kit.uuid : resource
+          generate = resource.empty? || !resource_valid?(resource) || resource_used?(resource)
+          generate ? Kit.uuid : resource
         end
 
         def resource_limit_reached?
@@ -59,6 +60,11 @@ module Vines
           stream.available_resources(stream.user.jid).any? do |c|
             c.user.jid.resource == resource
           end
+        end
+
+        def resource_valid?(resource)
+          jid = stream.user.jid
+          JID.new(jid.node, jid.domain, resource) rescue false
         end
       end
     end
