@@ -12,6 +12,9 @@ module Vines
     # http://tools.ietf.org/html/rfc3454#appendix-C
     NAME_PREP = /[[:cntrl:] ]/.freeze
 
+    # http://tools.ietf.org/html/rfc6122#appendix-B
+    RESOURCE_PREP = /[[:cntrl:]]/.freeze
+
     attr_reader :node, :domain, :resource
     attr_writer :resource
 
@@ -84,7 +87,7 @@ module Vines
       raise ArgumentError, 'empty node' if @node && @node.strip.empty?
       raise ArgumentError, 'node contains invalid characters' if @node && @node =~ NODE_PREP
       raise ArgumentError, 'empty resource' if @resource && @resource.strip.empty?
-      raise ArgumentError, 'resource contains invalid characters' if @resource && @resource =~ NAME_PREP
+      raise ArgumentError, 'resource contains invalid characters' if @resource && @resource =~ RESOURCE_PREP
       raise ArgumentError, 'empty domain' if @domain == '' && (@node || @resource)
       raise ArgumentError, 'domain contains invalid characters' if @domain && @domain =~ NAME_PREP
     end
