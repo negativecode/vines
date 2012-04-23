@@ -68,16 +68,16 @@ module Vines
       # the authzid is provided and different than the authcid.
       #
       # Most clients don't send an authzid at all because it's optional and not
-      # widely supported. However, Strophe sends a bare JID, in compliance with
-      # RFC 6120, but Smack sends just the user name as the authzid. So, take
-      # care to handle non-compliant clients here.
+      # widely supported. However, Strophe and Blather send a bare JID, in
+      # compliance with RFC 6120, but Smack sends just the user name as the
+      # authzid. So, take care to handle non-compliant clients here.
       # http://tools.ietf.org/html/rfc6120#section-6.3.8
       def validate_authzid!(authzid, jid)
         return if authzid.nil? || authzid.empty?
         authzid.downcase!
         smack = authzid == jid.node
-        strophe = authzid == jid.to_s
-        raise SaslErrors::InvalidAuthzid unless strophe || smack
+        compliant = authzid == jid.to_s
+        raise SaslErrors::InvalidAuthzid unless compliant || smack
       end
 
       # Decode the base64 encoded string, raising an error for invalid data.

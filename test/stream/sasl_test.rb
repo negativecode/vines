@@ -82,7 +82,7 @@ describe Vines::Stream::SASL do
       storage.verify.must_equal true
     end
 
-    it 'passes with valid password and authzid provided by strophe' do
+    it 'passes with valid password and authzid provided by strophe and blather' do
       romeo = Vines::JID.new('romeo@verona.lit')
       storage = MiniTest::Mock.new
       storage.expect(:authenticate, Vines::User.new(jid: romeo), [romeo, 'secr3t'])
