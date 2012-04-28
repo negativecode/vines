@@ -35,13 +35,10 @@ $ sudo apt-get -y install build-essential bison openssl \
   libxml2-dev libxslt-dev autoconf libc6-dev ncurses-dev
 </pre>
 <p>
-  Ubuntu 11.10 provides a Ruby 1.9.2 package, so we can skip the RVM steps.
-  Don't worry about the 1.9.1 reference in the command below. It really will
-  install 1.9.2!
+  Ubuntu 12.04 provides a Ruby 1.9.3 package, so we can skip the RVM steps.
 </p>
 <pre>
-$ sudo apt-get -y install ruby1.9.1-full
-$ sudo REALLY_GEM_UPDATE_SYSTEM=true gem update --system
+$ sudo apt-get -y install ruby1.9.3
 $ sudo gem install vines
 </pre>
 
