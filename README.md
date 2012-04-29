@@ -1,4 +1,4 @@
-== Welcome to Vines
+# Welcome to Vines
 
 Vines is an XMPP chat server that supports thousands of simultaneous connections
 by using EventMachine for asynchronous IO. User data is stored in a SQL database,
@@ -12,7 +12,7 @@ immediately after starting the chat server at http://localhost:5280/chat/.
 
 Additional documentation can be found at www.getvines.org.
 
-== Usage
+## Usage
 
 1. gem install vines
 2. vines init wonderland.lit
@@ -20,16 +20,16 @@ Additional documentation can be found at www.getvines.org.
 4. Login with your favorite chat program (iChat, Adium, Pidgin, etc.) to
    start chatting!
 
-== Dependencies
+## Dependencies
 
 Vines requires Ruby 1.9.2 or better. Instructions for installing the
 needed OS packages, as well as Ruby itself, are available at
 http://www.getvines.org/ruby.
 
-== Contact
+## Contact
 
 * David Graham <david@negativecode.com>
 
-== License
+## License
 
 Vines is released under the MIT license. Check the LICENSE file for details.
