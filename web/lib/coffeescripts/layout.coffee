@@ -10,7 +10,7 @@ class @Layout
     this.fn()
 
   fill: (selector, get, set) ->
-    $(selector).each (ix, node) =>
+    $(selector).filter(':visible').each (ix, node) =>
       node = $(node)
       getter = node[get]
       parent = getter.call node.parent(), true
