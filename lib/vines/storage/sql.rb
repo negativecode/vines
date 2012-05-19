@@ -12,6 +12,12 @@ module Vines
         belongs_to :user
       end
       class Group < ActiveRecord::Base; end
+
+      class OfflineMessage < ActiveRecord::Base
+        belongs_to :sender,:foreign_key=>"from",:class_name=>"User"
+        belongs_to :recipient,:foreign_key=>"to",:class_name=>"User"
+      end
+      
       class User < ActiveRecord::Base
         has_many :contacts,  :dependent => :destroy
         has_many :fragments, :dependent => :delete_all
@@ -78,8 +84,8 @@ module Vines
 
         # remove deleted contacts from roster
         xuser.contacts.delete(xuser.contacts.select do |contact|
-          !user.contact?(contact.jid)
-        end)
+            !user.contact?(contact.jid)
+          end)
 
         # update contacts
         xuser.contacts.each do |contact|
@@ -94,18 +100,39 @@ module Vines
         # add new contacts to roster
         jids = xuser.contacts.map {|c| c.jid }
         user.roster.select {|contact| !jids.include?(contact.jid.bare.to_s) }
-          .each do |contact|
-            xuser.contacts.build(
-              user: xuser,
-              jid: contact.jid.bare.to_s,
-              name: contact.name,
-              ask: contact.ask,
-              subscription: contact.subscription,
-              groups: groups(contact))
-          end
+        .each do |contact|
+          xuser.contacts.build(
+            user: xuser,
+            jid: contact.jid.bare.to_s,
+            name: contact.name,
+            ask: contact.ask,
+            subscription: contact.subscription,
+            groups: groups(contact))
+        end
         xuser.save
       end
       with_connection :save_user
+
+      def offline_messages_present?(jid)
+        jid = JID.new(jid).bare.to_s
+        return if jid.empty?
+        offline_messages_to_jid(jid)
+      end
+
+      def delete_offline_messages(jid)
+        jid = JID.new(jid).bare.to_s
+        return if jid.empty?
+        Sql::OfflineMessage.destroy_all(:to=>jid)
+      end
+
+      def fetch_offline_messages(jid)
+        jid = JID.new(jid).bare.to_s
+        offline_msgs = offline_messages_to_jid(jid) || {}
+      end
+
+      def save_offline_message(msg)        
+        Sql::OfflineMessage.create(msg)
+      end
 
       def find_vcard(jid)
         jid = JID.new(jid).bare.to_s
@@ -138,9 +165,9 @@ module Vines
         jid = JID.new(jid).bare.to_s
         fragment = fragment_by_jid(jid, node) ||
           Sql::Fragment.new(
-            user: user_by_jid(jid),
-            root: node.name,
-            namespace: node.namespace.href)
+          user: user_by_jid(jid),
+          root: node.name,
+          namespace: node.namespace.href)
         fragment.xml = node.to_xml
         fragment.save
       end
@@ -186,6 +213,13 @@ module Vines
             t.text    :xml,       null: false
           end
           add_index :fragments, [:user_id, :root, :namespace], unique: true
+
+          create_table :offline_messages do |t|
+            t.string  :from,      null: false
+            t.string  :to,        limit: 512,null: false
+            t.text    :body,      null: false
+          end
+          add_index :offline_messages,[:from,:to]
         end
       end
       with_connection :create_schema, defer: false
@@ -215,6 +249,12 @@ module Vines
       def groups(contact)
         contact.groups.map {|name| Sql::Group.find_or_create_by_name(name.strip) }
       end
+
+      def offline_messages_to_jid(jid)
+        jid = JID.new(jid).bare.to_s
+        Sql::OfflineMessage.find_all_by_to(jid)
+      end
+
     end
   end
 end

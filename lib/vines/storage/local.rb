@@ -15,7 +15,7 @@ module Vines
           raise 'Must provide a writable storage directory'
         end
 
-        %w[user vcard fragment].each do |sub|
+        %w[user vcard fragment room message].each do |sub|
           sub = File.expand_path(sub, @dir)
           Dir.mkdir(sub, 0700) unless File.exists?(sub)
         end
@@ -49,6 +49,32 @@ module Vines
         end
         save("user/#{user.jid.bare}") do |f|
           YAML.dump(record, f)
+        end
+      end
+
+      def offline_messages_present?(jid)
+        File.exist?(absolute_path("message/#{jid.bare.to_s}"))
+      end
+
+      def delete_offline_messages(jid)
+        if offline_messages_present?(jid)
+          File.delete(absolute_path("message/#{jid.bare.to_s}"))
+        end
+      end
+
+      def fetch_offline_messages(jid)
+        jid = JID.new(jid).bare.to_s        
+        file = absolute_path("message/#{jid}") unless jid.empty?        
+        offline_msgs = YAML.load_file(file) rescue {}
+      end
+
+      def save_offline_message(msg)
+        file = "message/#{msg[:to]}"
+        offline_msgs = YAML.load_file(absolute_path(file)) rescue []
+        msg.delete('to')
+        offline_msgs << msg
+        save(file) do |f|          
+          YAML.dump(offline_msgs,f)
         end
       end
 
@@ -87,7 +113,7 @@ module Vines
       def absolute_path(file)
         File.expand_path(file, @dir).tap do |absolute|
           parent = File.dirname(File.dirname(absolute))
-          raise 'path traversal' unless parent == @dir
+          raise "path traversal failed for #{file}" unless parent == @dir
         end
       end
 
