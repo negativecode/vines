@@ -80,7 +80,6 @@ def check_config(opts)
   end
 end
 
-VINES_ROOT = Dir.pwd
 opts = parse(ARGV)
 check_config(opts)
 command = Vines::Command.const_get(opts[:command].capitalize).new
