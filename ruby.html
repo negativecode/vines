@@ -2,9 +2,9 @@
 layout: docs
 title: Vines - Install Ruby
 ---
-<h2>Install Ruby 1.9.2</h2>
+<h2>Install Ruby 1.9.3</h2>
 <p>
-  Before we can install the Vines gem, we need to install Ruby 1.9.2. The easiest
+  Before we can install the Vines gem, we need to install Ruby 1.9.3. The easiest
   way to do this is with
   <a href="https://rvm.beginrescueend.com/">RVM: Ruby Version Manager</a>.
 </p>
@@ -26,31 +26,28 @@ The install is only two steps:
 
 <h2>Ubuntu</h2>
 <p>
-  Install the following packages using apt-get.
+  Install the following packages using apt-get. Ubuntu 12.04 provides a Ruby
+  1.9.3 package, so we can skip the RVM steps.
 </p>
 <pre>
 $ sudo apt-get -y install build-essential bison openssl \
   libreadline6 libreadline6-dev curl git-core zlib1g zlib1g-dev \
   libssl-dev libyaml-dev libsqlite3-0 libsqlite3-dev sqlite3 \
-  libxml2-dev libxslt-dev autoconf libc6-dev ncurses-dev
-</pre>
-<p>
-  Ubuntu 12.04 provides a Ruby 1.9.3 package, so we can skip the RVM steps.
-</p>
-<pre>
-$ sudo apt-get -y install ruby1.9.3
+  libxml2-dev libxslt-dev autoconf libc6-dev ncurses-dev ruby1.9.3
 $ sudo gem install vines
 </pre>
 
 <h2>Fedora</h2>
 <p>
-  Install the following packages using yum.
+  Install the following packages using yum. Fedora 17 provides a Ruby
+  1.9.3 package, so we can skip the RVM steps.
 </p>
 <pre>
 $ sudo yum install -y bash curl git gcc-c++ patch readline \
   readline-devel zlib zlib-devel libyaml-devel libffi-devel \
   openssl-devel make bzip2 sqlite sqlite-devel libxslt \
-  libxslt-devel libxml2 libxml2-devel
+  libxslt-devel libxml2 libxml2-devel ruby-devel
+$ sudo gem install vines
 </pre>
 
 <h2>SUSE</h2>
@@ -75,7 +72,7 @@ $ sudo pkg_add -r bash curl git openssl bzip2 readline \
 $ bash
 </pre>
 
-<h2>Install RVM &amp; Ruby 1.9.2</h2>
+<h2>Install RVM &amp; Ruby 1.9.3</h2>
 <p>
   With the OS libraries installed, we can now use RVM to install Ruby.
 </p>
@@ -83,8 +80,8 @@ $ bash
 $ bash &lt; &lt;(curl -s https://rvm.beginrescueend.com/install/rvm)
 $ echo '[[ -s "$HOME/.rvm/scripts/rvm" ]] &amp;&amp; . "$HOME/.rvm/scripts/rvm" # Load RVM function' &gt;&gt; ~/.bash_profile
 $ source .bash_profile
-$ rvm install 1.9.2
-$ rvm use 1.9.2 --default
+$ rvm install 1.9.3
+$ rvm use 1.9.3 --default
 $ gem update --system
 $ gem install vines
 </pre>
