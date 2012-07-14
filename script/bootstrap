@@ -1,0 +1,9 @@
+#!/bin/sh
+
+set -e
+
+echo "==> Installing gem dependencies . . ."
+bundle install --binstubs --path vendor/gems
+
+echo "==> getvines.org is installed!"
+
