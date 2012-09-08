@@ -26,6 +26,13 @@ Vines requires Ruby 1.9.2 or better. Instructions for installing the
 needed OS packages, as well as Ruby itself, are available at
 http://www.getvines.org/ruby.
 
+## Development
+
+```
+$ script/bootstrap
+$ script/test
+```
+
 ## Contact
 
 * David Graham <david@negativecode.com>
@@ -33,3 +40,4 @@ http://www.getvines.org/ruby.
 ## License
 
 Vines is released under the MIT license. Check the LICENSE file for details.
+
