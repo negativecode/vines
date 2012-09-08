@@ -1,5 +1,6 @@
 .DS_Store
-pkg
 .bundle
 Gemfile.lock
+pkg
+_site
 
