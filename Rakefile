@@ -3,7 +3,6 @@
 require 'rake'
 require 'rake/clean'
 require 'rake/testtask'
-require 'rubygems/package_task'
 
 ignore = File.read('web/lib/javascripts/.gitignore')
   .split("\n").map {|f| "web/lib/javascripts/#{f}" }
