@@ -5,8 +5,8 @@ module Vines
     class Cert
       def run(opts)
         raise 'vines cert <domain>' unless opts[:args].size == 1
-        dir = File.expand_path('../certs', opts[:config])
-        create_cert(opts[:args].first, dir)
+        require opts[:config]
+        create_cert(opts[:args].first, Config.instance.certs)
       end
 
       def create_cert(domain, dir)
@@ -33,7 +33,7 @@ module Vines
 
         cert.sign(key, OpenSSL::Digest::SHA1.new)
 
-        {'key' => key, 'crt' => cert}.each_pair do |ext, o| 
+        {'key' => key, 'crt' => cert}.each_pair do |ext, o|
           name = File.join(dir, "#{domain}.#{ext}")
           File.open(name, "w") {|f| f.write(o.to_pem) }
           File.chmod(0600, name) if ext == 'key'
