@@ -28,7 +28,7 @@ module Vines
 
       def inbound?
         stream.class == Vines::Stream::Server ||
-        stream.class == Vines::Stream::Component
+          stream.class == Vines::Stream::Component
       end
 
       def outbound_broadcast_presence
@@ -58,7 +58,22 @@ module Vines
           stream.remote_subscribed_to_contacts.each do |contact|
             send_probe(contact.jid.bare)
           end
+          #offline messages
+          storage.fetch_offline_messages(stream.user.jid).each do |offline_msg|
+            doc = Document.new
+            node = doc.create_element('message') do |el|
+              el['from'] = offline_msg[:from]              
+              el['to'] = stream.user.jid.to_s
+              el['type'] = "chat"
+              el << doc.create_element("body") do |b|
+                b << offline_msg[:body]
+              end
+            end            
+            stream.write(node)
+          end
+          storage.delete_offline_messages(stream.user.jid)          
           stream.available!
+
         end
 
         stream.remote_subscribers(to).each do |contact|

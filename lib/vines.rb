@@ -7,6 +7,7 @@ module Vines
     :server           => 'jabber:server'.freeze,
     :component        => 'jabber:component:accept'.freeze,
     :roster           => 'jabber:iq:roster'.freeze,
+    :register         => 'jabber:iq:register'.freeze,
     :non_sasl         => 'jabber:iq:auth'.freeze,
     :storage          => 'jabber:iq:private'.freeze,
     :version          => 'jabber:iq:version'.freeze,
@@ -88,6 +89,7 @@ end
   vines/stanza/iq/error
   vines/stanza/iq/ping
   vines/stanza/iq/private_storage
+  vines/stanza/iq/register
   vines/stanza/iq/result
   vines/stanza/iq/roster
   vines/stanza/iq/session
