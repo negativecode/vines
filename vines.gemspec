@@ -16,21 +16,21 @@ Gem::Specification.new do |s|
   s.executables  = %w[vines]
   s.require_path = 'lib'
 
-  s.add_dependency 'activerecord', '~> 3.2.1'
+  s.add_dependency 'activerecord', '~> 3.2.8'
   s.add_dependency 'bcrypt-ruby', '~> 3.0.1'
-  s.add_dependency 'em-http-request', '~> 1.0.1'
-  s.add_dependency 'em-hiredis', '~> 0.1.0'
-  s.add_dependency 'eventmachine', '1.0.0.beta.4'
+  s.add_dependency 'em-http-request', '~> 1.0.3'
+  s.add_dependency 'em-hiredis', '~> 0.1.1'
+  s.add_dependency 'eventmachine', '>= 1.0.0.beta.4'
   s.add_dependency 'http_parser.rb', '~> 0.5.3'
   s.add_dependency 'mongo', '~> 1.5.2'
   s.add_dependency 'bson_ext', '~> 1.5.2'
-  s.add_dependency 'net-ldap', '~> 0.2.2'
+  s.add_dependency 'net-ldap', '~> 0.3.1'
   s.add_dependency 'nokogiri', '~> 1.4.7'
 
   s.add_development_dependency 'minitest', '~> 2.11.2'
   s.add_development_dependency 'coffee-script', '~> 2.2.0'
-  s.add_development_dependency 'coffee-script-source', '~> 1.2.0'
-  s.add_development_dependency 'uglifier', '~> 1.2.3'
+  s.add_development_dependency 'coffee-script-source', '~> 1.3.3'
+  s.add_development_dependency 'uglifier', '~> 1.3.0'
   s.add_development_dependency 'rake'
   s.add_development_dependency 'sqlite3'
 
