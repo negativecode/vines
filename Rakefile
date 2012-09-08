@@ -12,9 +12,11 @@ ignore = File.read('web/lib/javascripts/.gitignore')
 
 CLOBBER.include('pkg', 'web/chat/javascripts', *ignore)
 
+directory 'pkg'
+
 desc 'Build distributable packages'
-task :build => :assets do
-  system "gem build vines.gemspec"
+task :build => [:assets, :pkg] do
+  system 'gem build vines.gemspec && mv vines-*.gem pkg/'
 end
 
 Rake::TestTask.new(:test) do |test|
