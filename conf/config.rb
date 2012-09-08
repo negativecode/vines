@@ -8,6 +8,11 @@ Vines::Config.configure do
   # level logs all XML sent and received by the server.
   log :info
 
+  # Set the directory in which to look for virtual hosts' TLS certificates.
+  # This is optional and defaults to the conf/certs directory created during
+  # `vines init`.
+  certs 'conf/certs'
+
   # Each host element below is a virtual host domain name that this server will
   # service. Hosts can share storage configurations or use separate databases.
   # TLS encryption is mandatory so each host must have a <domain>.crt and
