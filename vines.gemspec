@@ -1,8 +1,7 @@
-require 'rake'
 require './lib/vines/version'
 
-spec = Gem::Specification.new do |s|
-  s.name    = "vines"
+Gem::Specification.new do |s|
+  s.name    = 'vines'
   s.version = Vines::VERSION
 
   s.summary     = "Vines is an XMPP chat server that's easy to install and run."
@@ -16,11 +15,12 @@ is mandatory on all client and server connections."
   s.authors      = ["David Graham"]
   s.email        = %w[david@negativecode.com]
   s.homepage     = "http://www.getvines.org"
+  s.license      = 'MIT'
 
-  s.files        = FileList['[A-Z]*', '{bin,lib,conf,web}/**/*'].to_a
-  s.test_files   = FileList["test/**/*"].to_a
+  s.files        = Dir['[A-Z]*', 'vines.gemspec', '{bin,lib,conf,web}/**/*'] - ['Gemfile.lock']
+  s.test_files   = Dir['test/**/*']
   s.executables  = %w[vines]
-  s.require_path = "lib"
+  s.require_path = 'lib'
 
   s.add_dependency "activerecord", "~> 3.2.1"
   s.add_dependency "bcrypt-ruby", "~> 3.0.1"
