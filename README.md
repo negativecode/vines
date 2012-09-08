@@ -1,24 +1,27 @@
 # Welcome to Vines
 
-Vines is an XMPP chat server that supports thousands of simultaneous connections
-by using EventMachine for asynchronous IO. User data is stored in a SQL database,
+Vines is an XMPP chat server that supports thousands of simultaneous connections,
+using EventMachine for asynchronous IO. User data is stored in a SQL database,
 CouchDB, MongoDB, Redis, the file system, or a custom storage implementation
 that you provide. LDAP authentication can be used so user names and passwords
 aren't stored in the chat database. SSL encryption is mandatory on all client
 and server connections.
 
 The Vines XMPP server includes a web chat client. The web application is available
-immediately after starting the chat server at http://localhost:5280/chat/.
+after starting the chat server at http://localhost:5280/chat/.
 
 Additional documentation can be found at www.getvines.org.
 
 ## Usage
 
-1. gem install vines
-2. vines init wonderland.lit
-3. cd wonderland.lit && vines start
-4. Login with your favorite chat program (iChat, Adium, Pidgin, etc.) to
-   start chatting!
+```
+$ gem install vines
+$ vines init wonderland.lit
+$ cd wonderland.lit && vines start
+$ open http://localhost:5280/chat/
+```
+
+Login with your favorite chat program (iChat, Adium, Pidgin, etc.) to start chatting!
 
 ## Dependencies
 
