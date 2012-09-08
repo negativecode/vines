@@ -21,11 +21,16 @@ module Vines
     end
 
     def initialize(&block)
+      @certs = "conf/certs"
       @vhosts, @ports, @cluster = {}, {}, nil
       @null = Storage::Null.new
       @router = Router.new(self)
       instance_eval(&block)
       raise "must define at least one virtual host" if @vhosts.empty?
+    end
+
+    def certs value = nil
+      File.expand_path value ? @certs = value : @certs
     end
 
     def host(*names, &block)

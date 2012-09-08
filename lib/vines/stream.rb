@@ -21,7 +21,7 @@ module Vines
       @remote_addr, @local_addr = addresses
       @user, @closed, @stanza_size = nil, false, 0
       @bucket = TokenBucket.new(100, 10)
-      @store = Store.new(File.join(VINES_ROOT, 'conf', 'certs'))
+      @store = Store.new(@config.certs)
       @nodes = EM::Queue.new
       process_node_queue
       create_parser
