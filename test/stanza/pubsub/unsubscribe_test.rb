@@ -1,179 +1,148 @@
 # encoding: UTF-8
 
-require 'tmpdir'
-require 'vines'
-require 'ext/nokogiri'
-require 'minitest/autorun'
+require 'test_helper'
 
-class UnsubscribePubSubTest < MiniTest::Unit::TestCase
-  def setup
-    @user = Vines::User.new(jid: 'alice@wonderland.lit/tea')
-    @config = Vines::Config.new do
+describe Vines::Stanza::PubSub::Unsubscribe do
+  subject      { Vines::Stanza::PubSub::Unsubscribe.new(xml, stream) }
+  let(:user)   { Vines::User.new(jid: 'alice@wonderland.lit/tea') }
+  let(:stream) { MiniTest::Mock.new }
+  let(:config) do
+    Vines::Config.new do
       host 'wonderland.lit' do
         storage(:fs) { dir Dir.tmpdir }
         pubsub 'games'
       end
     end
-    @stream = MiniTest::Mock.new
-    @stream.expect(:config, @config)
-    @stream.expect(:user, @user)
   end
 
-  def test_missing_to_address_raises
-    node = node(%q{
-      <iq type='set' id='42'>
-        <pubsub xmlns='http://jabber.org/protocol/pubsub'>
-          <unsubscribe node='game_13' jid="alice@wonderland.lit/tea"/>
-        </pubsub>
-      </iq>
-    }.strip.gsub(/\n|\s{2,}/, ''))
-
-    @stream.expect(:domain, 'wonderland.lit')
-
-    stanza = Vines::Stanza::PubSub::Unsubscribe.new(node, @stream)
-    assert_raises(Vines::StanzaErrors::FeatureNotImplemented) { stanza.process }
-    assert @stream.verify
-  end
-
-  def test_server_domain_to_address_raises
-    node = node(%q{
-      <iq type='set' to='wonderland.lit' id='42'>
-        <pubsub xmlns='http://jabber.org/protocol/pubsub'>
-          <unsubscribe node='game_13' jid="alice@wonderland.lit/tea"/>
-        </pubsub>
-      </iq>
-    }.strip.gsub(/\n|\s{2,}/, ''))
-
-    stanza = Vines::Stanza::PubSub::Unsubscribe.new(node, @stream)
-    assert_raises(Vines::StanzaErrors::FeatureNotImplemented) { stanza.process }
-    assert @stream.verify
-  end
-
-  def test_non_pubsub_to_address_routes
-    node = node(%q{
-      <iq type='set' to='bogus.wonderland.lit' id='42'>
-        <pubsub xmlns='http://jabber.org/protocol/pubsub'>
-          <unsubscribe node='game_13' jid="alice@wonderland.lit/tea"/>
-        </pubsub>
-      </iq>
-    }.strip.gsub(/\n|\s{2,}/, ''))
-
-    router = MiniTest::Mock.new
-    router.expect(:route, nil, [node])
-    @stream.expect(:router, router)
-
-    stanza = Vines::Stanza::PubSub::Unsubscribe.new(node, @stream)
-    stanza.process
-    assert @stream.verify
-    assert router.verify
-  end
-
-  def test_multiple_unsubscribe_elements_raises
-    node = node(%q{
-      <iq type='set' to='games.wonderland.lit' id='42'>
-        <pubsub xmlns='http://jabber.org/protocol/pubsub'>
-          <unsubscribe node='game_13' jid="alice@wonderland.lit/tea"/>
-          <unsubscribe node='game_14' jid="alice@wonderland.lit/tea"/>
-        </pubsub>
-      </iq>
-    }.strip.gsub(/\n|\s{2,}/, ''))
-
-    stanza = Vines::Stanza::PubSub::Unsubscribe.new(node, @stream)
-    assert_raises(Vines::StanzaErrors::BadRequest) { stanza.process }
-    assert @stream.verify
-  end
-
-  def test_unsubscribe_missing_node_raises
-    node = node(%q{
-      <iq type='set' to='games.wonderland.lit' id='42'>
-        <pubsub xmlns='http://jabber.org/protocol/pubsub'>
-          <unsubscribe node='game_13' jid="alice@wonderland.lit/tea"/>
-        </pubsub>
-      </iq>
-    }.strip.gsub(/\n|\s{2,}/, ''))
-
-    stanza = Vines::Stanza::PubSub::Unsubscribe.new(node, @stream)
-    assert_raises(Vines::StanzaErrors::ItemNotFound) { stanza.process }
-    assert @stream.verify
-  end
-
-  def test_unsubscribe_without_subscription_raises
-    node = node(%q{
-      <iq type='set' to='games.wonderland.lit' id='42'>
-        <pubsub xmlns='http://jabber.org/protocol/pubsub'>
-          <unsubscribe node='game_13' jid="alice@wonderland.lit/tea"/>
-        </pubsub>
-      </iq>
-    }.strip.gsub(/\n|\s{2,}/, ''))
-
-    stanza = Vines::Stanza::PubSub::Unsubscribe.new(node, @stream)
-    def stanza.mock_pubsub; @mock_pubsub; end
-    def stanza.pubsub
-      unless @mock_pubsub
-        @mock_pubsub = MiniTest::Mock.new
-        @mock_pubsub.expect(:node?, true, ['game_13'])
-        @mock_pubsub.expect(:subscribed?, false, ['game_13', Vines::JID.new('alice@wonderland.lit/tea')])
+  before do
+    class << stream
+      attr_accessor :config, :nodes, :user
+      def write(node)
+        @nodes ||= []
+        @nodes << node
       end
-      @mock_pubsub
     end
-    assert_raises(Vines::StanzaErrors::UnexpectedRequest) { stanza.process }
-    assert @stream.verify
-    assert stanza.mock_pubsub.verify
+    stream.config = config
+    stream.user = user
   end
 
-  def test_unsubscribe_illegal_jid_raises
-    node = node(%q{
-      <iq type='set' to='games.wonderland.lit' id='42'>
-        <pubsub xmlns='http://jabber.org/protocol/pubsub'>
-          <unsubscribe node='game_13' jid="not_alice@wonderland.lit/tea"/>
-        </pubsub>
-      </iq>
-    }.strip.gsub(/\n|\s{2,}/, ''))
+  describe 'when missing a to address' do
+    let(:xml) { unsubscribe('') }
 
-    stanza = Vines::Stanza::PubSub::Unsubscribe.new(node, @stream)
-    assert_raises(Vines::StanzaErrors::Forbidden) { stanza.process }
-    assert @stream.verify
+    it 'raises a feature-not-implemented stanza error' do
+      stream.expect :domain, 'wonderland.lit'
+      -> { subject.process }.must_raise Vines::StanzaErrors::FeatureNotImplemented
+      stream.verify
+    end
   end
 
-  def test_good_stanza_processes
-    node = node(%q{
-      <iq type='set' to='games.wonderland.lit' id='42'>
-        <pubsub xmlns='http://jabber.org/protocol/pubsub'>
-          <unsubscribe node='game_13' jid="alice@wonderland.lit/tea"/>
-        </pubsub>
-      </iq>
-    }.strip.gsub(/\n|\s{2,}/, ''))
+  describe 'when addressed to bare server domain' do
+    let(:xml) { unsubscribe('wonderland.lit') }
 
-    def @stream.nodes; @nodes; end
-    def @stream.write(node)
-      @nodes ||= []
-      @nodes << node
+    it 'raises a feature-not-implemented stanza error' do
+      -> { subject.process }.must_raise Vines::StanzaErrors::FeatureNotImplemented
+      stream.verify
+    end
+  end
+
+  describe 'when addressed to a non-pubsub component' do
+    let(:router) { MiniTest::Mock.new }
+    let(:xml) { unsubscribe('bogus.wonderland.lit') }
+
+    before do
+      router.expect :route, nil, [xml]
+      stream.expect :router, router
     end
 
-    stanza = Vines::Stanza::PubSub::Unsubscribe.new(node, @stream)
-    def stanza.mock_pubsub; @mock_pubsub; end
-    def stanza.pubsub
-      unless @mock_pubsub
-        @mock_pubsub = MiniTest::Mock.new
-        @mock_pubsub.expect(:node?, true, ['game_13'])
-        @mock_pubsub.expect(:subscribed?, true, ['game_13', Vines::JID.new('alice@wonderland.lit/tea')])
-        @mock_pubsub.expect(:unsubscribe, nil, ['game_13', Vines::JID.new('alice@wonderland.lit/tea')])
+    it 'routes rather than handle locally' do
+      subject.process
+      stream.verify
+      router.verify
+    end
+  end
+
+  describe 'when attempting to unsubscribe from multiple nodes' do
+    let(:xml) { unsubscribe('games.wonderland.lit', true) }
+
+    it 'raises a bad-request stanza error' do
+      -> { subject.process }.must_raise Vines::StanzaErrors::BadRequest
+      stream.verify
+    end
+  end
+
+  describe 'when unsubscribing from a missing node' do
+    let(:xml) { unsubscribe('games.wonderland.lit') }
+
+    it 'raises an item-not-found stanza error' do
+      -> { subject.process }.must_raise Vines::StanzaErrors::ItemNotFound
+      stream.verify
+    end
+  end
+
+  describe 'when unsubscribing without a subscription' do
+    let(:pubsub) { MiniTest::Mock.new }
+    let(:xml) { unsubscribe('games.wonderland.lit') }
+
+    before do
+      pubsub.expect :node?, true, ['game_13']
+      pubsub.expect :subscribed?, false, ['game_13', user.jid]
+    end
+
+    it 'raises an unexpected-request stanza error' do
+      subject.stub :pubsub, pubsub do
+        -> { subject.process }.must_raise Vines::StanzaErrors::UnexpectedRequest
       end
-      @mock_pubsub
+      stream.verify
+      pubsub.verify
     end
-    stanza.process
+  end
 
-    assert @stream.verify
-    assert stanza.mock_pubsub.verify
-    assert_equal 1, @stream.nodes.size
+  describe 'when unsubscribing an illegal jid' do
+    let(:xml) { unsubscribe('games.wonderland.lit', false, 'not_alice@wonderland.lit/tea') }
 
-    expected = node(%q{<iq from="games.wonderland.lit" id="42" to="alice@wonderland.lit/tea" type="result"/>})
-    assert_equal expected, @stream.nodes[0]
+    it 'raises a forbidden stanza error' do
+      -> { subject.process }.must_raise Vines::StanzaErrors::Forbidden
+      stream.verify
+    end
+  end
+
+  describe 'when given a valid stanza' do
+    let(:pubsub) { MiniTest::Mock.new }
+    let(:xml) { unsubscribe('games.wonderland.lit') }
+    let(:expected) { result(user.jid, 'games.wonderland.lit') }
+
+    before do
+      pubsub.expect :node?, true, ['game_13']
+      pubsub.expect :subscribed?, true, ['game_13', user.jid]
+      pubsub.expect :unsubscribe, nil, ['game_13', user.jid]
+    end
+
+    it 'sends an iq result stanza to sender' do
+      subject.stub :pubsub, pubsub do
+        subject.process
+      end
+
+      stream.nodes.size.must_equal 1
+      stream.nodes.first.must_equal expected
+      stream.verify
+      pubsub.verify
+    end
   end
 
   private
 
-  def node(xml)
-    Nokogiri::XML(xml).root
+  def unsubscribe(to, multiple=false, jid=user.jid)
+    extra = "<unsubscribe node='game_14' jid='#{jid}'/>" if multiple
+    body = %Q{
+      <pubsub xmlns='http://jabber.org/protocol/pubsub'>
+        <unsubscribe node='game_13' jid="#{jid}"/>
+        #{extra}
+      </pubsub>}
+    iq(type: 'set', to: to, id: 42, body: body)
+  end
+
+  def result(to, from)
+    iq(from: from, id: 42, to: to, type: 'result')
   end
 end
