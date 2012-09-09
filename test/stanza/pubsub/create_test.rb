@@ -5,134 +5,122 @@ require 'vines'
 require 'ext/nokogiri'
 require 'minitest/autorun'
 
-class CreatePubSubTest < MiniTest::Unit::TestCase
-  def setup
-    @user = Vines::User.new(jid: 'alice@wonderland.lit/tea')
-    @config = Vines::Config.new do
+describe Vines::Stanza::PubSub::Create do
+  subject      { Vines::Stanza::PubSub::Create.new(xml, stream) }
+  let(:user)   { Vines::User.new(jid: 'alice@wonderland.lit/tea') }
+  let(:stream) { MiniTest::Mock.new }
+  let(:config) do
+    Vines::Config.new do
       host 'wonderland.lit' do
         storage(:fs) { dir Dir.tmpdir }
         pubsub 'games'
       end
     end
-    @stream = MiniTest::Mock.new
-    @stream.expect(:config, @config)
-    @stream.expect(:user, @user)
   end
 
-  def test_missing_to_address_raises
-    node = node(%q{
-      <iq type='set' id='42'>
-        <pubsub xmlns='http://jabber.org/protocol/pubsub'>
-          <create node='game_13'/>
-        </pubsub>
-      </iq>
-    }.strip.gsub(/\n|\s{2,}/, ''))
-
-    @stream.expect(:domain, 'wonderland.lit')
-
-    stanza = Vines::Stanza::PubSub::Create.new(node, @stream)
-    assert_raises(Vines::StanzaErrors::FeatureNotImplemented) { stanza.process }
-    assert @stream.verify
-  end
-
-  def test_server_domain_to_address_raises
-    node = node(%q{
-      <iq type='set' to='wonderland.lit' id='42'>
-        <pubsub xmlns='http://jabber.org/protocol/pubsub'>
-          <create node='game_13'/>
-        </pubsub>
-      </iq>
-    }.strip.gsub(/\n|\s{2,}/, ''))
-
-    stanza = Vines::Stanza::PubSub::Create.new(node, @stream)
-    assert_raises(Vines::StanzaErrors::FeatureNotImplemented) { stanza.process }
-    assert @stream.verify
-  end
-
-  def test_non_pubsub_to_address_routes
-    node = node(%q{
-      <iq type='set' to='bogus.wonderland.lit' id='42'>
-        <pubsub xmlns='http://jabber.org/protocol/pubsub'>
-          <create node='game_13'/>
-        </pubsub>
-      </iq>
-    }.strip.gsub(/\n|\s{2,}/, ''))
-
-    router = MiniTest::Mock.new
-    router.expect(:route, nil, [node])
-    @stream.expect(:router, router)
-
-    stanza = Vines::Stanza::PubSub::Create.new(node, @stream)
-    stanza.process
-    assert @stream.verify
-    assert router.verify
-  end
-
-  def test_multiple_create_elements_raises
-    node = node(%q{
-      <iq type='set' to='games.wonderland.lit' id='42'>
-        <pubsub xmlns='http://jabber.org/protocol/pubsub'>
-          <create node='game_13'/>
-          <create node='game_14'/>
-        </pubsub>
-      </iq>
-    }.strip.gsub(/\n|\s{2,}/, ''))
-
-    stanza = Vines::Stanza::PubSub::Create.new(node, @stream)
-    assert_raises(Vines::StanzaErrors::BadRequest) { stanza.process }
-    assert @stream.verify
-  end
-
-  def test_create_duplicate_node_raises
-    node = node(%q{
-      <iq type='set' to='games.wonderland.lit' id='42'>
-        <pubsub xmlns='http://jabber.org/protocol/pubsub'>
-          <create node='game_13'/>
-        </pubsub>
-      </iq>
-    }.strip.gsub(/\n|\s{2,}/, ''))
-
-    stanza = Vines::Stanza::PubSub::Create.new(node, @stream)
-    def stanza.pubsub
-      pubsub = MiniTest::Mock.new
-      pubsub.expect(:node?, true, ['game_13'])
-      pubsub
+  before do
+    class << stream
+      attr_accessor :config, :nodes, :user
+      def write(node)
+        @nodes ||= []
+        @nodes << node
+      end
     end
-    assert_raises(Vines::StanzaErrors::Conflict) { stanza.process }
-    assert @stream.verify
+    stream.config = config
+    stream.user = user
   end
 
-  def test_good_stanza_processes
-    node = node(%q{
-      <iq type='set' to='games.wonderland.lit' id='42'>
-        <pubsub xmlns='http://jabber.org/protocol/pubsub'>
-          <create node='game_13'/>
-        </pubsub>
-      </iq>
-    }.strip.gsub(/\n|\s{2,}/, ''))
+  describe 'when missing a to address' do
+    let(:xml) { create('') }
 
-    def @stream.nodes; @nodes; end
-    def @stream.write(node)
-      @nodes ||= []
-      @nodes << node
+    it 'raises a feature-not-implemented stanza error' do
+      stream.expect :domain, 'wonderland.lit'
+      -> { subject.process }.must_raise Vines::StanzaErrors::FeatureNotImplemented
+      stream.verify
+    end
+  end
+
+  describe 'when addressed to bare server domain' do
+    let(:xml) { create('wonderland.lit') }
+
+    it 'raises a feature-not-implemented stanza error' do
+      -> { subject.process }.must_raise Vines::StanzaErrors::FeatureNotImplemented
+      stream.verify
+    end
+  end
+
+  describe 'when addressed to a non-pubsub component' do
+    let(:router) { MiniTest::Mock.new }
+    let(:xml) { create('bogus.wonderland.lit') }
+
+    before do
+      router.expect :route, nil, [xml]
+      stream.expect :router, router
     end
 
-    stanza = Vines::Stanza::PubSub::Create.new(node, @stream)
-    stanza.process
+    it 'routes rather than handle locally' do
+      subject.process
+      stream.verify
+      router.verify
+    end
+  end
 
-    assert @stream.verify
-    assert_equal 1, @stream.nodes.size
+  describe 'when attempting to create multiple nodes' do
+    let(:xml) { create('games.wonderland.lit', true) }
 
-    expected = %q{<iq from="games.wonderland.lit" id="42" to="alice@wonderland.lit/tea" type="result">}
-    expected << %q{<pubsub xmlns="http://jabber.org/protocol/pubsub"><create node="game_13"/></pubsub>}
-    expected << %q{</iq>}
-    expected = node(expected)
-    assert_equal expected, @stream.nodes[0]
+    it 'raises a bad-request stanza error' do
+      -> { subject.process }.must_raise Vines::StanzaErrors::BadRequest
+      stream.verify
+    end
+  end
+
+  describe 'when attempting to create duplicate nodes' do
+    let(:pubsub) { MiniTest::Mock.new }
+    let(:xml) { create('games.wonderland.lit') }
+
+    it 'raises a conflict stanza error' do
+      pubsub.expect :node?, true, ['game_13']
+      subject.stub :pubsub, pubsub do
+        -> { subject.process }.must_raise Vines::StanzaErrors::Conflict
+      end
+      stream.verify
+      pubsub.verify
+    end
+  end
+
+  describe 'when given a valid stanza' do
+    let(:xml) { create('games.wonderland.lit') }
+
+    it 'sends an iq result stanza to sender' do
+      subject.process
+      stream.verify
+      stream.nodes.size.must_equal 1
+
+      expected = %q{<iq from="games.wonderland.lit" id="42" to="alice@wonderland.lit/tea" type="result">}
+      expected << %q{<pubsub xmlns="http://jabber.org/protocol/pubsub"><create node="game_13"/></pubsub>}
+      expected << %q{</iq>}
+      expected = node(expected)
+      stream.nodes.first.must_equal expected
+    end
   end
 
   private
 
+  def create(to, multiple=false)
+    to = "to='#{to}'" unless to.nil? || to.empty?
+    extra_create = "<create node='game_14'/>" if multiple
+    node(%Q{
+      <iq type='set' #{to} id='42'>
+        <pubsub xmlns='http://jabber.org/protocol/pubsub'>
+          <create node='game_13'/>
+          #{extra_create}
+        </pubsub>
+      </iq>
+    })
+  end
+
   def node(xml)
+    xml = xml.strip.gsub(/\n|\s{2,}/, '')
     Nokogiri::XML(xml).root
   end
 end
