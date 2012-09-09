@@ -3,13 +3,13 @@
 require 'test_helper'
 
 describe Vines::Stream::SASL do
+  subject       { Vines::Stream::SASL.new(stream) }
   let(:stream)  { MiniTest::Mock.new }
-  let(:sasl)    { Vines::Stream::SASL.new(stream) }
   let(:storage) { MiniTest::Mock.new }
   let(:romeo)   { Vines::User.new(jid: 'romeo@verona.lit') }
 
   before do
-    def sasl.log
+    def subject.log
       Class.new do
         def method_missing(*args)
           # do nothing
@@ -24,54 +24,54 @@ describe Vines::Stream::SASL do
     end
 
     it 'fails with empty input' do
-      -> { sasl.plain_auth(nil) }.must_raise Vines::SaslErrors::IncorrectEncoding
-      -> { sasl.plain_auth('') }.must_raise Vines::SaslErrors::NotAuthorized
+      -> { subject.plain_auth(nil) }.must_raise Vines::SaslErrors::IncorrectEncoding
+      -> { subject.plain_auth('') }.must_raise Vines::SaslErrors::NotAuthorized
     end
 
     it 'fails with plain text' do
-      -> { sasl.plain_auth('bogus') }.must_raise Vines::SaslErrors::IncorrectEncoding
+      -> { subject.plain_auth('bogus') }.must_raise Vines::SaslErrors::IncorrectEncoding
     end
 
     it 'fails with incorrectly encoded base64 text' do
-      -> { sasl.plain_auth('=dmVyb25hLmxpdA==') }.must_raise Vines::SaslErrors::IncorrectEncoding
-      -> { sasl.plain_auth("dmVyb25hLmxpdA==\n") }.must_raise Vines::SaslErrors::IncorrectEncoding
+      -> { subject.plain_auth('=dmVyb25hLmxpdA==') }.must_raise Vines::SaslErrors::IncorrectEncoding
+      -> { subject.plain_auth("dmVyb25hLmxpdA==\n") }.must_raise Vines::SaslErrors::IncorrectEncoding
     end
 
     it 'fails when authzid does not match authcid username' do
       encoded = Base64.strict_encode64("juliet@verona.lit\x00romeo\x00secr3t")
-      -> { sasl.plain_auth(encoded) }.must_raise Vines::SaslErrors::InvalidAuthzid
+      -> { subject.plain_auth(encoded) }.must_raise Vines::SaslErrors::InvalidAuthzid
       stream.verify
     end
 
     it 'fails when authzid does not match authcid domain' do
       encoded = Base64.strict_encode64("romeo@wonderland.lit\x00romeo\x00secr3t")
-      -> { sasl.plain_auth(encoded) }.must_raise Vines::SaslErrors::InvalidAuthzid
+      -> { subject.plain_auth(encoded) }.must_raise Vines::SaslErrors::InvalidAuthzid
       stream.verify
     end
 
     it 'fails when username and password are missing' do
       encoded = Base64.strict_encode64("\x00\x00")
-      -> { sasl.plain_auth(encoded) }.must_raise Vines::SaslErrors::NotAuthorized
+      -> { subject.plain_auth(encoded) }.must_raise Vines::SaslErrors::NotAuthorized
     end
 
     it 'fails when username is missing' do
       encoded = Base64.strict_encode64("\x00\x00secr3t")
-      -> { sasl.plain_auth(encoded) }.must_raise Vines::SaslErrors::NotAuthorized
+      -> { subject.plain_auth(encoded) }.must_raise Vines::SaslErrors::NotAuthorized
     end
 
     it 'fails when password is missing with delimiter' do
       encoded = Base64.strict_encode64("\x00romeo\x00")
-      -> { sasl.plain_auth(encoded) }.must_raise Vines::SaslErrors::NotAuthorized
+      -> { subject.plain_auth(encoded) }.must_raise Vines::SaslErrors::NotAuthorized
     end
 
     it 'fails when password is missing' do
       encoded = Base64.strict_encode64("\x00romeo")
-      -> { sasl.plain_auth(encoded) }.must_raise Vines::SaslErrors::NotAuthorized
+      -> { subject.plain_auth(encoded) }.must_raise Vines::SaslErrors::NotAuthorized
     end
 
     it 'fails with invalid jid' do
       encoded = Base64.strict_encode64("\x00#{'a' * 1024}\x00secr3t")
-      -> { sasl.plain_auth(encoded) }.must_raise Vines::SaslErrors::NotAuthorized
+      -> { subject.plain_auth(encoded) }.must_raise Vines::SaslErrors::NotAuthorized
       stream.verify
     end
 
@@ -80,7 +80,7 @@ describe Vines::Stream::SASL do
       stream.expect :storage, storage
 
       encoded = Base64.strict_encode64("\x00romeo\x00secr3t")
-      -> { sasl.plain_auth(encoded) }.must_raise Vines::SaslErrors::NotAuthorized
+      -> { subject.plain_auth(encoded) }.must_raise Vines::SaslErrors::NotAuthorized
 
       stream.verify
       storage.verify
@@ -91,7 +91,7 @@ describe Vines::Stream::SASL do
       stream.expect :storage, storage
 
       encoded = Base64.strict_encode64("\x00romeo\x00secr3t")
-      sasl.plain_auth(encoded).must_equal romeo
+      subject.plain_auth(encoded).must_equal romeo
 
       stream.verify
       storage.verify
@@ -102,7 +102,7 @@ describe Vines::Stream::SASL do
       stream.expect :storage, storage
 
       encoded = Base64.strict_encode64("romeo@Verona.LIT\x00romeo\x00secr3t")
-      sasl.plain_auth(encoded).must_equal romeo
+      subject.plain_auth(encoded).must_equal romeo
 
       stream.verify
       storage.verify
@@ -113,7 +113,7 @@ describe Vines::Stream::SASL do
       stream.expect :storage, storage
 
       encoded = Base64.strict_encode64("romeo\x00romeo\x00secr3t")
-      sasl.plain_auth(encoded).must_equal romeo
+      subject.plain_auth(encoded).must_equal romeo
 
       stream.verify
       storage.verify
@@ -128,7 +128,7 @@ describe Vines::Stream::SASL do
 
       stream.expect :storage, storage
       encoded = Base64.strict_encode64("\x00romeo\x00secr3t")
-      -> { sasl.plain_auth(encoded) }.must_raise Vines::SaslErrors::TemporaryAuthFailure
+      -> { subject.plain_auth(encoded) }.must_raise Vines::SaslErrors::TemporaryAuthFailure
       stream.verify
     end
   end
@@ -136,39 +136,39 @@ describe Vines::Stream::SASL do
   describe '#external_auth' do
     it 'fails with empty input' do
       stream.expect :remote_domain, 'verona.lit'
-      -> { sasl.external_auth(nil) }.must_raise Vines::SaslErrors::IncorrectEncoding
-      -> { sasl.external_auth('') }.must_raise Vines::SaslErrors::InvalidAuthzid
+      -> { subject.external_auth(nil) }.must_raise Vines::SaslErrors::IncorrectEncoding
+      -> { subject.external_auth('') }.must_raise Vines::SaslErrors::InvalidAuthzid
       stream.verify
     end
 
     it 'fails with plain text' do
-      -> { sasl.external_auth('bogus') }.must_raise Vines::SaslErrors::IncorrectEncoding
+      -> { subject.external_auth('bogus') }.must_raise Vines::SaslErrors::IncorrectEncoding
       stream.verify
     end
 
     it 'fails with incorrectly encoded base64 text' do
-      -> { sasl.external_auth('=dmVyb25hLmxpdA==') }.must_raise Vines::SaslErrors::IncorrectEncoding
-      -> { sasl.external_auth("dmVyb25hLmxpdA==\n") }.must_raise Vines::SaslErrors::IncorrectEncoding
+      -> { subject.external_auth('=dmVyb25hLmxpdA==') }.must_raise Vines::SaslErrors::IncorrectEncoding
+      -> { subject.external_auth("dmVyb25hLmxpdA==\n") }.must_raise Vines::SaslErrors::IncorrectEncoding
       stream.verify
     end
 
     it 'passes with empty authzid and matching cert' do
       stream.expect :remote_domain, 'verona.lit'
       stream.expect :cert_domain_matches?, true, ['verona.lit']
-      sasl.external_auth('=').must_equal true
+      subject.external_auth('=').must_equal true
       stream.verify
     end
 
     it 'fails with empty authzid and non-matching cert' do
       stream.expect :remote_domain, 'verona.lit'
       stream.expect :cert_domain_matches?, false, ['verona.lit']
-      -> { sasl.external_auth('=') }.must_raise Vines::SaslErrors::NotAuthorized
+      -> { subject.external_auth('=') }.must_raise Vines::SaslErrors::NotAuthorized
       stream.verify
     end
 
     it 'fails when authzid does not match stream from address' do
       stream.expect :remote_domain, 'not.verona.lit'
-      -> { sasl.external_auth('dmVyb25hLmxpdA==') }.must_raise Vines::SaslErrors::InvalidAuthzid
+      -> { subject.external_auth('dmVyb25hLmxpdA==') }.must_raise Vines::SaslErrors::InvalidAuthzid
       stream.verify
     end
 
@@ -176,7 +176,7 @@ describe Vines::Stream::SASL do
       stream.expect :remote_domain, 'verona.lit'
       stream.expect :remote_domain, 'verona.lit'
       stream.expect :cert_domain_matches?, true, ['verona.lit']
-      sasl.external_auth('dmVyb25hLmxpdA==').must_equal true
+      subject.external_auth('dmVyb25hLmxpdA==').must_equal true
       stream.verify
     end
   end
