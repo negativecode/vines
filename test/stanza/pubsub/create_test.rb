@@ -1,9 +1,6 @@
 # encoding: UTF-8
 
-require 'tmpdir'
-require 'vines'
-require 'ext/nokogiri'
-require 'minitest/autorun'
+require 'test_helper'
 
 describe Vines::Stanza::PubSub::Create do
   subject      { Vines::Stanza::PubSub::Create.new(xml, stream) }
@@ -90,37 +87,30 @@ describe Vines::Stanza::PubSub::Create do
 
   describe 'when given a valid stanza' do
     let(:xml) { create('games.wonderland.lit') }
+    let(:expected) { result(user.jid, 'games.wonderland.lit') }
 
     it 'sends an iq result stanza to sender' do
       subject.process
-      stream.verify
       stream.nodes.size.must_equal 1
-
-      expected = %q{<iq from="games.wonderland.lit" id="42" to="alice@wonderland.lit/tea" type="result">}
-      expected << %q{<pubsub xmlns="http://jabber.org/protocol/pubsub"><create node="game_13"/></pubsub>}
-      expected << %q{</iq>}
-      expected = node(expected)
       stream.nodes.first.must_equal expected
+      stream.verify
     end
   end
 
   private
 
   def create(to, multiple=false)
-    to = "to='#{to}'" unless to.nil? || to.empty?
     extra_create = "<create node='game_14'/>" if multiple
-    node(%Q{
-      <iq type='set' #{to} id='42'>
-        <pubsub xmlns='http://jabber.org/protocol/pubsub'>
-          <create node='game_13'/>
-          #{extra_create}
-        </pubsub>
-      </iq>
-    })
+    body = %Q{
+      <pubsub xmlns='http://jabber.org/protocol/pubsub'>
+        <create node='game_13'/>
+        #{extra_create}
+      </pubsub>}
+    iq(type: 'set', to: to, id: 42, body: body)
   end
 
-  def node(xml)
-    xml = xml.strip.gsub(/\n|\s{2,}/, '')
-    Nokogiri::XML(xml).root
+  def result(to, from)
+    body = '<pubsub xmlns="http://jabber.org/protocol/pubsub"><create node="game_13"/></pubsub>'
+    iq(from: from, id: 42, to: to, type: 'result', body: body)
   end
 end

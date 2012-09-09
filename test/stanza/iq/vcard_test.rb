@@ -1,9 +1,6 @@
 # encoding: UTF-8
 
-require 'tmpdir'
-require 'vines'
-require 'ext/nokogiri'
-require 'minitest/autorun'
+require 'test_helper'
 
 describe Vines::Stanza::Iq::Vcard do
   subject       { Vines::Stanza::Iq::Vcard.new(xml, stream) }
@@ -145,17 +142,5 @@ describe Vines::Stanza::Iq::Vcard do
 
   def result(to, from=nil, card=nil)
     iq(from: from, id: 42, to: to, type: 'result', body: card)
-  end
-
-  def iq(options)
-    body = options.delete(:body)
-    options.delete_if {|k, v| v.nil? || v.to_s.empty? }
-    attrs = options.map {|k,v| "#{k}=\"#{v}\"" }.join(' ')
-    node(%Q{<iq #{attrs}>#{body}</iq>})
-  end
-
-  def node(xml)
-    xml = xml.strip.gsub(/\n|\s{2,}/, '')
-    Nokogiri::XML(xml).root
   end
 end
