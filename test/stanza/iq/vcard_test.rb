@@ -5,10 +5,13 @@ require 'vines'
 require 'ext/nokogiri'
 require 'minitest/autorun'
 
-class VcardTest < MiniTest::Unit::TestCase
-  def setup
-    @stream = MiniTest::Mock.new
-    @config = Vines::Config.new do
+describe Vines::Stanza::Iq::Vcard do
+  subject       { Vines::Stanza::Iq::Vcard.new(xml, stream) }
+  let(:alice)   { Vines::User.new(jid: 'alice@wonderland.lit/tea') }
+  let(:stream)  { MiniTest::Mock.new }
+  let(:storage) { MiniTest::Mock.new }
+  let(:config) do
+    Vines::Config.new do
       host 'wonderland.lit' do
         cross_domain_messages true
         storage(:fs) { dir Dir.tmpdir }
@@ -16,130 +19,143 @@ class VcardTest < MiniTest::Unit::TestCase
     end
   end
 
-  def test_vcard_get_on_remote_jid_routes
-    alice = Vines::User.new(:jid => 'alice@wonderland.lit/tea')
-    node = node(%q{<iq id="42" to="romeo@verona.lit" type="get"><vCard xmlns="vcard-temp"/></iq>})
-
-    router = MiniTest::Mock.new
-    router.expect(:route, nil, [node])
-
-    @stream.expect(:config, @config)
-    @stream.expect(:user, alice)
-    @stream.expect(:router, router)
-
-    stanza = Vines::Stanza::Iq::Vcard.new(node, @stream)
-    stanza.process
-    assert @stream.verify
-    assert router.verify
+  before do
+    class << stream
+      attr_accessor :config, :domain, :user
+    end
+    stream.config = config
+    stream.domain = 'wonderland.lit'
+    stream.user = alice
   end
 
-  def test_vcard_get_missing_to_address
-    alice = Vines::User.new(:jid => 'alice@wonderland.lit/tea')
-    node = node(%q{<iq id="42" type="get"><vCard xmlns="vcard-temp"/></iq>})
+  describe 'when getting vcard' do
+    describe 'and addressed to a remote jid' do
+      let(:xml) { get('romeo@verona.lit') }
+      let(:router) { MiniTest::Mock.new }
 
-    card = node(%q{<vCard xmlns="vcard-temp"><FN>Alice in Wonderland</FN></vCard>})
+      before do
+        router.expect :route, nil, [xml]
+        stream.expect :router, router
+      end
 
-    storage = MiniTest::Mock.new
-    storage.expect(:find_vcard, card, [alice.jid.bare])
+      it 'routes rather than handle locally' do
+        subject.process
+        stream.verify
+        router.verify
+      end
+    end
 
-    @stream.expect(:config, @config)
-    @stream.expect(:user, alice)
-    @stream.expect(:domain, 'wonderland.lit')
-    @stream.expect(:storage, storage, ['wonderland.lit'])
-    expected = node(%q{
-      <iq id="42" to="alice@wonderland.lit/tea" type="result">
-        <vCard xmlns="vcard-temp">
-          <FN>Alice in Wonderland</FN>
-        </vCard>
-      </iq>}.strip.gsub(/\n|\s{2,}/, ''))
-    @stream.expect(:write, nil, [expected])
+    describe 'and missing to address' do
+      let(:xml) { get('') }
+      let(:card) { vcard('Alice') }
+      let(:expected) { result(alice.jid, '', card) }
 
-    stanza = Vines::Stanza::Iq::Vcard.new(node, @stream)
-    stanza.process
-    assert @stream.verify
-    assert storage.verify
+      before do
+        storage.expect :find_vcard, card, [alice.jid.bare]
+        stream.expect :storage, storage, ['wonderland.lit']
+        stream.expect :write, nil, [expected]
+      end
+
+      it 'sends vcard for authenticated jid' do
+        subject.process
+        stream.verify
+        storage.verify
+      end
+    end
+
+    describe 'for another user' do
+      let(:xml) { get(hatter) }
+      let(:card) { vcard('Hatter') }
+      let(:hatter) { Vines::JID.new('hatter@wonderland.lit') }
+      let(:expected) { result(alice.jid, hatter, card) }
+
+      before do
+        storage.expect :find_vcard, card, [hatter]
+        stream.expect :storage, storage, ['wonderland.lit']
+        stream.expect :write, nil, [expected]
+      end
+
+      it 'succeeds and returns vcard with from address' do
+        subject.process
+        stream.verify
+        storage.verify
+      end
+    end
+
+    describe 'for missing vcard' do
+      let(:xml) { get('') }
+
+      before do
+        storage.expect :find_vcard, nil, [alice.jid.bare]
+        stream.expect :storage, storage, ['wonderland.lit']
+      end
+
+      it 'returns an item-not-found stanza error' do
+        -> { subject.process }.must_raise Vines::StanzaErrors::ItemNotFound
+        stream.verify
+        storage.verify
+      end
+    end
   end
 
-  def test_vcard_get_another_user_includes_from_address
-    alice = Vines::User.new(:jid => 'alice@wonderland.lit/tea')
-    node = node(%q{<iq id="42" to="hatter@wonderland.lit" type="get"><vCard xmlns="vcard-temp"/></iq>})
+  describe 'when setting vcard' do
+    describe 'and addressed to another user' do
+      let(:xml) { set('hatter@wonderland.lit') }
 
-    card = node(%q{<vCard xmlns="vcard-temp"><FN>Mad Hatter</FN></vCard>})
+      it 'raises a forbidden stanza error' do
+        -> { subject.process }.must_raise Vines::StanzaErrors::Forbidden
+        stream.verify
+      end
+    end
 
-    storage = MiniTest::Mock.new
-    storage.expect(:find_vcard, card, [Vines::JID.new('hatter@wonderland.lit')])
+    describe 'and missing to address' do
+      let(:xml) { set('') }
+      let(:card) { vcard('Alice') }
+      let(:expected) { result(alice.jid) }
 
-    @stream.expect(:config, @config)
-    @stream.expect(:user, alice)
-    @stream.expect(:storage, storage, ['wonderland.lit'])
-    expected = node(%q{
-      <iq from="hatter@wonderland.lit" id="42" to="alice@wonderland.lit/tea" type="result">
-        <vCard xmlns="vcard-temp">
-          <FN>Mad Hatter</FN>
-        </vCard>
-      </iq>}.strip.gsub(/\n|\s{2,}/, ''))
-    @stream.expect(:write, nil, [expected])
+      before do
+        storage.expect :save_vcard, nil, [alice.jid, card]
+        stream.expect :storage, storage, ['wonderland.lit']
+        stream.expect :write, nil, [expected]
+      end
 
-    stanza = Vines::Stanza::Iq::Vcard.new(node, @stream)
-    stanza.process
-    assert @stream.verify
-    assert storage.verify
-  end
-
-  def test_missing_vcard_get_returns_item_not_found
-    alice = Vines::User.new(:jid => 'alice@wonderland.lit/tea')
-    node = node(%q{<iq id="42" type="get"><vCard xmlns="vcard-temp"/></iq>})
-
-    storage = MiniTest::Mock.new
-    storage.expect(:find_vcard, nil, [alice.jid.bare])
-
-    @stream.expect(:config, @config)
-    @stream.expect(:user, alice)
-    @stream.expect(:domain, 'wonderland.lit')
-    @stream.expect(:storage, storage, ['wonderland.lit'])
-
-    stanza = Vines::Stanza::Iq::Vcard.new(node, @stream)
-    assert_raises(Vines::StanzaErrors::ItemNotFound) { stanza.process }
-    assert @stream.verify
-    assert storage.verify
-  end
-
-  def test_vcard_set_on_another_user_returns_forbidden
-    alice = Vines::User.new(:jid => 'alice@wonderland.lit/tea')
-    node = node(%q{<iq id="42" to="hatter@wonderland.lit" type="set"><vCard xmlns="vcard-temp"><FN>Alice</FN></vCard></iq>})
-
-    @stream.expect(:config, @config)
-    @stream.expect(:user, alice)
-
-    stanza = Vines::Stanza::Iq::Vcard.new(node, @stream)
-    assert_raises(Vines::StanzaErrors::Forbidden) { stanza.process }
-    assert @stream.verify
-  end
-
-  def test_vcard_set_returns_result
-    alice = Vines::User.new(:jid => 'alice@wonderland.lit/tea')
-    node = node(%q{<iq id="42" type="set"><vCard xmlns="vcard-temp"><FN>Alice</FN></vCard></iq>})
-    card = node(%q{<vCard xmlns="vcard-temp"><FN>Alice</FN></vCard>})
-
-    storage = MiniTest::Mock.new
-    storage.expect(:save_vcard, nil, [alice.jid, card])
-
-    @stream.expect(:config, @config)
-    @stream.expect(:user, alice)
-    @stream.expect(:domain, 'wonderland.lit')
-    @stream.expect(:storage, storage, ['wonderland.lit'])
-    expected = node(%q{<iq id="42" to="alice@wonderland.lit/tea" type="result"/>})
-    @stream.expect(:write, nil, [expected])
-
-    stanza = Vines::Stanza::Iq::Vcard.new(node, @stream)
-    stanza.process
-    assert @stream.verify
-    assert storage.verify
+      it 'succeeds and returns an iq result' do
+        subject.process
+        stream.verify
+        storage.verify
+      end
+    end
   end
 
   private
 
+  def vcard(name)
+    node(%Q{<vCard xmlns="vcard-temp"><FN>#{name}</FN></vCard>})
+  end
+
+  def get(to)
+    card = '<vCard xmlns="vcard-temp"/>'
+    iq(id: 42, to: to, type: 'get', body: card)
+  end
+
+  def set(to)
+    card = '<vCard xmlns="vcard-temp"><FN>Alice</FN></vCard>'
+    iq(id: 42, to: to, type: 'set', body: card)
+  end
+
+  def result(to, from=nil, card=nil)
+    iq(from: from, id: 42, to: to, type: 'result', body: card)
+  end
+
+  def iq(options)
+    body = options.delete(:body)
+    options.delete_if {|k, v| v.nil? || v.to_s.empty? }
+    attrs = options.map {|k,v| "#{k}=\"#{v}\"" }.join(' ')
+    node(%Q{<iq #{attrs}>#{body}</iq>})
+  end
+
   def node(xml)
+    xml = xml.strip.gsub(/\n|\s{2,}/, '')
     Nokogiri::XML(xml).root
   end
 end
