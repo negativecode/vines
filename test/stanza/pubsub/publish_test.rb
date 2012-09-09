@@ -1,373 +1,309 @@
 # encoding: UTF-8
 
-require 'tmpdir'
-require 'vines'
-require 'ext/nokogiri'
-require 'minitest/autorun'
+require 'test_helper'
 
-class PublishPubSubTest < MiniTest::Unit::TestCase
-  def setup
-    @user = Vines::User.new(jid: 'alice@wonderland.lit/tea')
-    @config = Vines::Config.new do
+describe Vines::Stanza::PubSub::Publish do
+  subject      { Vines::Stanza::PubSub::Publish.new(xml, stream) }
+  let(:user)   { Vines::User.new(jid: 'alice@wonderland.lit/tea') }
+  let(:stream) { MiniTest::Mock.new }
+  let(:config) do
+    Vines::Config.new do
       host 'wonderland.lit' do
         storage(:fs) { dir Dir.tmpdir }
         pubsub 'games'
       end
     end
-    @stream = MiniTest::Mock.new
-    @stream.expect(:config, @config)
-    @stream.expect(:user, @user)
   end
 
-  def test_missing_to_address_raises
-    node = node(%q{
-      <iq type='set' id='42'>
-        <pubsub xmlns='http://jabber.org/protocol/pubsub'>
-          <publish node='game_13'>
-            <item id='item_42'>
-              <entry xmlns='http://www.w3.org/2005/Atom'>
-                <title>Test</title>
-                <summary>This is a summary.</summary>
-              </entry>
-            </item>
-          </publish>
-        </pubsub>
-      </iq>
-    }.strip.gsub(/\n|\s{2,}/, ''))
-
-    @stream.expect(:domain, 'wonderland.lit')
-
-    stanza = Vines::Stanza::PubSub::Publish.new(node, @stream)
-    assert_raises(Vines::StanzaErrors::FeatureNotImplemented) { stanza.process }
-    assert @stream.verify
-  end
-
-  def test_server_domain_to_address_raises
-    node = node(%q{
-      <iq type='set' to='wonderland.lit' id='42'>
-        <pubsub xmlns='http://jabber.org/protocol/pubsub'>
-          <publish node='game_13'>
-            <item id='item_42'>
-              <entry xmlns='http://www.w3.org/2005/Atom'>
-                <title>Test</title>
-                <summary>This is a summary.</summary>
-              </entry>
-            </item>
-          </publish>
-        </pubsub>
-      </iq>
-    }.strip.gsub(/\n|\s{2,}/, ''))
-
-    stanza = Vines::Stanza::PubSub::Publish.new(node, @stream)
-    assert_raises(Vines::StanzaErrors::FeatureNotImplemented) { stanza.process }
-    assert @stream.verify
-  end
-
-  def test_non_pubsub_to_address_routes
-    node = node(%q{
-      <iq type='set' to='bogus.wonderland.lit' id='42'>
-        <pubsub xmlns='http://jabber.org/protocol/pubsub'>
-          <publish node='game_13'>
-            <item id='item_42'>
-              <entry xmlns='http://www.w3.org/2005/Atom'>
-                <title>Test</title>
-                <summary>This is a summary.</summary>
-              </entry>
-            </item>
-          </publish>
-        </pubsub>
-      </iq>
-    }.strip.gsub(/\n|\s{2,}/, ''))
-
-    router = MiniTest::Mock.new
-    router.expect(:route, nil, [node])
-    @stream.expect(:router, router)
-
-    stanza = Vines::Stanza::PubSub::Publish.new(node, @stream)
-    stanza.process
-    assert @stream.verify
-    assert router.verify
-  end
-
-  def test_multiple_publish_elements_raises
-    node = node(%q{
-      <iq type='set' to='games.wonderland.lit' id='42'>
-        <pubsub xmlns='http://jabber.org/protocol/pubsub'>
-          <publish node='game_13'>
-            <item id='item_42'>
-              <entry xmlns='http://www.w3.org/2005/Atom'>
-                <title>Test</title>
-                <summary>This is a summary.</summary>
-              </entry>
-            </item>
-          </publish>
-          <publish node='game_13'>
-            <item id='item_42'>
-              <entry xmlns='http://www.w3.org/2005/Atom'>
-                <title>Test</title>
-                <summary>This is a summary.</summary>
-              </entry>
-            </item>
-          </publish>
-        </pubsub>
-      </iq>
-    }.strip.gsub(/\n|\s{2,}/, ''))
-
-    stanza = Vines::Stanza::PubSub::Publish.new(node, @stream)
-    assert_raises(Vines::StanzaErrors::BadRequest) { stanza.process }
-    assert @stream.verify
-  end
-
-  def test_multiple_item_elements_raises
-    node = node(%q{
-      <iq type='set' to='games.wonderland.lit' id='42'>
-        <pubsub xmlns='http://jabber.org/protocol/pubsub'>
-          <publish node='game_13'>
-            <item id='item_42'>
-              <entry xmlns='http://www.w3.org/2005/Atom'>
-                <title>Test</title>
-                <summary>This is a summary.</summary>
-              </entry>
-            </item>
-            <item id="item_43">bad</item>
-          </publish>
-        </pubsub>
-      </iq>
-    }.strip.gsub(/\n|\s{2,}/, ''))
-
-    stanza = Vines::Stanza::PubSub::Publish.new(node, @stream)
-    def stanza.mock_pubsub; @mock_pubsub; end
-    def stanza.pubsub
-      unless @mock_pubsub
-        @mock_pubsub = MiniTest::Mock.new
-        @mock_pubsub.expect(:node?, true, ['game_13'])
+  before do
+    class << stream
+      attr_accessor :config, :nodes, :user
+      def write(node)
+        @nodes ||= []
+        @nodes << node
       end
-      @mock_pubsub
     end
-    assert_raises(Vines::StanzaErrors::BadRequest) { stanza.process }
-    assert @stream.verify
-    assert stanza.mock_pubsub.verify
+    stream.config = config
+    stream.user = user
   end
 
-  def test_multiple_payload_elements_raises
-    node = node(%q{
-      <iq type='set' to='games.wonderland.lit' id='42'>
-        <pubsub xmlns='http://jabber.org/protocol/pubsub'>
-          <publish node='game_13'>
-            <item id='item_42'>
-              <entry xmlns='http://www.w3.org/2005/Atom'>
-                <title>Test</title>
-                <summary>This is a summary.</summary>
-              </entry>
-              <entry>bad</entry>
-            </item>
-          </publish>
-        </pubsub>
-      </iq>
-    }.strip.gsub(/\n|\s{2,}/, ''))
+  describe 'when missing a to address' do
+    let(:xml) { publish('') }
 
-    stanza = Vines::Stanza::PubSub::Publish.new(node, @stream)
-    def stanza.mock_pubsub; @mock_pubsub; end
-    def stanza.pubsub
-      unless @mock_pubsub
-        @mock_pubsub = MiniTest::Mock.new
-        @mock_pubsub.expect(:node?, true, ['game_13'])
-      end
-      @mock_pubsub
+    it 'raises a feature-not-implemented stanza error' do
+      stream.expect(:domain, 'wonderland.lit')
+      -> { subject.process }.must_raise Vines::StanzaErrors::FeatureNotImplemented
+      stream.verify
     end
-    assert_raises(Vines::StanzaErrors::BadRequest) { stanza.process }
-    assert @stream.verify
-    assert stanza.mock_pubsub.verify
   end
 
-  def test_no_payload_elements_raises
-    node = node(%q{
-      <iq type='set' to='games.wonderland.lit' id='42'>
-        <pubsub xmlns='http://jabber.org/protocol/pubsub'>
-          <publish node='game_13'>
-            <item id='item_42'>
-            </item>
-          </publish>
-        </pubsub>
-      </iq>
-    }.strip.gsub(/\n|\s{2,}/, ''))
+  describe 'when addressed to bare server domain' do
+    let(:xml) { publish('wonderland.lit') }
 
-    stanza = Vines::Stanza::PubSub::Publish.new(node, @stream)
-    def stanza.mock_pubsub; @mock_pubsub; end
-    def stanza.pubsub
-      unless @mock_pubsub
-        @mock_pubsub = MiniTest::Mock.new
-        @mock_pubsub.expect(:node?, true, ['game_13'])
-      end
-      @mock_pubsub
+    it 'raises a feature-not-implemented stanza error' do
+      -> { subject.process }.must_raise Vines::StanzaErrors::FeatureNotImplemented
+      stream.verify
     end
-
-    assert_raises(Vines::StanzaErrors::BadRequest) { stanza.process }
-    assert @stream.verify
-    assert stanza.mock_pubsub.verify
   end
 
-  def test_publish_to_missing_node_raises
-    node = node(%q{
-      <iq type='set' to='games.wonderland.lit' id='42'>
-        <pubsub xmlns='http://jabber.org/protocol/pubsub'>
-          <publish node='game_13'>
-            <item id='item_42'>
-              <entry xmlns='http://www.w3.org/2005/Atom'>
-                <title>Test</title>
-                <summary>This is a summary.</summary>
-              </entry>
-            </item>
-          </publish>
-        </pubsub>
-      </iq>
-    }.strip.gsub(/\n|\s{2,}/, ''))
+  describe 'when addressed to a non-pubsub component' do
+    let(:router) { MiniTest::Mock.new }
+    let(:xml) { publish('bogus.wonderland.lit') }
 
-    stanza = Vines::Stanza::PubSub::Publish.new(node, @stream)
-    assert_raises(Vines::StanzaErrors::ItemNotFound) { stanza.process }
-    assert @stream.verify
+    before do
+      router.expect :route, nil, [xml]
+      stream.expect :router, router
+    end
+
+    it 'routes rather than handle locally' do
+      subject.process
+      stream.verify
+      router.verify
+    end
   end
 
-  def test_generate_item_id
-    node = node(%q{
-      <iq type='set' to='games.wonderland.lit' id='42'>
-        <pubsub xmlns='http://jabber.org/protocol/pubsub'>
-          <publish node='game_13'>
-            <item>
-              <entry xmlns='http://www.w3.org/2005/Atom'>
-                <title>Test</title>
-                <summary>This is a summary.</summary>
-              </entry>
-            </item>
-          </publish>
-        </pubsub>
-      </iq>
-    }.strip.gsub(/\n|\s{2,}/, ''))
-
-    def @stream.nodes; @nodes; end
-    def @stream.write(node)
-      @nodes ||= []
-      @nodes << node
-    end
-
-    stanza = Vines::Stanza::PubSub::Publish.new(node, @stream)
-    def stanza.mock_pubsub; @mock_pubsub; end
-    def stanza.pubsub
-      unless @mock_pubsub
-        @mock_pubsub = MiniTest::Mock.new
-        @mock_pubsub.expect(:node?, true, ['game_13'])
-        def @mock_pubsub.published; @published; end
-        def @mock_pubsub.publish(node, message)
-          @published ||= []
-          @published << [node, message]
-        end
-      end
-      @mock_pubsub
-    end
-    stanza.process
-
-    assert @stream.verify
-    assert stanza.mock_pubsub.verify
-    assert_equal 1, @stream.nodes.size
-
-    # test result stanza contains generated item id
-    expected = node(%q{
-      <iq from="games.wonderland.lit" id="42" to="alice@wonderland.lit/tea" type="result">
-        <pubsub xmlns="http://jabber.org/protocol/pubsub">
-          <publish node="game_13">
-            <item/>
-          </publish>
-        </pubsub>
-      </iq>}.strip.gsub(/\n|\s{2,}/, ''))
-      # id is random
-      item = @stream.nodes[0].xpath('ns:pubsub/ns:publish/ns:item', 'ns' => 'http://jabber.org/protocol/pubsub').first
-      refute_nil item['id']
-      item.remove_attribute('id')
-      assert_equal expected, @stream.nodes[0]
-
-      # test published message has a generated item id
-      expected = node(%q{
-        <message>
-          <event xmlns="http://jabber.org/protocol/pubsub#event">
-            <items node="game_13">
-              <item publisher="alice@wonderland.lit/tea">
-                <entry xmlns="http://www.w3.org/2005/Atom">
+  describe 'when publishing to multiple nodes' do
+    let(:xml) do
+      node(%q{
+        <iq type='set' to='games.wonderland.lit' id='42'>
+          <pubsub xmlns='http://jabber.org/protocol/pubsub'>
+            <publish node='game_13'>
+              <item id='item_42'>
+                <entry xmlns='http://www.w3.org/2005/Atom'>
                   <title>Test</title>
                   <summary>This is a summary.</summary>
                 </entry>
               </item>
-            </items>
-          </event>
-        </message>
-      }.strip.gsub(/\n|\s{2,}/, ''))
-      published_node, published_message = *stanza.mock_pubsub.published[0]
-      assert_equal 'game_13', published_node
-      # id is random
-      item = published_message.xpath('ns:event/ns:items/ns:item', 'ns' => 'http://jabber.org/protocol/pubsub#event').first
-      refute_nil item['id']
-      item.remove_attribute('id')
-      assert_equal expected, published_message
+            </publish>
+            <publish node='game_13'>
+              <item id='item_42'>
+                <entry xmlns='http://www.w3.org/2005/Atom'>
+                  <title>Test</title>
+                  <summary>This is a summary.</summary>
+                </entry>
+              </item>
+            </publish>
+          </pubsub>
+        </iq>
+      })
+    end
+
+    it 'raises a bad-request stanza error' do
+      -> { subject.process }.must_raise Vines::StanzaErrors::BadRequest
+      stream.verify
+    end
   end
 
-  def test_good_stanza_processes
-    node = node(%q{
-      <iq type='set' to='games.wonderland.lit' id='42'>
-        <pubsub xmlns='http://jabber.org/protocol/pubsub'>
-          <publish node='game_13'>
-            <item id='item_42'>
-              <entry xmlns='http://www.w3.org/2005/Atom'>
-                <title>Test</title>
-                <summary>This is a summary.</summary>
-              </entry>
-            </item>
-          </publish>
-        </pubsub>
-      </iq>
-    }.strip.gsub(/\n|\s{2,}/, ''))
-
-    def @stream.nodes; @nodes; end
-    def @stream.write(node)
-      @nodes ||= []
-      @nodes << node
+  describe 'when publishing multiple items' do
+    let(:pubsub) { MiniTest::Mock.new }
+    let(:xml) do
+      node(%q{
+        <iq type='set' to='games.wonderland.lit' id='42'>
+          <pubsub xmlns='http://jabber.org/protocol/pubsub'>
+            <publish node='game_13'>
+              <item id='item_42'>
+                <entry xmlns='http://www.w3.org/2005/Atom'>
+                  <title>Test</title>
+                  <summary>This is a summary.</summary>
+                </entry>
+              </item>
+              <item id="item_43">bad</item>
+            </publish>
+          </pubsub>
+        </iq>
+      })
     end
 
-    stanza = Vines::Stanza::PubSub::Publish.new(node, @stream)
-    def stanza.mock_pubsub; @mock_pubsub; end
-    def stanza.pubsub
-      unless @mock_pubsub
-        xml = %q{
-          <message>
-            <event xmlns="http://jabber.org/protocol/pubsub#event">
-              <items node="game_13">
-                <item id="item_42" publisher="alice@wonderland.lit/tea">
-                  <entry xmlns="http://www.w3.org/2005/Atom">
-                    <title>Test</title>
-                    <summary>This is a summary.</summary>
-                  </entry>
-                </item>
-              </items>
-            </event>
-          </message>
-        }.strip.gsub(/\n|\s{2,}/, '')
-        @mock_pubsub = MiniTest::Mock.new
-        @mock_pubsub.expect(:node?, true, ['game_13'])
-        @mock_pubsub.expect(:publish, nil, ['game_13', Nokogiri::XML(xml).root])
+    it 'raises a bad-request stanza error' do
+      pubsub.expect :node?, true, ['game_13']
+      subject.stub :pubsub, pubsub do
+        -> { subject.process }.must_raise Vines::StanzaErrors::BadRequest
       end
-      @mock_pubsub
+      stream.verify
+      pubsub.verify
     end
-    stanza.process
+  end
 
-    assert @stream.verify
-    assert stanza.mock_pubsub.verify
-    assert_equal 1, @stream.nodes.size
+  describe 'when publishing one item with multiple payloads' do
+    let(:pubsub) { MiniTest::Mock.new }
+    let(:xml) do
+      node(%q{
+        <iq type='set' to='games.wonderland.lit' id='42'>
+          <pubsub xmlns='http://jabber.org/protocol/pubsub'>
+            <publish node='game_13'>
+              <item id='item_42'>
+                <entry xmlns='http://www.w3.org/2005/Atom'>
+                  <title>Test</title>
+                  <summary>This is a summary.</summary>
+                </entry>
+                <entry>bad</entry>
+              </item>
+            </publish>
+          </pubsub>
+        </iq>
+      })
+    end
 
-    expected = node(%q{<iq from="games.wonderland.lit" id="42" to="alice@wonderland.lit/tea" type="result"/>})
-    assert_equal expected, @stream.nodes[0]
+    it 'raises a bad-request stanza error' do
+      pubsub.expect :node?, true, ['game_13']
+      subject.stub :pubsub, pubsub do
+        -> { subject.process }.must_raise Vines::StanzaErrors::BadRequest
+      end
+      stream.verify
+      pubsub.verify
+    end
+  end
+
+  describe 'when publishing with no payload' do
+    let(:pubsub) { MiniTest::Mock.new }
+    let(:xml) do
+      node(%q{
+        <iq type='set' to='games.wonderland.lit' id='42'>
+          <pubsub xmlns='http://jabber.org/protocol/pubsub'>
+            <publish node='game_13'>
+              <item id='item_42'>
+              </item>
+            </publish>
+          </pubsub>
+        </iq>
+      })
+    end
+
+    it 'raises a bad-request stanza error' do
+      pubsub.expect :node?, true, ['game_13']
+      subject.stub :pubsub, pubsub do
+        -> { subject.process }.must_raise Vines::StanzaErrors::BadRequest
+      end
+      stream.verify
+      pubsub.verify
+    end
+  end
+
+  describe 'when publishing to a missing node' do
+    let(:xml) { publish('games.wonderland.lit') }
+
+    it 'raises an item-not-found stanza error' do
+      -> { subject.process }.must_raise Vines::StanzaErrors::ItemNotFound
+      stream.verify
+    end
+  end
+
+  describe 'when publishing an item without an id' do
+    let(:pubsub) { MiniTest::Mock.new }
+    let(:xml) { publish('games.wonderland.lit', '') }
+    let(:broadcast) { message_broadcast('') }
+    let(:response) do
+      node(%q{
+        <iq from="games.wonderland.lit" id="42" to="alice@wonderland.lit/tea" type="result">
+          <pubsub xmlns="http://jabber.org/protocol/pubsub">
+            <publish node="game_13">
+              <item/>
+            </publish>
+          </pubsub>
+        </iq>})
+    end
+
+    before do
+      pubsub.expect :node?, true, ['game_13']
+      def pubsub.published; @published; end
+      def pubsub.publish(node, message)
+        @published ||= []
+        @published << [node, message]
+      end
+    end
+
+    it 'generates an item id in the response' do
+      subject.stub :pubsub, pubsub do
+        subject.process
+      end
+      stream.verify
+      pubsub.verify
+      stream.nodes.size.must_equal 1
+
+      # id is random
+      item = stream.nodes.first.xpath('ns:pubsub/ns:publish/ns:item',
+        'ns' => 'http://jabber.org/protocol/pubsub').first
+      item['id'].wont_be_nil
+      item.remove_attribute('id')
+      stream.nodes.first.must_equal response
+    end
+
+    it 'broadcasts the message with the generated item id' do
+      subject.stub :pubsub, pubsub do
+        subject.process
+      end
+      stream.verify
+      pubsub.verify
+      stream.nodes.size.must_equal 1
+
+      published_node, published_message = *pubsub.published[0]
+      published_node.must_equal 'game_13'
+      # id is random
+      item = published_message.xpath('ns:event/ns:items/ns:item',
+        'ns' => 'http://jabber.org/protocol/pubsub#event').first
+      item['id'].wont_be_nil
+      item.remove_attribute('id')
+      published_message.must_equal broadcast
+    end
+  end
+
+  describe 'when publishing a valid stanza' do
+    let(:pubsub) { MiniTest::Mock.new }
+    let(:xml) { publish('games.wonderland.lit') }
+    let(:response) { result(user.jid, 'games.wonderland.lit') }
+    let(:broadcast) { message_broadcast('item_42') }
+
+    it 'broadcasts and returns result to sender' do
+      pubsub.expect :node?, true, ['game_13']
+      pubsub.expect :publish, nil, ['game_13', broadcast]
+
+      subject.stub :pubsub, pubsub do
+        subject.process
+      end
+
+      stream.nodes.size.must_equal 1
+      stream.nodes.first.must_equal response
+      stream.verify
+      pubsub.verify
+    end
   end
 
   private
 
-  def node(xml)
-    Nokogiri::XML(xml).root
+  def message_broadcast(item_id)
+    item_id = (item_id.nil? || item_id.empty?) ?  ' ' : " id='#{item_id}' "
+    node(%Q{
+      <message>
+        <event xmlns="http://jabber.org/protocol/pubsub#event">
+          <items node="game_13">
+            <item#{item_id}publisher="alice@wonderland.lit/tea">
+              <entry xmlns="http://www.w3.org/2005/Atom">
+                <title>Test</title>
+                <summary>This is a summary.</summary>
+              </entry>
+            </item>
+          </items>
+        </event>
+      </message>})
+  end
+
+  def publish(to, item_id='item_42')
+    item_id = "id='#{item_id}'" unless item_id.nil? || item_id.empty?
+    body = %Q{
+      <pubsub xmlns='http://jabber.org/protocol/pubsub'>
+        <publish node='game_13'>
+          <item #{item_id}>
+            <entry xmlns='http://www.w3.org/2005/Atom'>
+              <title>Test</title>
+              <summary>This is a summary.</summary>
+            </entry>
+          </item>
+        </publish>
+      </pubsub>}
+    iq(type: 'set', to: to, id: 42, body: body)
+  end
+
+  def result(to, from)
+    iq(from: from, id: 42, to: to, type: 'result')
   end
 end
