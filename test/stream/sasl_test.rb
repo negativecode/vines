@@ -1,7 +1,6 @@
 # encoding: UTF-8
 
-require 'vines'
-require 'minitest/autorun'
+require 'test_helper'
 
 describe Vines::Stream::SASL do
   let(:stream)  { MiniTest::Mock.new }
