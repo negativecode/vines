@@ -1,202 +1,243 @@
 # encoding: UTF-8
 
-require 'tmpdir'
-require 'vines'
-require 'minitest/autorun'
+require 'test_helper'
 
-class RouterTest < MiniTest::Unit::TestCase
-  def setup
-    @alice = Vines::JID.new('alice@wonderland.lit/tea')
-    @config = Vines::Config.new do
+describe Vines::Router do
+  subject      { Vines::Router.new(config) }
+  let(:alice)  { Vines::JID.new('alice@wonderland.lit/tea') }
+  let(:hatter) { 'hatter@wonderland.lit/cake' }
+  let(:romeo)  { 'romeo@verona.lit/party' }
+  let(:config) do
+    Vines::Config.new do
       host 'wonderland.lit' do
         storage(:fs) { dir Dir.tmpdir }
         components 'tea' => 'secr3t'
       end
     end
-    @router = Vines::Router.new(@config)
   end
 
-  def test_connected_resources
-    cake = 'alice@wonderland.lit/cake'
-    assert_equal 0, @router.connected_resources(@alice, @alice).size
-    assert_equal 0, @router.connected_resources(cake, @alice).size
-    assert_equal 0, @router.size
+  describe '#connected_resources' do
+    let(:cake) { 'alice@wonderland.lit/cake' }
+    let(:stream1) { stream(alice) }
+    let(:stream2) { stream(cake) }
 
-    stream1, stream2 = stream(@alice), stream(cake)
-    @router << stream1
-    @router << stream2
+    it 'is empty before any streams are connected' do
+      subject.connected_resources(alice, alice).size.must_equal 0
+      subject.connected_resources(cake, alice).size.must_equal 0
+      subject.size.must_equal 0
+    end
 
-    assert_equal 1, @router.connected_resources(@alice, @alice).size
-    assert_equal @alice, @router.connected_resources(@alice, @alice)[0].user.jid
+    it 'returns only one stream matching full jid' do
+      subject << stream1
+      subject << stream2
 
-    assert_equal 1, @router.connected_resources(cake, @alice).size
-    assert_equal cake, @router.connected_resources(cake, @alice)[0].user.jid.to_s
+      streams = subject.connected_resources(alice, alice)
+      streams.size.must_equal 1
+      streams.first.user.jid.must_equal alice
 
-    assert_equal 2, @router.connected_resources(@alice.bare, @alice).size
-    assert_equal 2, @router.size
-    assert stream1.verify
-    assert stream2.verify
+      streams = subject.connected_resources(cake, alice)
+      streams.size.must_equal 1
+      streams.first.user.jid.to_s.must_equal cake
+    end
+
+    it 'returns all streams matching bare jid' do
+      subject << stream1
+      subject << stream2
+
+      streams = subject.connected_resources(alice.bare, alice)
+      streams.size.must_equal 2
+      subject.size.must_equal 2
+    end
   end
 
-  def test_connected_resources_checks_allowed
-    romeo = 'romeo@verona.lit/party'
-    stream1, stream2 = stream(@alice), stream(romeo)
-    @router << stream1
-    @router << stream2
+  describe '#connected_resources with permissions' do
+    let(:stream1) { stream(alice) }
+    let(:stream2) { stream(romeo) }
 
-    assert_equal 2, @router.size
-    assert_equal 0, @router.connected_resources(@alice, romeo).size
-    @config.vhost('wonderland.lit').cross_domain_messages true
-    assert_equal 1, @router.connected_resources(@alice, romeo).size
+    before do
+      subject << stream1
+      subject << stream2
+    end
 
-    assert stream1.verify
-    assert stream2.verify
+    it 'denies access when cross domain messages is off' do
+      subject.connected_resources(alice, romeo).size.must_equal 0
+    end
+
+    it 'allows access when cross domain messages is on' do
+      config.vhost('wonderland.lit').cross_domain_messages true
+      subject.connected_resources(alice, romeo).size.must_equal 1
+    end
   end
 
-  def test_available_resources
-    cake = 'alice@wonderland.lit/cake'
-    assert_equal 0, @router.available_resources(@alice, @alice).size
-    assert_equal 0, @router.available_resources(cake, @alice).size
-    assert_equal 0, @router.size
+  describe '#available_resources' do
+    let(:cake) { 'alice@wonderland.lit/cake' }
+    let(:stream1) { stream(alice) }
+    let(:stream2) { stream(cake) }
 
-    stream1, stream2 = stream(@alice), stream(cake)
-    stream1.expect(:available?, true)
-    stream2.expect(:available?, false)
-    @router << stream1
-    @router << stream2
+    before do
+      stream1.send 'available?=', true
+      stream2.send 'available?=', false
+    end
 
-    assert_equal 1, @router.available_resources(@alice, @alice).size
-    assert_equal @alice, @router.available_resources(@alice, @alice)[0].user.jid
+    it 'is empty before any streams are connected' do
+      subject.available_resources(alice, alice).size.must_equal 0
+      subject.available_resources(cake, alice).size.must_equal 0
+      subject.size.must_equal 0
+    end
 
-    assert_equal 1, @router.available_resources(cake, @alice).size
-    assert_equal @alice, @router.available_resources(cake, @alice)[0].user.jid
+    it 'returns available streams based on bare jid, not full jid' do
+      subject << stream1
+      subject << stream2
 
-    assert_equal 1, @router.available_resources(@alice.bare, @alice).size
-    assert_equal @alice, @router.available_resources(@alice.bare, @alice)[0].user.jid
+      streams = [alice, cake, alice.bare].map do |jid|
+        subject.available_resources(jid, alice)
+      end.flatten
 
-    assert_equal 2, @router.size
-    assert stream1.verify
-    assert stream2.verify
+      # should only have found alice's stream
+      streams.size.must_equal 3
+      streams.uniq.size.must_equal 1
+      streams.first.user.jid.must_equal alice
+
+      subject.size.must_equal 2
+    end
   end
 
-  def test_interested_resources
-    hatter = 'hatter@wonderland.lit/cake'
-    assert_equal 0, @router.interested_resources(@alice, @alice).size
-    assert_equal 0, @router.interested_resources(hatter, @alice).size
-    assert_equal 0, @router.interested_resources(@alice, hatter, @alice).size
-    assert_equal 0, @router.size
-
-    stream1, stream2 = stream(@alice), stream(hatter)
-    stream1.expect(:interested?, true)
-    stream2.expect(:interested?, false)
-    @router << stream1
-    @router << stream2
-
-    assert_equal 0, @router.interested_resources('bogus@wonderland.lit', @alice).size
-
-    assert_equal 1, @router.interested_resources(@alice, hatter, @alice).size
-    assert_equal 1, @router.interested_resources([@alice, hatter], @alice).size
-    assert_equal @alice, @router.interested_resources(@alice, hatter, @alice)[0].user.jid
-
-    assert_equal 0, @router.interested_resources(hatter, @alice).size
-    assert_equal 0, @router.interested_resources([hatter], @alice).size
-
-    assert_equal 1, @router.interested_resources(@alice.bare, @alice).size
-    assert_equal @alice, @router.interested_resources(@alice.bare, @alice)[0].user.jid
-
-    assert_equal 2, @router.size
-    assert stream1.verify
-    assert stream2.verify
+  describe '#interested_resources with no streams' do
+    it 'is empty before any streams are connected' do
+      subject.interested_resources(alice, alice).size.must_equal 0
+      subject.interested_resources(hatter, alice).size.must_equal 0
+      subject.interested_resources(alice, hatter, alice).size.must_equal 0
+      subject.size.must_equal 0
+    end
   end
 
-  def test_delete
-    hatter = 'hatter@wonderland.lit/cake'
-    assert_equal 0, @router.size
+  describe '#interested_resources' do
+    let(:stream1) { stream(alice) }
+    let(:stream2) { stream(hatter) }
 
-    stream1, stream2 = stream(@alice), stream(hatter)
-    @router << stream1
-    @router << stream2
+    before do
+      stream1.send 'interested?=', true
+      stream2.send 'interested?=', false
+      subject << stream1
+      subject << stream2
+    end
 
-    assert_equal 2, @router.size
+    it 'does not find streams for unauthenticated jids' do
+      subject.interested_resources('bogus@wonderland.lit', alice).size.must_equal 0
+    end
 
-    @router.delete(stream2)
-    assert_equal 1, @router.size
+    it 'finds interested streams for full jids' do
+      subject.interested_resources(alice, hatter, alice).size.must_equal 1
+      subject.interested_resources([alice, hatter], alice).size.must_equal 1
+      subject.interested_resources(alice, hatter, alice)[0].user.jid.must_equal alice
+    end
 
-    @router.delete(stream2)
-    assert_equal 1, @router.size
+    it 'does not find streams for uninterested jids' do
+      subject.interested_resources(hatter, alice).size.must_equal 0
+      subject.interested_resources([hatter], alice).size.must_equal 0
+    end
 
-    @router.delete(stream1)
-    assert_equal 0, @router.size
-
-    assert stream1.verify
-    assert stream2.verify
+    it 'finds interested streams for bare jids' do
+      subject.interested_resources(alice.bare, alice).size.must_equal 1
+      subject.interested_resources(alice.bare, alice)[0].user.jid.must_equal alice
+    end
   end
 
-  def test_multiple_component_streams_are_load_balanced
-    stream1 = component('tea.wonderland.lit')
-    stream2 = component('tea.wonderland.lit')
-    @router << stream1
-    @router << stream2
-    stanza = Nokogiri::XML('<message from="alice@wonderland.lit" to="tea.wonderland.lit">test</message>').root
-    100.times { @router.route(stanza) }
+  describe '#delete' do
+    let(:stream1) { stream(alice) }
+    let(:stream2) { stream(hatter) }
 
-    assert_equal 100, stream1.count + stream2.count
-    assert stream1.count > 33
-    assert stream2.count > 33
-    assert stream1.verify
-    assert stream2.verify
+    it 'correctly adds and removes streams' do
+      subject.size.must_equal 0
+
+      subject << stream1
+      subject << stream2
+      subject.size.must_equal 2
+
+      subject.delete(stream2)
+      subject.size.must_equal 1
+
+      subject.delete(stream2)
+      subject.size.must_equal 1
+
+      subject.delete(stream1)
+      subject.size.must_equal 0
+    end
   end
 
-  def test_multiple_s2s_streams_are_load_balanced
-    @config.vhost('wonderland.lit').cross_domain_messages true
-    stream1 = s2s('wonderland.lit', 'verona.lit')
-    stream2 = s2s('wonderland.lit', 'verona.lit')
-    @router << stream1
-    @router << stream2
-    stanza = Nokogiri::XML('<message from="alice@wonderland.lit" to="romeo@verona.lit">test</message>').root
-    100.times { @router.route(stanza) }
+  describe 'load balanced component streams' do
+    let(:stream1) { component('tea.wonderland.lit') }
+    let(:stream2) { component('tea.wonderland.lit') }
+    let(:stanza)  { node('<message from="alice@wonderland.lit" to="tea.wonderland.lit">test</message>')}
 
-    assert_equal 100, stream1.count + stream2.count
-    assert stream1.count > 33
-    assert stream2.count > 33
-    assert stream1.verify
-    assert stream2.verify
+    before do
+      subject << stream1
+      subject << stream2
+    end
+
+    it 'must evenly distribute routed stanzas to both streams' do
+      100.times { subject.route(stanza) }
+
+      (stream1.count + stream2.count).must_equal 100
+      stream1.count.must_be :>, 33
+      stream2.count.must_be :>, 33
+    end
+  end
+
+  describe 'load balanced s2s streams' do
+    let(:stream1) { s2s('wonderland.lit', 'verona.lit') }
+    let(:stream2) { s2s('wonderland.lit', 'verona.lit') }
+    let(:stanza) { node('<message from="alice@wonderland.lit" to="romeo@verona.lit">test</message>') }
+
+    before do
+      config.vhost('wonderland.lit').cross_domain_messages true
+      subject << stream1
+      subject << stream2
+    end
+
+    it 'must evenly distribute routed stanzas to both streams' do
+      100.times { subject.route(stanza) }
+
+      (stream1.count + stream2.count).must_equal 100
+      stream1.count.must_be :>, 33
+      stream2.count.must_be :>, 33
+    end
   end
 
   private
 
   def stream(jid)
-    stream = MiniTest::Mock.new
-    stream.expect(:connected?, true)
-    stream.expect(:stream_type, :client)
-    stream.expect(:user, Vines::User.new(jid: jid))
-    stream
+    OpenStruct.new.tap do |stream|
+      stream.send('connected?=', true)
+      stream.stream_type = :client
+      stream.user = Vines::User.new(jid: jid)
+    end
   end
 
   def component(jid)
-    stream = MiniTest::Mock.new
-    stream.expect(:stream_type, :component)
-    stream.expect(:remote_domain, jid)
-    stream.expect(:ready?, true)
-    def stream.count; @count || 0; end
-    def stream.write(stanza)
-      @count ||= 0
-      @count += 1
+    OpenStruct.new.tap do |stream|
+      stream.stream_type = :component
+      stream.remote_domain = jid
+      stream.send('ready?=', true)
+      def stream.count; @count || 0; end
+      def stream.write(stanza)
+        @count ||= 0
+        @count += 1
+      end
     end
-    stream
   end
 
   def s2s(domain, remote_domain)
-    stream = MiniTest::Mock.new
-    stream.expect(:stream_type, :server)
-    stream.expect(:domain, domain)
-    stream.expect(:remote_domain, remote_domain)
-    stream.expect(:ready?, true)
-    def stream.count; @count || 0; end
-    def stream.write(stanza)
-      @count ||= 0
-      @count += 1
+    OpenStruct.new.tap do |stream|
+      stream.stream_type = :server
+      stream.domain = domain
+      stream.remote_domain = remote_domain
+      stream.send('ready?=', true)
+      def stream.count; @count || 0; end
+      def stream.write(stanza)
+        @count ||= 0
+        @count += 1
+      end
     end
-    stream
   end
 end
