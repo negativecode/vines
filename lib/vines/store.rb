@@ -43,10 +43,12 @@ module Vines
       unless @@sources
         pattern = /-{5}BEGIN CERTIFICATE-{5}\n.*?-{5}END CERTIFICATE-{5}\n/m
         pairs = Dir[File.join(@dir, '*.crt')].map do |name|
-          pems = File.read(name).scan(pattern)
-          certs = pems.map {|pem| OpenSSL::X509::Certificate.new(pem) }
-          certs.reject! {|cert| cert.not_after < Time.now }
-          [name, certs]
+          File.open(name, "r:UTF-8") do |f|
+            pems = f.read.scan(pattern)
+            certs = pems.map {|pem| OpenSSL::X509::Certificate.new(pem) }
+            certs.reject! {|cert| cert.not_after < Time.now }
+            [name, certs]
+          end
         end
         @@sources = Hash[pairs]
       end
