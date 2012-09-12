@@ -33,7 +33,7 @@ http://www.getvines.org/ruby.
 
 ```
 $ script/bootstrap
-$ script/test
+$ script/tests
 ```
 
 ## Contact
@@ -43,4 +43,3 @@ $ script/test
 ## License
 
 Vines is released under the MIT license. Check the LICENSE file for details.
-
