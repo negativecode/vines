@@ -25,7 +25,7 @@ Login with your favorite chat program (iChat, Adium, Pidgin, etc.) to start chat
 
 ## Dependencies
 
-Vines requires Ruby 1.9.2 or better. Instructions for installing the
+Vines requires Ruby 1.9.3 or better. Instructions for installing the
 needed OS packages, as well as Ruby itself, are available at
 http://www.getvines.org/ruby.
 
