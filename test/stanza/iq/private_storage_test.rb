@@ -4,7 +4,7 @@ require 'test_helper'
 
 describe Vines::Stanza::Iq::PrivateStorage do
   subject       { Vines::Stanza::Iq::PrivateStorage.new(xml, stream) }
-  let(:alice)   { Vines::User.new(jid:  'alice@wonderland.lit/tea') }
+  let(:alice)   { Vines::User.new(jid: 'alice@wonderland.lit/tea') }
   let(:storage) { MiniTest::Mock.new }
   let(:stream)  { MiniTest::Mock.new }
   let(:config) do
