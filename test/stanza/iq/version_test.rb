@@ -1,63 +1,64 @@
 # encoding: UTF-8
 
-require 'tmpdir'
-require 'vines'
-require 'ext/nokogiri'
-require 'minitest/autorun'
+require 'test_helper'
 
-class VersionTest < MiniTest::Unit::TestCase
-  def setup
-    @stream = MiniTest::Mock.new
-    @config = Vines::Config.new do
+describe Vines::Stanza::Iq::Version do
+  subject      { Vines::Stanza::Iq::Version.new(xml, stream) }
+  let(:alice)  { Vines::User.new(jid: 'alice@wonderland.lit/tea') }
+  let(:stream) { MiniTest::Mock.new }
+  let(:config) do
+    Vines::Config.new do
       host 'wonderland.lit' do
         storage(:fs) { dir Dir.tmpdir }
       end
     end
   end
 
-  def test_to_address_routes
-    alice = Vines::User.new(:jid => 'alice@wonderland.lit/tea')
-    node = node(%q{<iq id="42" to="romeo@verona.lit" type="get"><query xmlns="jabber:iq:version"/></iq>})
-
-    router = MiniTest::Mock.new
-    router.expect(:route, nil, [node])
-
-    @stream.expect(:config, @config)
-    @stream.expect(:user, alice)
-    @stream.expect(:router, router)
-
-    stanza = Vines::Stanza::Iq::Version.new(node, @stream)
-    stanza.process
-    assert @stream.verify
-    assert router.verify
+  before do
+    class << stream
+      attr_accessor :config, :user
+    end
+    stream.config = config
+    stream.user = alice
   end
 
-  def test_version_get_returns_result
-    alice = Vines::User.new(:jid => 'alice@wonderland.lit/tea')
-    node = node(%q{<iq id="42" type="get"><query xmlns="jabber:iq:version"/></iq>})
+  describe 'when not addressed to the server' do
+    let(:router) { MiniTest::Mock.new }
+    let(:xml) { node(%q{<iq id="42" to="romeo@verona.lit" type="get"><query xmlns="jabber:iq:version"/></iq>}) }
 
-    @stream.expect(:config, @config)
-    @stream.expect(:user, alice)
-    @stream.expect(:domain, 'wonderland.lit')
+    before do
+      router.expect :route, nil, [xml]
+      stream.expect :router, router
+    end
 
-    expected = node(%Q{
-      <iq from="wonderland.lit" id="42" to="alice@wonderland.lit/tea" type="result">
-        <query xmlns="jabber:iq:version">
-          <name>Vines</name>
-          <version>#{Vines::VERSION}</version>
-        </query>
-      </iq>}.strip.gsub(/\n|\s{2,}/, ''))
-
-    @stream.expect(:write, nil, [expected])
-
-    stanza = Vines::Stanza::Iq::Version.new(node, @stream)
-    stanza.process
-    assert @stream.verify
+    it 'routes the stanza to the recipient jid' do
+      subject.process
+      stream.verify
+      router.verify
+    end
   end
 
-  private
+  describe 'when missing a to address' do
+    let(:xml) { node(%q{<iq id="42" type="get"><query xmlns="jabber:iq:version"/></iq>}) }
+    let(:expected) do
+      node(%Q{
+        <iq from="wonderland.lit" id="42" to="alice@wonderland.lit/tea" type="result">
+          <query xmlns="jabber:iq:version">
+            <name>Vines</name>
+            <version>#{Vines::VERSION}</version>
+          </query>
+        </iq>})
+    end
 
-  def node(xml)
-    Nokogiri::XML(xml).root
+    before do
+      stream.expect :domain, 'wonderland.lit'
+      stream.expect :domain, 'wonderland.lit'
+      stream.expect :write, nil, [expected]
+    end
+
+    it 'returns a version result when missing a to jid' do
+      subject.process
+      stream.verify
+    end
   end
 end
