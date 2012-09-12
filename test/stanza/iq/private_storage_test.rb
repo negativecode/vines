@@ -1,14 +1,14 @@
 # encoding: UTF-8
 
-require 'tmpdir'
-require 'vines'
-require 'ext/nokogiri'
-require 'minitest/autorun'
+require 'test_helper'
 
-class PrivateStorageTest < MiniTest::Unit::TestCase
-  def setup
-    @stream = MiniTest::Mock.new
-    @config = Vines::Config.new do
+describe Vines::Stanza::Iq::PrivateStorage do
+  subject       { Vines::Stanza::Iq::PrivateStorage.new(xml, stream) }
+  let(:alice)   { Vines::User.new(jid:  'alice@wonderland.lit/tea') }
+  let(:storage) { MiniTest::Mock.new }
+  let(:stream)  { MiniTest::Mock.new }
+  let(:config) do
+    Vines::Config.new do
       host 'wonderland.lit' do
         storage(:fs) { dir Dir.tmpdir }
         private_storage true
@@ -16,174 +16,169 @@ class PrivateStorageTest < MiniTest::Unit::TestCase
     end
   end
 
-  def test_feature_disabled_raises_error
-    query = %q{<query xmlns="jabber:iq:private"><one xmlns="a"/></query>}
-    node = node(%Q{<iq id="42" type="get">#{query}</iq>})
-
-    @config.vhost('wonderland.lit').private_storage false
-    @stream.expect(:domain, 'wonderland.lit')
-    @stream.expect(:config, @config)
-
-    stanza = Vines::Stanza::Iq::PrivateStorage.new(node, @stream)
-    assert_raises(Vines::StanzaErrors::ServiceUnavailable) { stanza.process }
-    assert @stream.verify
+  before do
+    class << stream
+      attr_accessor :config, :domain, :user
+    end
+    stream.config = config
+    stream.user = alice
+    stream.domain = 'wonderland.lit'
   end
 
-  def test_get_another_user_fragment_raises_error
-    alice = Vines::User.new(:jid => 'alice@wonderland.lit/tea')
-    query = %q{<query xmlns="jabber:iq:private"><one xmlns="a"/></query>}
-    node = node(%Q{<iq id="42" to="hatter@wonderland.lit" type="get">#{query}</iq>})
+  describe 'when private storage feature is disabled' do
+    let(:xml) do
+      query = %q{<query xmlns="jabber:iq:private"><one xmlns="a"/></query>}
+      node(%Q{<iq id="42" type="get">#{query}</iq>})
+    end
 
-    @stream.expect(:user, alice)
+    before do
+      config.vhost('wonderland.lit').private_storage false
+    end
 
-    stanza = Vines::Stanza::Iq::PrivateStorage.new(node, @stream)
-    assert_raises(Vines::StanzaErrors::Forbidden) { stanza.process }
-    assert @stream.verify
+    it 'raises a service-unavailable stanza error' do
+      -> { subject.process }.must_raise Vines::StanzaErrors::ServiceUnavailable
+      stream.verify
+    end
   end
 
-  def test_get_with_zero_children_raises_error
-    alice = Vines::User.new(:jid => 'alice@wonderland.lit/tea')
-    query = %q{<query xmlns="jabber:iq:private"></query>}
-    node = node(%Q{<iq id="42" type="get">#{query}</iq>})
+  describe 'when retrieving a fragment for another user jid' do
+    let(:xml) do
+      query = %q{<query xmlns="jabber:iq:private"><one xmlns="a"/></query>}
+      node(%Q{<iq id="42" to="hatter@wonderland.lit" type="get">#{query}</iq>})
+    end
 
-    @stream.expect(:domain, 'wonderland.lit')
-    @stream.expect(:config, @config)
-
-    stanza = Vines::Stanza::Iq::PrivateStorage.new(node, @stream)
-    assert_raises(Vines::StanzaErrors::NotAcceptable) { stanza.process }
-    assert @stream.verify
+    it 'raises a forbidden stanza error' do
+      -> { subject.process }.must_raise Vines::StanzaErrors::Forbidden
+      stream.verify
+    end
   end
 
-  def test_get_with_two_children_raises_error
-    alice = Vines::User.new(:jid => 'alice@wonderland.lit/tea')
-    query = %q{<query xmlns="jabber:iq:private"><one xmlns="a"/><two xmlns="b"/></query>}
-    node = node(%Q{<iq id="42" type="get">#{query}</iq>})
+  describe 'when get stanza contains zero child elements' do
+    let(:xml) do
+      query = %q{<query xmlns="jabber:iq:private"></query>}
+      node(%Q{<iq id="42" type="get">#{query}</iq>})
+    end
 
-    @stream.expect(:domain, 'wonderland.lit')
-    @stream.expect(:config, @config)
-
-    stanza = Vines::Stanza::Iq::PrivateStorage.new(node, @stream)
-    assert_raises(Vines::StanzaErrors::NotAcceptable) { stanza.process }
-    assert @stream.verify
+    it 'raises a not-acceptable stanza error' do
+      -> { subject.process }.must_raise Vines::StanzaErrors::NotAcceptable
+      stream.verify
+    end
   end
 
-  def test_set_with_zero_children_raises_error
-    alice = Vines::User.new(:jid => 'alice@wonderland.lit/tea')
-    query = %q{<query xmlns="jabber:iq:private"></query>}
-    node = node(%Q{<iq id="42" type="set">#{query}</iq>})
+  describe 'when get stanza contains more than one child element' do
+    let(:xml) do
+      query = %q{<query xmlns="jabber:iq:private"><one xmlns="a"/><two xmlns="b"/></query>}
+      node(%Q{<iq id="42" type="get">#{query}</iq>})
+    end
 
-    @stream.expect(:domain, 'wonderland.lit')
-    @stream.expect(:config, @config)
-
-    stanza = Vines::Stanza::Iq::PrivateStorage.new(node, @stream)
-    assert_raises(Vines::StanzaErrors::NotAcceptable) { stanza.process }
-    assert @stream.verify
+    it 'raises a not-acceptable stanza error' do
+      -> { subject.process }.must_raise Vines::StanzaErrors::NotAcceptable
+      stream.verify
+    end
   end
 
-  def test_get_without_namespace_raises_error
-    alice = Vines::User.new(:jid => 'alice@wonderland.lit/tea')
-    query = %q{<query xmlns="jabber:iq:private"><one/></query>}
-    node = node(%Q{<iq id="42" type="get">#{query}</iq>})
+  describe 'when get stanza is missing a namespace' do
+    let(:xml) do
+      query = %q{<query xmlns="jabber:iq:private"><one/></query>}
+      node = node(%Q{<iq id="42" type="get">#{query}</iq>})
+    end
 
-    @stream.expect(:domain, 'wonderland.lit')
-    @stream.expect(:config, @config)
-
-    stanza = Vines::Stanza::Iq::PrivateStorage.new(node, @stream)
-    assert_raises(Vines::StanzaErrors::NotAcceptable) { stanza.process }
-    assert @stream.verify
+    it 'raises a not-acceptable stanza error' do
+      -> { subject.process }.must_raise Vines::StanzaErrors::NotAcceptable
+      stream.verify
+    end
   end
 
-  def test_get_missing_fragment_raises_error
-    alice = Vines::User.new(:jid => 'alice@wonderland.lit/tea')
-    query = %q{<query xmlns="jabber:iq:private"><one xmlns="a"/></query>}
-    node = node(%Q{<iq id="42" type="get">#{query}</iq>})
+  describe 'when get stanza is missing fragment' do
+    let(:xml) do
+      query = %q{<query xmlns="jabber:iq:private"><one xmlns="a"/></query>}
+      node(%Q{<iq id="42" type="get">#{query}</iq>})
+    end
 
-    storage = MiniTest::Mock.new
-    storage.expect(:find_fragment, nil, [alice.jid, node.elements[0].elements[0]])
+    before do
+      storage.expect :find_fragment, nil, [alice.jid, xml.elements[0].elements[0]]
+      stream.expect :storage, storage, ['wonderland.lit']
+    end
 
-    @stream.expect(:domain, 'wonderland.lit')
-    @stream.expect(:config, @config)
-    @stream.expect(:storage, storage, ['wonderland.lit'])
-    @stream.expect(:user, alice)
-
-    stanza = Vines::Stanza::Iq::PrivateStorage.new(node, @stream)
-    assert_raises(Vines::StanzaErrors::ItemNotFound) { stanza.process }
-    assert @stream.verify
-    assert storage.verify
+    it 'raises an item-not-found stanza error' do
+      -> { subject.process }.must_raise Vines::StanzaErrors::ItemNotFound
+      stream.verify
+      storage.verify
+    end
   end
 
-  def test_get_finds_fragment_writes_to_stream
-    alice = Vines::User.new(:jid => 'alice@wonderland.lit/tea')
-    query = %q{<query xmlns="jabber:iq:private"><one xmlns="a"/></query>}
-    node = node(%Q{<iq id="42" type="get">#{query}</iq>})
+  describe 'when get finds fragment successfully' do
+    let(:xml) do
+      query = %q{<query xmlns="jabber:iq:private"><one xmlns="a"/></query>}
+      node = node(%Q{<iq id="42" type="get">#{query}</iq>})
+    end
 
-    data = %q{<one xmlns="a"><child>data</child></one>}
-    query = %Q{<query xmlns="jabber:iq:private">#{data}</query>}
-    expected = node(%Q{<iq from="#{alice.jid}" id="42" to="#{alice.jid}" type="result">#{query}</iq>})
+    before do
+      data = %q{<one xmlns="a"><child>data</child></one>}
+      query = %Q{<query xmlns="jabber:iq:private">#{data}</query>}
+      expected = node(%Q{<iq from="#{alice.jid}" id="42" to="#{alice.jid}" type="result">#{query}</iq>})
 
-    storage = MiniTest::Mock.new
-    storage.expect(:find_fragment, node(data), [alice.jid, node.elements[0].elements[0]])
+      storage.expect :find_fragment, node(data), [alice.jid, xml.elements[0].elements[0]]
+      stream.expect :storage, storage, ['wonderland.lit']
+      stream.expect :write, nil, [expected]
+    end
 
-    @stream.expect(:domain, 'wonderland.lit')
-    @stream.expect(:config, @config)
-    @stream.expect(:storage, storage, ['wonderland.lit'])
-    @stream.expect(:user, alice)
-    @stream.expect(:write, nil, [expected])
-
-    stanza = Vines::Stanza::Iq::PrivateStorage.new(node, @stream)
-    stanza.process
-    assert @stream.verify
-    assert storage.verify
+    it 'writes a response to the stream' do
+      subject.process
+      stream.verify
+      storage.verify
+    end
   end
 
-  def test_set_one_fragment_writes_result_to_stream
-    alice = Vines::User.new(:jid => 'alice@wonderland.lit/tea')
-    query = %q{<query xmlns="jabber:iq:private"><one xmlns="a"/></query>}
-    node = node(%Q{<iq id="42" type="set">#{query}</iq>})
+  describe 'when saving a fragment' do
+    let(:result) { node(%Q{<iq from="#{alice.jid}" id="42" to="#{alice.jid}" type="result"/>}) }
 
-    storage = MiniTest::Mock.new
-    storage.expect(:save_fragment, nil, [alice.jid, node.elements[0].elements[0]])
+    before do
+      storage.expect :save_fragment, nil, [alice.jid, xml.elements[0].elements[0]]
+      stream.expect :storage, storage, ['wonderland.lit']
+      stream.expect :write, nil, [result]
+    end
 
-    expected = node(%Q{<iq from="#{alice.jid}" id="42" to="#{alice.jid}" type="result"/>})
+    describe 'and stanza contains zero child elements' do
+      let(:xml) do
+        query = %q{<query xmlns="jabber:iq:private"></query>}
+        node(%Q{<iq id="42" type="set">#{query}</iq>})
+      end
 
-    @stream.expect(:domain, 'wonderland.lit')
-    @stream.expect(:config, @config)
-    @stream.expect(:storage, storage, ['wonderland.lit'])
-    @stream.expect(:user, alice)
-    @stream.expect(:write, nil, [expected])
+      it 'raises a not-acceptable stanza error' do
+        -> { subject.process }.must_raise Vines::StanzaErrors::NotAcceptable
+      end
+    end
 
-    stanza = Vines::Stanza::Iq::PrivateStorage.new(node, @stream)
-    stanza.process
-    assert @stream.verify
-    assert storage.verify
-  end
+    describe 'and a single single fragment saves successfully' do
+      let(:xml) do
+        query = %q{<query xmlns="jabber:iq:private"><one xmlns="a"/></query>}
+        node(%Q{<iq id="42" type="set">#{query}</iq>})
+      end
 
-  def test_set_two_fragments_writes_result_to_stream
-    alice = Vines::User.new(:jid => 'alice@wonderland.lit/tea')
-    query = %q{<query xmlns="jabber:iq:private"><one xmlns="a"/><two xmlns="a"/></query>}
-    node = node(%Q{<iq id="42" type="set">#{query}</iq>})
+      it 'writes a result to the stream' do
+        subject.process
+        stream.verify
+        storage.verify
+      end
+    end
 
-    storage = MiniTest::Mock.new
-    storage.expect(:save_fragment, nil, [alice.jid, node.elements[0].elements[0]])
-    storage.expect(:save_fragment, nil, [alice.jid, node.elements[0].elements[1]])
+    describe 'and two fragments save successfully' do
+      let(:xml) do
+        query = %q{<query xmlns="jabber:iq:private"><one xmlns="a"/><two xmlns="a"/></query>}
+        node(%Q{<iq id="42" type="set">#{query}</iq>})
+      end
 
-    expected = node(%Q{<iq from="#{alice.jid}" id="42" to="#{alice.jid}" type="result"/>})
+      before do
+        storage.expect :save_fragment, nil, [alice.jid, xml.elements[0].elements[1]]
+        stream.expect :storage, storage, ['wonderland.lit']
+      end
 
-    @stream.expect(:domain, 'wonderland.lit')
-    @stream.expect(:config, @config)
-    @stream.expect(:storage, storage, ['wonderland.lit'])
-    @stream.expect(:user, alice)
-    @stream.expect(:write, nil, [expected])
-
-    stanza = Vines::Stanza::Iq::PrivateStorage.new(node, @stream)
-    stanza.process
-    assert @stream.verify
-    assert storage.verify
-  end
-
-  private
-
-  def node(xml)
-    Nokogiri::XML(xml).root
+      it 'writes a result to the stream' do
+        subject.process
+        stream.verify
+        storage.verify
+      end
+    end
   end
 end
