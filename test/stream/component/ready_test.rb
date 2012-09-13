@@ -1,88 +1,103 @@
 # encoding: UTF-8
 
-require 'tmpdir'
-require 'vines'
-require 'ext/nokogiri'
-require 'minitest/autorun'
+require 'test_helper'
 
-class ComponentReadyTest < MiniTest::Unit::TestCase
-  def setup
-    @stream = MiniTest::Mock.new
-    @state  = Vines::Stream::Component::Ready.new(@stream, nil)
-    @config = Vines::Config.new do
+describe Vines::Stream::Component::Ready do
+  subject      { Vines::Stream::Component::Ready.new(stream, nil) }
+  let(:alice)  { Vines::User.new(jid: 'alice@tea.wonderland.lit') }
+  let(:hatter) { Vines::User.new(jid: 'hatter@wonderland.lit') }
+  let(:stream) { MiniTest::Mock.new }
+  let(:config) do
+    Vines::Config.new do
       host 'wonderland.lit' do
         storage(:fs) { dir Dir.tmpdir }
       end
     end
   end
 
-  def test_missing_to_and_from_addresses
-    node = node('<message/>')
-    assert_raises(Vines::StreamErrors::ImproperAddressing) { @state.node(node) }
-    assert @stream.verify
+  before do
+    class << stream
+      attr_accessor :config
+    end
+    stream.config = config
   end
 
-  def test_missing_from_address
-    node = node(%q{<message to="hatter@wonderland.lit"/>})
-    assert_raises(Vines::StreamErrors::ImproperAddressing) { @state.node(node) }
-    assert @stream.verify
+  describe 'when missing to and from addresses' do
+    it 'raises an improper-addressing stream error' do
+      node = node('<message/>')
+      -> { subject.node(node) }.must_raise Vines::StreamErrors::ImproperAddressing
+      stream.verify
+    end
   end
 
-  def test_missing_to_address
-    node = node(%q{<message from="alice@tea.wonderland.lit"/>})
-    assert_raises(Vines::StreamErrors::ImproperAddressing) { @state.node(node) }
-    assert @stream.verify
+  describe 'when missing from address' do
+    it 'raises an improper-addressing stream error' do
+      node = node(%q{<message to="hatter@wonderland.lit"/>})
+      -> { subject.node(node) }.must_raise Vines::StreamErrors::ImproperAddressing
+      stream.verify
+    end
   end
 
-  def test_invalid_from_address
-    @stream.expect(:remote_domain, 'tea.wonderland.lit')
-    node = node(%q{<message from="alice@bogus.wonderland.lit" to="hatter@wonderland.lit"/>})
-    assert_raises(Vines::StreamErrors::InvalidFrom) { @state.node(node) }
-    assert @stream.verify
+  describe 'when missing to address' do
+    it 'raises an improper-addressing stream error' do
+      node = node(%q{<message from="alice@tea.wonderland.lit"/>})
+      -> { subject.node(node) }.must_raise Vines::StreamErrors::ImproperAddressing
+      stream.verify
+    end
   end
 
-  def test_unsupported_stanza_type
-    node = node('<bogus/>')
-    assert_raises(Vines::StreamErrors::UnsupportedStanzaType) { @state.node(node) }
-    assert @stream.verify
+  describe 'when from address domain does not match component domain' do
+    it 'raises and invalid-from stream error' do
+      stream.expect :remote_domain, 'tea.wonderland.lit'
+      node = node(%q{<message from="alice@bogus.wonderland.lit" to="hatter@wonderland.lit"/>})
+      -> { subject.node(node) }.must_raise Vines::StreamErrors::InvalidFrom
+      stream.verify
+    end
   end
 
-  def test_remote_message_routes
-    node = node(%q{<message from="alice@tea.wonderland.lit" to="romeo@verona.lit"/>})
-    @stream.expect(:remote_domain, 'tea.wonderland.lit')
-    @stream.expect(:config, @config)
-    @stream.expect(:user=, nil, [Vines::User.new(:jid => 'alice@tea.wonderland.lit')])
-
-    @router = MiniTest::Mock.new
-    @router.expect(:route, nil, [node])
-    @stream.expect(:router, @router)
-
-    @state.node(node)
-    assert @stream.verify
-    assert @router.verify
+  describe 'when unrecognized element is received' do
+    it 'raises an unsupported-stanza-type stream error' do
+      node = node('<bogus/>')
+      -> { subject.node(node) }.must_raise Vines::StreamErrors::UnsupportedStanzaType
+      stream.verify
+    end
   end
 
-  def test_local_message_processes
-    node = node(%q{<message from="alice@tea.wonderland.lit" to="hatter@wonderland.lit"/>})
-    @stream.expect(:remote_domain, 'tea.wonderland.lit')
-    @stream.expect(:config, @config)
-    @stream.expect(:user=, nil, [Vines::User.new(:jid => 'alice@tea.wonderland.lit')])
-    @stream.expect(:user, Vines::User.new(:jid => 'alice@tea.wonderland.lit'))
+  describe 'when addressed to a remote jid' do
+    let(:router) { MiniTest::Mock.new }
+    let(:xml) { node(%q{<message from="alice@tea.wonderland.lit" to="romeo@verona.lit"/>}) }
 
-    @recipient = MiniTest::Mock.new
-    @recipient.expect(:user, Vines::User.new(:jid => 'hatter@wonderland.lit'))
-    @recipient.expect(:write, nil, [node])
+    before do
+      router.expect :route, nil, [xml]
+      stream.expect :remote_domain, 'tea.wonderland.lit'
+      stream.expect :user=, nil, [alice]
+      stream.expect :router, router
+    end
 
-    @stream.expect(:connected_resources, [@recipient], [Vines::JID.new('hatter@wonderland.lit')])
-
-    @state.node(node)
-    assert @stream.verify
-    assert @recipient.verify
+    it 'routes rather than handle locally' do
+      subject.node(xml)
+      stream.verify
+      router.verify
+    end
   end
 
-  private
+  describe 'when addressed to a local jid' do
+    let(:recipient) { MiniTest::Mock.new }
+    let(:xml) { node(%q{<message from="alice@tea.wonderland.lit" to="hatter@wonderland.lit"/>}) }
 
-  def node(xml)
-    Nokogiri::XML(xml).root
+    before do
+      recipient.expect :user, hatter
+      recipient.expect :write, nil, [xml]
+      stream.expect :remote_domain, 'tea.wonderland.lit'
+      stream.expect :user=, nil, [alice]
+      stream.expect :user, alice
+      stream.expect :connected_resources, [recipient], [hatter.jid]
+    end
+
+    it 'sends the message to the connected stream' do
+      subject.node(xml)
+      stream.verify
+      recipient.verify
+    end
   end
 end
