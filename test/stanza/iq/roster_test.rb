@@ -5,7 +5,6 @@ require 'test_helper'
 describe Vines::Stanza::Iq::Roster do
   subject      { Vines::Stanza::Iq::Roster.new(xml, stream) }
   let(:stream) { MiniTest::Mock.new }
-# FIXME try without resource
   let(:alice)  { Vines::User.new(jid: 'alice@wonderland.lit/tea') }
 
   before do
