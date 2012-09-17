@@ -1,70 +1,83 @@
 # encoding: UTF-8
 
-require 'vines'
-require 'ext/nokogiri'
-require 'minitest/autorun'
+require 'test_helper'
 
-class SubscribeTest < MiniTest::Unit::TestCase
-  def test_outbound_subscribe_to_local_jid_but_missing_contact
-    alice = Vines::JID.new('alice@wonderland.lit/tea')
-    hatter = Vines::JID.new('hatter@wonderland.lit')
+describe Vines::Stanza::Presence::Subscribe do
+  subject       { Vines::Stanza::Presence::Subscribe.new(xml, stream) }
+  let(:stream)  { MiniTest::Mock.new }
+  let(:alice)   { Vines::JID.new('alice@wonderland.lit/tea') }
+  let(:hatter)  { Vines::JID.new('hatter@wonderland.lit') }
+  let(:contact) { Vines::Contact.new(jid: hatter) }
 
-    contact = Vines::Contact.new(:jid => hatter)
-
-    user = MiniTest::Mock.new
-    user.expect(:jid, alice)
-    user.expect(:request_subscription, nil, [hatter])
-    user.expect(:contact, contact, [hatter])
-
-    storage = MiniTest::Mock.new
-    storage.expect(:save_user, nil, [user])
-    storage.expect(:find_user, nil, [hatter])
-
-    recipient = MiniTest::Mock.new
-    recipient.expect(:user, user)
-    def recipient.nodes; @nodes; end
-    def recipient.write(node)
-      @nodes ||= []
-      @nodes << node
+  before do
+    class << stream
+      attr_accessor :user, :nodes
+      def write(node)
+        @nodes ||= []
+        @nodes << node
+      end
     end
-
-    stream = MiniTest::Mock.new
-    stream.expect(:domain, 'wonderland.lit')
-    stream.expect(:storage, storage, ['wonderland.lit'])
-    stream.expect(:user, user)
-    stream.expect(:interested_resources, [recipient], [alice])
-    stream.expect(:update_user_streams, nil, [user])
-    def stream.nodes; @nodes; end
-    def stream.write(node)
-      @nodes ||= []
-      @nodes << node
-    end
-
-    node = node(%q{<presence id="42" to="hatter@wonderland.lit" type="subscribe"/>})
-    stanza = Vines::Stanza::Presence::Subscribe.new(node, stream)
-    def stanza.route_iq; false; end
-    def stanza.inbound?; false; end
-    def stanza.local?;   true; end
-
-    stanza.process
-    assert stream.verify
-    assert user.verify
-    assert storage.verify
-    assert_equal 1, stream.nodes.size
-    assert_equal 1, recipient.nodes.size
-
-    expected = node(%q{<presence from="hatter@wonderland.lit" id="42" to="alice@wonderland.lit" type="unsubscribed"/>})
-    assert_equal expected, stream.nodes[0]
-
-    query = %q{<query xmlns="jabber:iq:roster"><item jid="hatter@wonderland.lit" subscription="none"/></query>}
-    expected = node(%Q{<iq to="alice@wonderland.lit/tea" type="set">#{query}</iq>})
-    recipient.nodes[0].remove_attribute('id') # id is random
-    assert_equal expected, recipient.nodes[0]
   end
 
-  private
+  describe 'outbound subscription to a local jid, but missing contact' do
+    let(:xml) { node(%q{<presence id="42" to="hatter@wonderland.lit" type="subscribe"/>}) }
+    let(:user) { MiniTest::Mock.new }
+    let(:storage) { MiniTest::Mock.new }
+    let(:recipient) { MiniTest::Mock.new }
 
-  def node(xml)
-    Nokogiri::XML(xml).root
+    before do
+      class << user
+        attr_accessor :jid
+      end
+      user.jid = alice
+      user.expect :request_subscription, nil, [hatter]
+      user.expect :contact, contact, [hatter]
+
+      storage.expect :save_user, nil, [user]
+      storage.expect :find_user, nil, [hatter]
+
+      recipient.expect :user, user
+      class << recipient
+        attr_accessor :nodes
+        def write(node)
+          @nodes ||= []
+          @nodes << node
+        end
+      end
+
+      stream.user = user
+      stream.expect :domain, 'wonderland.lit'
+      stream.expect :storage, storage, ['wonderland.lit']
+      stream.expect :storage, storage, ['wonderland.lit']
+      stream.expect :interested_resources, [recipient], [alice]
+      stream.expect :update_user_streams, nil, [user]
+
+      class << subject
+        def route_iq; false; end
+        def inbound?; false; end
+        def local?;   true;  end
+      end
+    end
+
+    it 'rejects the subscription with an unsubscribed response' do
+      subject.process
+      stream.verify
+      user.verify
+      storage.verify
+      stream.nodes.size.must_equal 1
+
+      expected = node(%q{<presence from="hatter@wonderland.lit" id="42" to="alice@wonderland.lit" type="unsubscribed"/>})
+      stream.nodes.first.must_equal expected
+    end
+
+    it 'sends a roster set to the interested resources with subscription none' do
+      subject.process
+      recipient.nodes.size.must_equal 1
+
+      query = %q{<query xmlns="jabber:iq:roster"><item jid="hatter@wonderland.lit" subscription="none"/></query>}
+      expected = node(%Q{<iq to="alice@wonderland.lit/tea" type="set">#{query}</iq>})
+      recipient.nodes.first.remove_attribute('id') # id is random
+      recipient.nodes.first.must_equal expected
+    end
   end
 end
