@@ -1,26 +1,27 @@
 # encoding: UTF-8
 
-require 'vines'
-require 'minitest/autorun'
+require 'test_helper'
 
-class ClientSessionTest < MiniTest::Unit::TestCase
-  def setup
-    @stream = MiniTest::Mock.new
-    @stream.expect(:config, nil)
-  end
+describe Vines::Stream::Client::Session do
+  subject       { Vines::Stream::Client::Session.new(stream) }
+  let(:another) { Vines::Stream::Client::Session.new(stream) }
+  let(:stream)  { OpenStruct.new(config: nil) }
 
-  def test_equality
-    one = Vines::Stream::Client::Session.new(@stream)
-    two = Vines::Stream::Client::Session.new(@stream)
+  describe 'session equality checks' do
+    it 'uses class in equality check' do
+      (subject <=> 42).must_be_nil
+    end
 
-    assert_nil one <=> 42
+    it 'is equal to itself' do
+      assert subject == subject
+      assert subject.eql?(subject)
+      assert subject.hash == subject.hash
+    end
 
-    assert one == one
-    assert one.eql?(one)
-    assert one.hash == one.hash
-
-    refute one == two
-    refute one.eql?(two)
-    refute one.hash == two.hash
+    it 'is not equal to another session' do
+      refute subject == another
+      refute subject.eql?(another)
+      refute subject.hash == another.hash
+    end
   end
 end
