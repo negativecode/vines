@@ -1,78 +1,85 @@
 # encoding: UTF-8
 
-require 'tmpdir'
-require 'vines'
-require 'ext/nokogiri'
-require 'minitest/autorun'
+require 'test_helper'
 
-class StanzaTest < MiniTest::Unit::TestCase
-  def setup
-    @alice = Vines::JID.new('alice@wonderland.lit/tea')
-    @romeo = Vines::JID.new('romeo@verona.lit/balcony')
-    @stream = MiniTest::Mock.new
-    @config = Vines::Config.new do
+describe Vines::Stanza do
+  subject      { Vines::Stanza::Message.new(xml, stream) }
+  let(:alice)  { Vines::JID.new('alice@wonderland.lit/tea') }
+  let(:romeo)  { Vines::JID.new('romeo@verona.lit/balcony') }
+  let(:stream) { MiniTest::Mock.new }
+  let(:config) do
+    Vines::Config.new do
       host 'wonderland.lit' do
         storage(:fs) { dir Dir.tmpdir }
       end
     end
   end
 
-  def test_validate_missing_addresses
-    node = node(%Q{<message>hello!</message>})
-    stanza = Vines::Stanza::Message.new(node, @stream)
-    assert_nil stanza.validate_to
-    assert_nil stanza.validate_from
-    assert @stream.verify
+  describe 'when stanza contains no addresses' do
+    let(:xml) { node(%Q{<message>hello!</message>}) }
+
+    it 'validates them as nil' do
+      subject.validate_to.must_be_nil
+      subject.validate_from.must_be_nil
+      stream.verify
+    end
   end
 
-  def test_validate_valid_addresses
-    node = node(%Q{<message from="#{@alice}" to="#{@romeo}">hello!</message>})
-    stanza = Vines::Stanza::Message.new(node, @stream)
-    assert_equal @romeo, stanza.validate_to
-    assert_equal @alice, stanza.validate_from
-    assert @stream.verify
+  describe 'when stanza contains valid addresses' do
+    let(:xml) { node(%Q{<message from="#{alice}" to="#{romeo}">hello!</message>}) }
+
+    it 'validates and returns JID objects' do
+      subject.validate_to.must_equal romeo
+      subject.validate_from.must_equal alice
+      stream.verify
+    end
   end
 
-  def test_validate_invalid_addresses
-    node = node(%Q{<message from="a lice@wonderland.lit" to="romeo@v erona.lit">hello!</message>})
-    stanza = Vines::Stanza::Message.new(node, @stream)
-    assert_raises(Vines::StanzaErrors::JidMalformed) { stanza.validate_to }
-    assert_raises(Vines::StanzaErrors::JidMalformed) { stanza.validate_from }
-    assert @stream.verify
+  describe 'when stanza contains invalid addresses' do
+    let(:xml) { node(%Q{<message from="a lice@wonderland.lit" to="romeo@v erona.lit">hello!</message>}) }
+
+    it 'raises a jid-malformed stanza error' do
+      -> { subject.validate_to }.must_raise Vines::StanzaErrors::JidMalformed
+      -> { subject.validate_from }.must_raise Vines::StanzaErrors::JidMalformed
+      stream.verify
+    end
   end
 
-  def test_non_routable_stanza_is_local
-    stanza = Vines::Stanza.new(node('<auth/>'), @stream)
-    assert stanza.local?
-    assert @stream.verify
+  describe 'when receiving a non-routable stanza type' do
+    let(:xml) { node('<auth/>') }
+
+    it 'handles locally rather than routing' do
+      subject.local?.must_equal true
+      stream.verify
+    end
   end
 
-  def test_stanza_missing_to_is_local
-    node = node(%Q{<message>hello!</message>})
-    stanza = Vines::Stanza::Message.new(node, @stream)
-    assert stanza.local?
-    assert @stream.verify
+  describe 'when stanza is missing a to address' do
+    let(:xml) { node(%Q{<message>hello!</message>}) }
+
+    it 'handles locally rather than routing' do
+      subject.local?.must_equal true
+      stream.verify
+    end
   end
 
-  def test_stanza_with_local_jid_is_local
-    node = node(%Q{<message to="#{@alice}">hello!</message>})
-    @stream.expect(:config, @config)
-    stanza = Vines::Stanza::Message.new(node, @stream)
-    assert stanza.local?
-    assert @stream.verify
+  describe 'when stanza is addressed to a local jid' do
+    let(:xml) { node(%Q{<message to="#{alice}">hello!</message>}) }
+
+    it 'handles locally rather than routing' do
+      stream.expect :config, config
+      subject.local?.must_equal true
+      stream.verify
+    end
   end
 
-  def test_stanza_with_remote_jid_is_not_local
-    node = node(%Q{<message to="#{@romeo}">hello!</message>})
-    @stream.expect(:config, @config)
-    stanza = Vines::Stanza::Message.new(node, @stream)
-    refute stanza.local?
-    assert @stream.verify
-  end
+  describe 'when stanza is addressed to a remote jid' do
+    let(:xml) { node(%Q{<message to="#{romeo}">hello!</message>}) }
 
-  private
-
-  def node(xml)
-    Nokogiri::XML(xml).root
+    it 'is not considered a local stanza' do
+      stream.expect :config, config
+      subject.local?.must_equal false
+      stream.verify
+    end
   end
 end
