@@ -1,7 +1,6 @@
 # encoding: UTF-8
 
-require 'vines'
-require 'minitest/autorun'
+require 'test_helper'
 
 class OutboundAuthTest < MiniTest::Unit::TestCase
   def setup

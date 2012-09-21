@@ -1,7 +1,6 @@
 # encoding: UTF-8
 
-require 'vines'
-require 'minitest/autorun'
+require 'test_helper'
 
 describe Vines::Storage::Ldap do
   ALICE_DN = 'uid=alice@wondlerand.lit,ou=People,dc=wonderland,dc=lit'

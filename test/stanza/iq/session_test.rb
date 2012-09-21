@@ -1,8 +1,6 @@
 # encoding: UTF-8
 
-require 'vines'
-require 'ext/nokogiri'
-require 'minitest/autorun'
+require 'test_helper'
 
 class SessionTest < MiniTest::Unit::TestCase
   def test_session

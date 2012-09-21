@@ -1,8 +1,6 @@
 # encoding: UTF-8
 
-require 'tmpdir'
-require 'vines'
-require 'minitest/autorun'
+require 'test_helper'
 
 class HostTest < MiniTest::Unit::TestCase
   def test_missing_storage

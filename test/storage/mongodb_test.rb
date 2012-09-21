@@ -2,8 +2,7 @@
 
 require 'mock_mongo'
 require 'storage_tests'
-require 'vines'
-require 'minitest/autorun'
+require 'test_helper'
 
 class MongoDBTest < MiniTest::Unit::TestCase
   include StorageTests

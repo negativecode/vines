@@ -2,8 +2,7 @@
 
 require 'mock_redis'
 require 'storage_tests'
-require 'vines'
-require 'minitest/autorun'
+require 'test_helper'
 
 class RedisTest < MiniTest::Unit::TestCase
   include StorageTests

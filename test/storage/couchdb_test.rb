@@ -1,8 +1,7 @@
 # encoding: UTF-8
 
 require 'storage_tests'
-require 'vines'
-require 'minitest/autorun'
+require 'test_helper'
 
 class CouchDBTest < MiniTest::Unit::TestCase
   include StorageTests

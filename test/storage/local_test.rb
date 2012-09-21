@@ -1,9 +1,7 @@
 # encoding: UTF-8
 
 require 'storage_tests'
-require 'tmpdir'
-require 'vines'
-require 'minitest/autorun'
+require 'test_helper'
 
 class LocalTest < MiniTest::Unit::TestCase
   include StorageTests

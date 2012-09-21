@@ -1,8 +1,7 @@
 # encoding: UTF-8
 
 require 'storage_tests'
-require 'vines'
-require 'minitest/autorun'
+require 'test_helper'
 
 describe Vines::Storage do
   ALICE = 'alice@wonderland.lit'.freeze

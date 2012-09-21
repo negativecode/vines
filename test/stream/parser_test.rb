@@ -1,7 +1,6 @@
 # encoding: UTF-8
 
-require 'vines'
-require 'minitest/autorun'
+require 'test_helper'
 
 class ParserTest < MiniTest::Unit::TestCase
   STREAM_START = '<stream:stream to="wonderland.lit" xmlns="jabber:client" xmlns:stream="http://etherx.jabber.org/streams">'.freeze

@@ -1,9 +1,6 @@
 # encoding: UTF-8
 
-require 'tmpdir'
-require 'vines'
-require 'ext/nokogiri'
-require 'minitest/autorun'
+require 'test_helper'
 
 class ConfigPubSubTest < MiniTest::Unit::TestCase
   def setup

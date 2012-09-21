@@ -1,8 +1,6 @@
 # encoding: UTF-8
 
-require 'tmpdir'
-require 'vines'
-require 'minitest/autorun'
+require 'test_helper'
 
 describe Vines::Stream::Http::Request do
   PASSWORD = File.expand_path('../passwords')
