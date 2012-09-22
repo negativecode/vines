@@ -33,12 +33,7 @@ module Vines
     # bucket isn't full enough to satisy the request.
     def take(tokens)
       raise ArgumentError.new('tokens must be > 0') unless tokens > 0
-      if tokens <= fill
-        @tokens -= tokens
-        true
-      else
-        false
-      end
+      tokens <= fill ? @tokens -= tokens : false
     end
 
     private
