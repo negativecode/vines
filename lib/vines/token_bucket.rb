@@ -9,8 +9,12 @@ module Vines
   # of operations.
   class TokenBucket
 
-    # Create a full bucket with capacity number of tokens to be filled
+    # Create a full bucket with `capacity` number of tokens to be filled
     # at the given rate of tokens/second.
+    #
+    # capacity - The Fixnum maximum number of tokens the bucket can hold.
+    # rate     - The Fixnum number of tokens per second at which the bucket is
+    #            refilled.
     def initialize(capacity, rate)
       raise ArgumentError.new('capacity must be > 0') unless capacity > 0
       raise ArgumentError.new('rate must be > 0') unless rate > 0
@@ -20,7 +24,13 @@ module Vines
       @timestamp = Time.new
     end
 
-    # Returns true if tokens can be taken from the bucket.
+    # Remove tokens from the bucket if it's full enough. There's no way, or
+    # need, to add tokens to the bucket. It refills over time.
+    #
+    # tokens - The Fixnum number of tokens to attempt to take from the bucket.
+    #
+    # Returns true if the bucket contains enough tokens to take, false if the
+    # bucket isn't full enough to satisy the request.
     def take(tokens)
       raise ArgumentError.new('tokens must be > 0') unless tokens > 0
       if tokens <= fill
@@ -33,6 +43,10 @@ module Vines
 
     private
 
+    # Add tokens to the bucket at the `rate` provided in the constructor. This
+    # fills the bucket slowly over time.
+    #
+    # Returns the Fixnum number of tokens left in the bucket.
     def fill
       if @tokens < @capacity
         now = Time.new
