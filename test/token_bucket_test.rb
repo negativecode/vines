@@ -28,8 +28,17 @@ describe Vines::TokenBucket do
   it 'refills over time' do
     assert subject.take(10)
     refute subject.take(1)
-    sleep(1)
-    assert subject.take(1)
+    Time.stub(:new, Time.now + 1) do
+      assert subject.take(1)
+      refute subject.take(1)
+    end
+  end
+
+  it 'does not refill over capacity' do
+    assert subject.take(10)
     refute subject.take(1)
+    Time.stub(:new, Time.now + 15) do
+      refute subject.take(11)
+    end
   end
 end
