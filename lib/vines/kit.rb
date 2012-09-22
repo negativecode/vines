@@ -12,10 +12,7 @@ module Vines
     # Generates a random uuid per rfc 4122 that's useful for including in
     # stream, iq, and other xmpp stanzas.
     def self.uuid
-      hex = (0...16).map { "%02x" % rand(256) }.join
-      hex[12] = '4'
-      hex[16] = %w[8 9 a b][rand(4)]
-      hex.scan(/(\w{8})(\w{4})(\w{4})(\w{4})(\w{12})/).first.join('-')
+      SecureRandom.uuid
     end
 
     # Generates a random 128 character authentication token.
