@@ -50,8 +50,8 @@ module Vines
     def fill
       if @tokens < @capacity
         now = Time.new
-        delta = (@rate * (now - @timestamp)).round
-        @tokens = [@capacity, @tokens + delta].min
+        @tokens += (@rate * (now - @timestamp)).round
+        @tokens = @capacity if @tokens > @capacity
         @timestamp = now
       end
       @tokens
