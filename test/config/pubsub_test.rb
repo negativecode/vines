@@ -2,177 +2,186 @@
 
 require 'test_helper'
 
-class ConfigPubSubTest < MiniTest::Unit::TestCase
-  def setup
+describe Vines::Config::PubSub do
+  subject { config.pubsub('topics.wonderland.lit') }
+  let(:alice) { Vines::JID.new('alice@wonderland.lit') }
+  let(:romeo) { Vines::JID.new('romeo@verona.lit') }
+  let(:config) do
     @config = Vines::Config.new do
       host 'wonderland.lit' do
         storage(:fs) { dir Dir.tmpdir }
         pubsub 'topics'
       end
     end
-    @pubsub = @config.pubsub('topics.wonderland.lit')
   end
 
-  def test_add_node
+  it 'adds and deletes a topic node' do
     topic = 'rhode_island_is_neither_a_road_nor_an_island'
-    refute @pubsub.node?(topic)
-    @pubsub.add_node(topic)
-    assert @pubsub.node?(topic)
-    @pubsub.delete_node(topic)
-    refute @pubsub.node?(topic)
+    refute subject.node?(topic)
+    subject.add_node(topic)
+    assert subject.node?(topic)
+    subject.delete_node(topic)
+    refute subject.node?(topic)
   end
 
-  def test_delete_missing_node
+  it 'ignores deleting a missing topic node' do
     topic = 'kittens_vs_puppies'
-    refute @pubsub.node?(topic)
-    @pubsub.delete_node(topic)
-    refute @pubsub.node?(topic)
+    refute subject.node?(topic)
+    subject.delete_node(topic)
+    refute subject.node?(topic)
   end
 
-  def test_subscribe_with_jid
+  it 'subscribes a jid to a node' do
     topic = 'with_jid'
     jid = Vines::JID.new('alice@wonderland.lit')
-    @pubsub.add_node(topic)
-    @pubsub.subscribe(topic, jid)
-    assert @pubsub.subscribed?(topic, jid.to_s)
-    assert @pubsub.subscribed?(topic, jid)
+    subject.add_node(topic)
+    subject.subscribe(topic, jid)
+    assert subject.subscribed?(topic, jid.to_s)
+    assert subject.subscribed?(topic, jid)
   end
 
-  def test_subscribe_remote_jid_not_allowed
+  it 'does not allow remote jids to subscribe to a node by default' do
     topic = 'remote_jids_failed'
     jid = 'romeo@verona.lit'
-    @pubsub.add_node(topic)
-    @pubsub.subscribe(topic, jid)
-    refute @pubsub.subscribed?(topic, jid)
+    subject.add_node(topic)
+    subject.subscribe(topic, jid)
+    refute subject.subscribed?(topic, jid)
   end
 
-  def test_subscribe_remote_jid_is_allowed
+  it 'allows remote jid subscriptions when cross domain messages are enabled' do
     topic = 'remote_jids_allowed'
     jid = 'romeo@verona.lit'
-    @config.vhost('wonderland.lit').cross_domain_messages true
-    @pubsub.add_node(topic)
-    @pubsub.subscribe(topic, jid)
-    assert @pubsub.subscribed?(topic, jid)
+    config.vhost('wonderland.lit').cross_domain_messages true
+    subject.add_node(topic)
+    subject.subscribe(topic, jid)
+    assert subject.subscribed?(topic, jid)
   end
 
-  def test_subscribe_missing_node
+  it 'ignores subscribing to a missing node' do
     topic = 'bogus'
     jid = 'alice@wonderland.lit'
-    refute @pubsub.node?(topic)
-    @pubsub.subscribe(topic, jid)
-    refute @pubsub.node?(topic)
-    refute @pubsub.subscribed?(topic, jid)
+    refute subject.node?(topic)
+    subject.subscribe(topic, jid)
+    refute subject.node?(topic)
+    refute subject.subscribed?(topic, jid)
   end
 
-  def test_unsubscribe_deletes_node
+  it 'deletes the node after unsubscribing' do
     topic = 'delete_me'
     jid = 'alice@wonderland.lit/tea'
-    @pubsub.add_node(topic)
-    @pubsub.subscribe(topic, jid)
-    assert @pubsub.subscribed?(topic, jid)
-    @pubsub.unsubscribe(topic, jid)
-    refute @pubsub.subscribed?(topic, jid)
-    refute @pubsub.node?(topic)
+    subject.add_node(topic)
+    subject.subscribe(topic, jid)
+    assert subject.subscribed?(topic, jid)
+    subject.unsubscribe(topic, jid)
+    refute subject.subscribed?(topic, jid)
+    refute subject.node?(topic)
   end
 
-  def test_unsubscribe_all
+  it 'unsubscribes a jid from all topics' do
     topic = 'pirates_vs_ninjas'
     topic2 = 'pirates_vs_ninjas_2'
     jid = 'alice@wonderland.lit'
     jid2 = 'hatter@wonderland.lit'
-    @pubsub.add_node(topic)
-    @pubsub.add_node(topic2)
+    subject.add_node(topic)
+    subject.add_node(topic2)
 
-    @pubsub.subscribe(topic, jid)
-    @pubsub.subscribe(topic, jid2)
-    @pubsub.subscribe(topic2, jid)
-    assert @pubsub.subscribed?(topic, jid)
-    assert @pubsub.subscribed?(topic, jid2)
-    assert @pubsub.subscribed?(topic2, jid)
+    subject.subscribe(topic, jid)
+    subject.subscribe(topic, jid2)
+    subject.subscribe(topic2, jid)
+    assert subject.subscribed?(topic, jid)
+    assert subject.subscribed?(topic, jid2)
+    assert subject.subscribed?(topic2, jid)
 
-    @pubsub.unsubscribe_all(jid)
-    refute @pubsub.node?(topic2)
-    refute @pubsub.subscribed?(topic, jid)
-    refute @pubsub.subscribed?(topic2, jid)
-    assert @pubsub.subscribed?(topic, jid2)
+    subject.unsubscribe_all(jid)
+    refute subject.node?(topic2)
+    refute subject.subscribed?(topic, jid)
+    refute subject.subscribed?(topic2, jid)
+    assert subject.subscribed?(topic, jid2)
   end
 
-  def test_publish
-    topic = 'pirates_vs_ninjas'
-    alice = Vines::JID.new('alice@wonderland.lit')
-    romeo = Vines::JID.new('romeo@verona.lit')
+  describe 'when publishing a message to a topic node' do
+    let(:xml) do
+      node(%q{
+        <iq type='set' to='topics.wonderland.lit'>
+          <pubsub xmlns='http://jabber.org/protocol/pubsub'>
+            <publish node='pirates_vs_ninjas'>
+              <item id='item_42'>
+                <entry xmlns='http://www.w3.org/2005/Atom'>
+                  <title>Test</title>
+                  <summary>This is a summary.</summary>
+                </entry>
+              </item>
+            </publish>
+          </pubsub>
+        </iq>})
+    end
 
-    @config.vhost('wonderland.lit').cross_domain_messages true
-    def @config.router
-      unless @mock_router
-        @mock_router = MiniTest::Mock.new
-        def @mock_router.nodes; @nodes; end
-        def @mock_router.route(node)
+    let(:recipient) do
+      recipient = MiniTest::Mock.new
+      recipient.expect :user, Vines::User.new(jid: alice)
+      class << recipient
+        attr_accessor :nodes
+        def write(node)
           @nodes ||= []
           @nodes << node
         end
       end
-      @mock_router
+      recipient
     end
 
-    recipient = recipient(alice)
-    @config.router.expect(:connected_resources, [recipient], [alice, 'topics.wonderland.lit'])
+    before do
+      router = MiniTest::Mock.new
+      router.expect :connected_resources, [recipient], [alice, 'topics.wonderland.lit']
+      class << router
+        attr_accessor :nodes
+        def route(node)
+          @nodes ||= []
+          @nodes << node
+        end
+      end
 
-    @pubsub.add_node(topic)
-    @pubsub.subscribe(topic, alice)
-    @pubsub.subscribe(topic, romeo)
-    assert @pubsub.subscribed?(topic, alice)
-    assert @pubsub.subscribed?(topic, romeo)
+      class << config
+        attr_accessor :router
+      end
+      config.router = router
+      config.vhost('wonderland.lit').cross_domain_messages true
 
-    node = node(%q{
-      <iq type='set' to='topics.wonderland.lit'>
-        <pubsub xmlns='http://jabber.org/protocol/pubsub'>
-          <publish node='pirates_vs_ninjas'>
-            <item id='item_42'>
-              <entry xmlns='http://www.w3.org/2005/Atom'>
-                <title>Test</title>
-                <summary>This is a summary.</summary>
-              </entry>
-            </item>
-          </publish>
-        </pubsub>
-      </iq>
-    }.strip.gsub(/\n|\s{2,}/, ''))
-    expected = node.clone
-
-    @pubsub.publish(topic, node)
-
-    assert @config.router.verify
-    assert recipient.verify
-
-    # id is random
-    refute_nil recipient.nodes[0]['id']
-    refute_nil @config.router.nodes[0]['id']
-    recipient.nodes[0].remove_attribute('id')
-    @config.router.nodes[0].remove_attribute('id')
-
-    expected['to'] = 'alice@wonderland.lit'
-    expected['from'] = 'topics.wonderland.lit'
-    assert_equal expected, recipient.nodes[0]
-
-    expected['to'] = 'romeo@verona.lit'
-    assert_equal expected, @config.router.nodes[0]
-  end
-
-  private
-
-  def recipient(jid)
-    recipient = MiniTest::Mock.new
-    recipient.expect(:user, Vines::User.new(jid: jid))
-    def recipient.nodes; @nodes; end
-    def recipient.write(node)
-      @nodes ||= []
-      @nodes << node
+      subject.add_node(topic)
+      subject.subscribe(topic, alice)
+      subject.subscribe(topic, romeo)
     end
-    recipient
-  end
 
-  def node(xml)
-    Nokogiri::XML(xml).root
+    let(:topic) { 'pirates_vs_ninjas' }
+
+    it 'writes the message to local connected resource streams' do
+      expected = xml.clone
+      expected['to'] = 'alice@wonderland.lit'
+      expected['from'] = 'topics.wonderland.lit'
+
+      subject.publish(topic, xml)
+      config.router.verify
+      recipient.verify
+
+      # id is random
+      received = recipient.nodes.first
+      received['id'].wont_be_nil
+      received.remove_attribute('id')
+      received.must_equal expected
+    end
+
+    it 'routes the message to remote jids' do
+      expected = xml.clone
+      expected['to'] = 'romeo@verona.lit'
+      expected['from'] = 'topics.wonderland.lit'
+
+      subject.publish(topic, xml)
+      config.router.verify
+
+      # id is random
+      routed = config.router.nodes.first
+      routed['id'].wont_be_nil
+      routed.remove_attribute('id')
+      routed.must_equal expected
+    end
   end
 end
