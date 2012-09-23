@@ -2,91 +2,108 @@
 
 require 'test_helper'
 
-class ClusterSubscriberTest < MiniTest::Unit::TestCase
-  def setup
-    @connection = MiniTest::Mock.new
-    @cluster = MiniTest::Mock.new
-    @cluster.expect(:id, 'abc')
+describe Vines::Cluster::Subscriber do
+  subject          { Vines::Cluster::Subscriber.new(cluster) }
+  let(:connection) { MiniTest::Mock.new }
+  let(:cluster)    { MiniTest::Mock.new }
+  let(:now)        { Time.now.to_i }
+
+  before do
+    cluster.expect :id, 'abc'
   end
 
-  def test_subscribe
-    @cluster.expect(:connect, @connection)
-    @connection.expect(:subscribe, nil, ['cluster:nodes:all'])
-    @connection.expect(:subscribe, nil, ['cluster:nodes:abc'])
-    @connection.expect(:on, nil, [:message])
-    subscriber = Vines::Cluster::Subscriber.new(@cluster)
-    subscriber.subscribe
-    assert @connection.verify
-    assert @cluster.verify
+  describe '#subscribe' do
+    before do
+      cluster.expect :connect, connection
+      connection.expect :subscribe, nil, ['cluster:nodes:all']
+      connection.expect :subscribe, nil, ['cluster:nodes:abc']
+      connection.expect :on, nil, [:message]
+    end
+
+    it 'subscribes to its own channel and the broadcast channel' do
+      subject.subscribe
+      connection.verify
+      cluster.verify
+    end
   end
 
-  def test_heartbeat
-    now = Time.now.to_i
-    msg = {from: 'node-42', type: 'heartbeat', time: now}.to_json
-    @cluster.expect(:poke, nil, ['node-42', now])
+  describe 'when receiving a heartbeat broadcast message' do
+    before do
+      cluster.expect :poke, nil, ['node-42', now]
+    end
 
-    subscriber = Vines::Cluster::Subscriber.new(@cluster)
-    subscriber.send(:on_message, 'cluster:nodes:all', msg)
-    assert @connection.verify
-    assert @cluster.verify
+    it 'pokes the session manager for the broadcasting node' do
+      msg = {from: 'node-42', type: 'heartbeat', time: now}.to_json
+      subject.send(:on_message, 'cluster:nodes:all', msg)
+      connection.verify
+      cluster.verify
+    end
   end
 
-  def test_online
-    now = Time.now.to_i
-    msg = {from: 'node-42', type: 'online', time: now}.to_json
-    @cluster.expect(:poke, nil, ['node-42', now])
+  describe 'when receiving an initial online broadcast message' do
+    before do
+      cluster.expect :poke, nil, ['node-42', now]
+    end
 
-    subscriber = Vines::Cluster::Subscriber.new(@cluster)
-    subscriber.send(:on_message, 'cluster:nodes:all', msg)
-    assert @connection.verify
-    assert @cluster.verify
+    it 'pokes the session manager for the broadcasting node' do
+      msg = {from: 'node-42', type: 'online', time: now}.to_json
+      subject.send(:on_message, 'cluster:nodes:all', msg)
+      connection.verify
+      cluster.verify
+    end
   end
 
-  def test_offline
-    now = Time.now.to_i
-    msg = {from: 'node-42', type: 'offline', time: now}.to_json
-    @cluster.expect(:delete_sessions, nil, ['node-42'])
+  describe 'when receiving an offline broadcast message' do
+    before do
+      cluster.expect :delete_sessions, nil, ['node-42']
+    end
 
-    subscriber = Vines::Cluster::Subscriber.new(@cluster)
-    subscriber.send(:on_message, 'cluster:nodes:all', msg)
-    assert @connection.verify
-    assert @cluster.verify
+    it 'deletes the sessions for the broadcasting node' do
+      msg = {from: 'node-42', type: 'offline', time: now}.to_json
+      subject.send(:on_message, 'cluster:nodes:all', msg)
+      connection.verify
+      cluster.verify
+    end
   end
 
-  def test_route_stanza
-    stanza = "<message to='alice@wonderland.lit/tea'>hello</message>"
-    node = Nokogiri::XML(stanza).root rescue nil
-    msg = {from: 'node-42', type: 'stanza', stanza: stanza}.to_json
+  describe 'when receiving a stanza routed to my node' do
+    let(:stream) { MiniTest::Mock.new }
+    let(:stanza) { "<message to='alice@wonderland.lit/tea'>hello</message>" }
+    let(:xml) { Nokogiri::XML(stanza).root }
 
-    stream = MiniTest::Mock.new
-    stream.expect(:write, nil, [node])
-    @cluster.expect(:connected_resources, [stream], ['alice@wonderland.lit/tea'])
+    before do
+      stream.expect :write, nil, [xml]
+      cluster.expect :connected_resources, [stream], ['alice@wonderland.lit/tea']
+    end
 
-    subscriber = Vines::Cluster::Subscriber.new(@cluster)
-    subscriber.send(:on_message, 'cluster:nodes:abc', msg)
-    assert stream.verify
-    assert @connection.verify
-    assert @cluster.verify
+    it 'writes the stanza to the connected user streams' do
+      msg = {from: 'node-42', type: 'stanza', stanza: stanza}.to_json
+      subject.send(:on_message, 'cluster:nodes:abc', msg)
+      stream.verify
+      connection.verify
+      cluster.verify
+    end
   end
 
-  def test_update_user
-    alice = Vines::User.new(jid: 'alice@wonderland.lit/tea')
-    msg = {from: 'node-42', type: 'user', jid: alice.jid.to_s}.to_json
+  describe 'when receiving a user update message to my node' do
+    let(:alice) { Vines::User.new(jid: 'alice@wonderland.lit/tea') }
+    let(:storage) { MiniTest::Mock.new }
+    let(:stream) { MiniTest::Mock.new }
 
-    storage = MiniTest::Mock.new
-    storage.expect(:find_user, alice, [alice.jid.bare])
+    before do
+      storage.expect :find_user, alice, [alice.jid.bare]
+      stream.expect :user, alice
+      cluster.expect :storage, storage, ['wonderland.lit']
+      cluster.expect :connected_resources, [stream], [alice.jid.bare]
+    end
 
-    stream = MiniTest::Mock.new
-    stream.expect(:user, alice)
-
-    @cluster.expect(:storage, storage, ['wonderland.lit'])
-    @cluster.expect(:connected_resources, [stream], [alice.jid.bare])
-
-    subscriber = Vines::Cluster::Subscriber.new(@cluster)
-    subscriber.send(:on_message, 'cluster:nodes:abc', msg)
-    assert storage.verify
-    assert stream.verify
-    assert @connection.verify
-    assert @cluster.verify
+    it 'reloads the user from storage and updates their connected streams' do
+      msg = {from: 'node-42', type: 'user', jid: alice.jid.to_s}.to_json
+      subject.send(:on_message, 'cluster:nodes:abc', msg)
+      storage.verify
+      stream.verify
+      connection.verify
+      cluster.verify
+    end
   end
 end
