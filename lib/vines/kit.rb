@@ -17,9 +17,7 @@ module Vines
 
     # Generates a random 128 character authentication token.
     def self.auth_token
-      hash = Digest::SHA512.new
-      1024.times { hash << rand.to_s }
-      hash.hexdigest
+      SecureRandom.hex(64)
     end
   end
 end
