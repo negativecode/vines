@@ -2,43 +2,56 @@
 
 require 'test_helper'
 
-class ClusterPublisherTest < MiniTest::Unit::TestCase
-  def setup
-    @connection = MiniTest::Mock.new
-    @cluster = MiniTest::Mock.new
-    @cluster.expect(:id, 'abc')
-    @cluster.expect(:connection, @connection)
+describe Vines::Cluster::Publisher do
+  subject          { Vines::Cluster::Publisher.new(cluster) }
+  let(:connection) { MiniTest::Mock.new }
+  let(:cluster)    { MiniTest::Mock.new }
+
+  before do
+    cluster.expect :id, 'abc'
+    cluster.expect :connection, connection
   end
 
-  def test_broadcast
-    msg = {from: 'abc', type: 'online', time: Time.now.to_i}.to_json
-    @connection.expect(:publish, nil, ["cluster:nodes:all", msg])
+  describe '#broadcast' do
+    before do
+      msg = {from: 'abc', type: 'online', time: Time.now.to_i}.to_json
+      connection.expect :publish, nil, ["cluster:nodes:all", msg]
+    end
 
-    publisher = Vines::Cluster::Publisher.new(@cluster)
-    publisher.broadcast(:online)
-    assert @connection.verify
-    assert @cluster.verify
+    it 'publishes the message to every cluster node' do
+      subject.broadcast(:online)
+      connection.verify
+      cluster.verify
+    end
   end
 
-  def test_route
-    stanza = "<message>hello</message>"
-    msg = {from: 'abc', type: 'stanza', stanza: stanza}.to_json
-    @connection.expect(:publish, nil, ["cluster:nodes:node-42", msg])
+  describe '#route' do
+    let(:stanza) { "<message>hello</message>" }
 
-    publisher = Vines::Cluster::Publisher.new(@cluster)
-    publisher.route(stanza, "node-42")
-    assert @connection.verify
-    assert @cluster.verify
+    before do
+      msg = {from: 'abc', type: 'stanza', stanza: stanza}.to_json
+      connection.expect :publish, nil, ["cluster:nodes:node-42", msg]
+    end
+
+    it 'publishes the message to just one cluster node' do
+      subject.route(stanza, "node-42")
+      connection.verify
+      cluster.verify
+    end
   end
 
-  def test_update_user
-    jid = Vines::JID.new('alice@wonderland.lit')
-    msg = {from: 'abc', type: 'user', jid: jid.to_s}.to_json
-    @connection.expect(:publish, nil, ["cluster:nodes:node-42", msg])
+  describe '#update_user' do
+    let(:jid) { Vines::JID.new('alice@wonderland.lit') }
 
-    publisher = Vines::Cluster::Publisher.new(@cluster)
-    publisher.update_user(jid, "node-42")
-    assert @connection.verify
-    assert @cluster.verify
+    before do
+      msg = {from: 'abc', type: 'user', jid: jid.to_s}.to_json
+      connection.expect :publish, nil, ["cluster:nodes:node-42", msg]
+    end
+
+    it 'publishes the new user to just one cluster node' do
+      subject.update_user(jid, "node-42")
+      connection.verify
+      cluster.verify
+    end
   end
 end
