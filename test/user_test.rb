@@ -2,64 +2,95 @@
 
 require 'test_helper'
 
-class UserTest < MiniTest::Unit::TestCase
-  def test_equality
-    alice  = Vines::User.new(:jid => 'alice@wonderland.lit')
-    alice2 = Vines::User.new(:jid => 'alice@wonderland.lit')
-    hatter = Vines::User.new(:jid => 'hatter@wonderland.lit')
+describe Vines::User do
+  subject { Vines::User.new(jid: 'alice@wonderland.lit', name: 'Alice', password: 'secr3t') }
 
-    assert_nil alice <=> 42
+  describe 'user equality checks' do
+    let(:alice)  { Vines::User.new(jid: 'alice@wonderland.lit') }
+    let(:hatter) { Vines::User.new(jid: 'hatter@wonderland.lit') }
 
-    assert alice == alice2
-    assert alice.eql?(alice2)
-    assert alice.hash == alice2.hash
+    it 'uses class in equality check' do
+      (subject <=> 42).must_be_nil
+    end
 
-    refute alice == hatter
-    refute alice.eql?(hatter)
-    refute alice.hash == hatter.hash
+    it 'is equal to itself' do
+      assert subject == subject
+      assert subject.eql?(subject)
+      assert subject.hash == subject.hash
+    end
+
+    it 'is equal to another user with the same jid' do
+      assert subject == alice
+      assert subject.eql?(alice)
+      assert subject.hash == alice.hash
+    end
+
+    it 'is not equal to a different jid' do
+      refute subject == hatter
+      refute subject.eql?(hatter)
+      refute subject.hash == hatter.hash
+    end
   end
 
-  def test_initialize_missing_jid
-    assert_raises(ArgumentError) { Vines::User.new }
+  describe 'initialize' do
+    it 'raises when not given a jid' do
+      -> { Vines::User.new }.must_raise ArgumentError
+      -> { Vines::User.new(jid: '') }.must_raise ArgumentError
+    end
+
+    it 'has an empty roster' do
+      subject.roster.wont_be_nil
+      subject.roster.size.must_equal 0
+    end
   end
 
-  def test_initialize_missing_roster
-    user = Vines::User.new(:jid => 'alice@wonderland.lit')
-    refute_nil user.roster
-    assert_equal 0, user.roster.size
+  describe '#update_from' do
+    let(:updated) { Vines::User.new(jid: 'alice2@wonderland.lit', name: 'Alice 2', password: "secr3t 2") }
+
+    before do
+      subject.roster << Vines::Contact.new(jid: 'hatter@wonderland.lit', name: "Hatter")
+      updated.roster << Vines::Contact.new(jid: 'cat@wonderland.lit', name: "Cheshire")
+    end
+
+    it 'updates jid, name, and password' do
+      subject.update_from(updated)
+      subject.jid.to_s.must_equal 'alice@wonderland.lit'
+      subject.name.must_equal 'Alice 2'
+      subject.password.must_equal 'secr3t 2'
+    end
+
+    it 'overwrites the entire roster' do
+      subject.update_from(updated)
+      subject.roster.size.must_equal 1
+      subject.roster.first.must_equal updated.roster.first
+    end
+
+    it 'clones roster entries' do
+      subject.update_from(updated)
+      updated.roster.first.name = 'Updated Contact 2'
+      subject.roster.first.name.must_equal 'Cheshire'
+    end
   end
 
-  def test_update_from
-    user = Vines::User.new(:jid => 'alice@wonderland.lit', :name => 'Alice', :password => "secr3t")
-    user.roster << Vines::Contact.new(:jid => 'hatter@wonderland.lit', :name => "Hatter")
+  describe '#to_roster_xml' do
+    let(:expected) do
+      node(%q{
+        <iq id="42" type="result">
+          <query xmlns="jabber:iq:roster">
+            <item jid="a@wonderland.lit" name="Contact 1" subscription="none"><group>A</group><group>B</group></item>
+            <item jid="b@wonderland.lit" name="Contact 2" subscription="none"><group>C</group></item>
+          </query>
+        </iq>
+      })
+    end
 
-    updated = Vines::User.new(:jid => 'alice2@wonderland.lit', :name => 'Alice 2', :password => "secr3t 2")
-    updated.roster << Vines::Contact.new(:jid => 'cat@wonderland.lit', :name => "Cheshire")
+    before do
+      subject.roster << Vines::Contact.new(jid: 'b@wonderland.lit', name: "Contact 2", groups: %w[C])
+      subject.roster << Vines::Contact.new(jid: 'a@wonderland.lit', name: "Contact 1", groups: %w[B A])
+    end
 
-    user.update_from(updated)
-    assert_equal 'alice@wonderland.lit', user.jid.to_s
-    assert_equal 'Alice 2', user.name
-    assert_equal 'secr3t 2', user.password
-    assert_equal 1, user.roster.size
-    assert_equal Vines::Contact.new(:jid => 'cat@wonderland.lit'), user.roster.first
-    # make sure we cloned roster entries
-    updated.roster.first.name = 'Updated Contact 2'
-    assert_equal 'Cheshire', user.roster.first.name
-  end
-
-  def test_to_roster_xml_contacts_and_groups_are_sorted
-    user = Vines::User.new(:jid => 'alice@wonderland.lit', :name => 'Alice', :password => "secr3t")
-    user.roster << Vines::Contact.new(:jid => 'b@wonderland.lit', :name => "Contact 2", :groups => %w[C])
-    user.roster << Vines::Contact.new(:jid => 'a@wonderland.lit', :name => "Contact 1", :groups => %w[B A])
-
-    expected = %q{
-      <iq id="42" type="result">
-        <query xmlns="jabber:iq:roster">
-          <item jid="a@wonderland.lit" name="Contact 1" subscription="none"><group>A</group><group>B</group></item>
-          <item jid="b@wonderland.lit" name="Contact 2" subscription="none"><group>C</group></item>
-        </query>
-      </iq>}.strip.gsub(/\n/, '').gsub(/\s{2,}/, '')
-
-    assert_equal expected, user.to_roster_xml(42).to_xml(:indent => 0).gsub(/\n/, '')
+    it 'sorts group names' do
+      subject.to_roster_xml(42).must_equal expected
+    end
   end
 end
