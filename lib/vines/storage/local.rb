@@ -27,8 +27,8 @@ module Vines
 
       def find_user(jid)
         jid = JID.new(jid).bare.to_s
-        file = absolute_path("user/#{jid}") unless jid.empty?
-        record = YAML.load_file(file) rescue nil
+        file = "user/#{jid}" unless jid.empty?
+        record = YAML.load(read(file)) rescue nil
         return User.new(jid: jid).tap do |user|
           user.name, user.password = record.values_at('name', 'password')
           (record['roster'] || {}).each_pair do |jid, props|
@@ -47,39 +47,34 @@ module Vines
         user.roster.each do |contact|
           record['roster'][contact.jid.bare.to_s] = contact.to_h
         end
-        save("user/#{user.jid.bare}") do |f|
-          YAML.dump(record, f)
-        end
+        save("user/#{user.jid.bare}", YAML.dump(record))
       end
 
       def find_vcard(jid)
         jid = JID.new(jid).bare.to_s
         return if jid.empty?
-        file = absolute_path("vcard/#{jid}")
-        Nokogiri::XML(File.read(file)).root rescue nil
+        file = "vcard/#{jid}"
+        Nokogiri::XML(read(file)).root rescue nil
       end
 
       def save_vcard(jid, card)
         jid = JID.new(jid).bare.to_s
         return if jid.empty?
-        save("vcard/#{jid}") do |f|
-          f.write(card.to_xml)
-        end
+        save("vcard/#{jid}", card.to_xml)
       end
 
       def find_fragment(jid, node)
         jid = JID.new(jid).bare.to_s
         return if jid.empty?
-        file = absolute_path("fragment/#{fragment_id(jid, node)}")
-        Nokogiri::XML(File.read(file)).root rescue nil
+        file = 'fragment/%s' % fragment_id(jid, node)
+        Nokogiri::XML(read(file)).root rescue nil
       end
 
       def save_fragment(jid, node)
         jid = JID.new(jid).bare.to_s
         return if jid.empty?
-        save("fragment/#{fragment_id(jid, node)}") do |f|
-          f.write(node.to_xml)
-        end
+        file = 'fragment/%s' % fragment_id(jid, node)
+        save(file, node.to_xml)
       end
 
       private
@@ -91,9 +86,14 @@ module Vines
         end
       end
 
-      def save(file)
+      def read(file)
         file = absolute_path(file)
-        File.open(file, 'w') {|f| yield f }
+        File.read(file, encoding: 'utf-8')
+      end
+
+      def save(file, content)
+        file = absolute_path(file)
+        File.open(file, 'w:utf-8') {|f| f.write(content) }
         File.chmod(0600, file)
       end
 

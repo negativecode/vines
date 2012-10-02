@@ -35,7 +35,7 @@ module Vines
 
         {'key' => key, 'crt' => cert}.each_pair do |ext, o|
           name = File.join(dir, "#{domain}.#{ext}")
-          File.open(name, "w") {|f| f.write(o.to_pem) }
+          File.open(name, 'w:utf-8') {|f| f.write(o.to_pem) }
           File.chmod(0600, name) if ext == 'key'
         end
       end

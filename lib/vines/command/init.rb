@@ -36,8 +36,8 @@ module Vines
 
       def update_config(domain, dir)
         config = File.expand_path('conf/config.rb', dir)
-        text = File.read(config)
-        File.open(config, 'w') do |f|
+        text = File.read(config, encoding: 'utf-8')
+        File.open(config, 'w:utf-8') do |f|
           f.write(text.gsub('wonderland.lit', domain))
         end
       end
