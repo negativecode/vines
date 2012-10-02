@@ -79,6 +79,16 @@ module Vines
 
       private
 
+      # Resolves a relative file name into an absolute path inside the
+      # storage directory.
+      #
+      # file - A fully-qualified or relative file name String.
+      #
+      # Returns the fully-qualified file path String.
+      #
+      # Raises RuntimeError if the resolved path is outside of the storage
+      # directory. This prevents directory path traversals with maliciously
+      # crafted JIDs.
       def absolute_path(file)
         File.expand_path(file, @dir).tap do |absolute|
           parent = File.dirname(File.dirname(absolute))
@@ -86,17 +96,40 @@ module Vines
         end
       end
 
+      # Read the file from the filesystem and return its contents as a String.
+      # All files are assumed to be encoded as UTF-8.
+      #
+      # file - A fully-qualified or relative file name String.
+      #
+      # Returns the file content as a UTF-8 encoded String.
       def read(file)
         file = absolute_path(file)
         File.read(file, encoding: 'utf-8')
       end
 
+      # Write the content to the file. Make sure to consistently encode files
+      # we read and write as UTF-8.
+      #
+      # file    - A fully-qualified or relative file name String.
+      # content - The String to write.
+      #
+      # Returns nothing.
       def save(file, content)
         file = absolute_path(file)
         File.open(file, 'w:utf-8') {|f| f.write(content) }
         File.chmod(0600, file)
       end
 
+      # Generates a unique file id for the user's private XML fragment.
+      #
+      # Private XML fragment storage needs to uniquely identify fragment files
+      # on disk. We combine the user's JID with a SHA-1 hash of the element's
+      # name and namespace to avoid special characters in the file name.
+      #
+      # jid  - A bare JID identifying the user who owns this fragment.
+      # node - A Nokogiri::XML::Node for the XML to be stored.
+      #
+      # Returns an id String suitable for use in a file name.
       def fragment_id(jid, node)
         id = Digest::SHA1.hexdigest("#{node.name}:#{node.namespace.href}")
         "#{jid}-#{id}"
