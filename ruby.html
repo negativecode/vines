@@ -66,13 +66,16 @@ $ sudo gem install vines
 
 <h2>FreeBSD</h2>
 <p>
-  Install the following packages using pkg_add. After installing the packages,
-  run <code>bash</code> to enter a bash shell before installing RVM.
+  Install the following packages using pkg_add. FreeBSD 9.1 provides a Ruby
+  1.9.3 port, so we can skip the RVM steps.
 </p>
 <pre>
 $ sudo pkg_add -r bash curl git openssl bzip2 readline \
   sqlite3 libxml2 libxslt libyaml
-$ bash
+$ sudo echo "RUBY_DEFAULT_VER=1.9" >> /etc/make.conf
+$ cd /usr/ports/lang/ruby19 && sudo make install clean
+$ cd /usr/ports/devel/ruby-gems/ && sudo make install clean
+$ sudo gem install vines
 </pre>
 
 <h2>Install RVM &amp; Ruby 1.9.3</h2>
