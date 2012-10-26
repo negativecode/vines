@@ -116,6 +116,7 @@ end
   vines/storage/mongodb
   vines/storage/null
   vines/storage/redis
+  vines/storage/riak
   vines/storage/sql
 
   vines/config

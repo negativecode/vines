@@ -163,6 +163,10 @@ end
 #  password ''
 #end
 
+#storage 'riak' do
+#  nodes [ {:host => '127.0.0.1'} ]
+#end
+
 #storage 'sql' do
 #  adapter 'postgresql'
 #  host 'localhost'

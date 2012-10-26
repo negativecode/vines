@@ -33,6 +33,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'uglifier', '~> 1.3.0'
   s.add_development_dependency 'rake'
   s.add_development_dependency 'sqlite3'
+  s.add_development_dependency 'riak-client'
 
   s.required_ruby_version = '>= 1.9.3'
 end
