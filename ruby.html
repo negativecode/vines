@@ -4,30 +4,33 @@ title: Vines - Install Ruby
 ---
 <h2>Install Ruby 1.9.3</h2>
 <p>
-  Before we can install the Vines gem, we need to install Ruby 1.9.3. The easiest
-  way to do this is with
-  <a href="https://rvm.beginrescueend.com/">RVM: Ruby Version Manager</a>.
-</p>
-<p>
-The install is only two steps:
+  Before we can install the Vines gem, we need to install Ruby 1.9.3.
+  The install is only two steps:
 </p>
 <ol>
   <li>Install the OS libraries upon which Ruby depends.</li>
-  <li>Install Ruby using RVM.</li>
+  <li>Install Ruby packages.</li>
 </ol>
 
-<h2>Mac OS X</h2>
+<h2>OS X</h2>
 <p>
   Install <a href="http://developer.apple.com/xcode/">Xcode</a>
   from the Mac App Store. Then make sure to install the Command Line Tools
   package from the Xcode > Preferences > Downloads screen. This installs all of
   the libraries and compiler tools needed to build Ruby.
 </p>
+<p>
+  Install <a href="http://mxcl.github.com/homebrew/">Homebrew</a> so we can compile
+  Ruby.
+</p>
+<pre>
+$ brew install ruby
+</pre>
 
 <h2>Ubuntu</h2>
 <p>
-  Install the following packages using apt-get. Ubuntu 12.04 provides a Ruby
-  1.9.3 package, so we can skip the RVM steps.
+  Install the following packages using apt-get. Ubuntu 12.04 and later provides
+  a Ruby 1.9.3 package.
 </p>
 <pre>
 $ sudo apt-get -y install build-essential bison openssl \
@@ -39,8 +42,8 @@ $ sudo gem install vines
 
 <h2>Fedora</h2>
 <p>
-  Install the following packages using yum. Fedora 17 provides a Ruby
-  1.9.3 package, so we can skip the RVM steps.
+  Install the following packages using yum. Fedora 17 and later provides a
+  Ruby 1.9.3 package.
 </p>
 <pre>
 $ sudo yum install -y git gcc-c++ patch readline-devel \
@@ -51,8 +54,8 @@ $ sudo gem install vines
 
 <h2>SUSE</h2>
 <p>
-  Install the following packages using zypper. SUSE 12.2 provides a Ruby
-  1.9.3 package, so we can skip the RVM steps.
+  Install the following packages using zypper. SUSE 12.2 and later provides
+  a Ruby 1.9.3 package.
 </p>
 <pre>
 $ sudo zypper install -y bash curl git gcc-c++ patch \
@@ -65,8 +68,8 @@ $ sudo gem install vines
 
 <h2>FreeBSD</h2>
 <p>
-  Install the following packages using pkg_add. FreeBSD 9.1 provides a Ruby
-  1.9.3 port, so we can skip the RVM steps.
+  Install the following packages using pkg_add. FreeBSD 9.1 and later provides
+  a Ruby 1.9.3 port.
 </p>
 <pre>
 $ sudo pkg_add -r bash curl git openssl bzip2 readline \
@@ -77,24 +80,6 @@ $ cd /usr/ports/devel/ruby-gems/ && sudo make install clean
 $ sudo gem install vines
 </pre>
 
-<h2>Install RVM &amp; Ruby 1.9.3</h2>
 <p>
-  With the OS libraries installed, we can now use RVM to install Ruby.
-</p>
-<pre>
-$ bash &lt; &lt;(curl -s https://rvm.beginrescueend.com/install/rvm)
-$ echo '[[ -s "$HOME/.rvm/scripts/rvm" ]] &amp;&amp; . "$HOME/.rvm/scripts/rvm" # Load RVM function' &gt;&gt; ~/.bash_profile
-$ source .bash_profile
-$ rvm install 1.9.3
-$ rvm use 1.9.3 --default
-$ gem update --system
-$ gem install vines
-</pre>
-
-<p>
-  That's all there is to it! RVM can manage not just Ruby versions, but also
-  <a href="https://rvm.beginrescueend.com/gemsets/basics/">gemsets</a> for each
-  app. Read the
-  <a href="https://rvm.beginrescueend.com/">RVM documentation</a> for more
-  advanced uses.
+  That's all there is to it!
 </p>
