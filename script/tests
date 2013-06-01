@@ -1,6 +1,13 @@
 #!/bin/sh
 
 set -e
-
-bundle exec rake test
-
+if [ "$1" != "" ]; then
+  if test -f "$1"; then
+    bundle exec rake test TEST=$1
+  else
+    echo "There is no test file $1"
+    exit
+  fi
+else
+  bundle exec rake test
+fi

@@ -1,0 +1,15 @@
+#!/usr/bin/ruby
+
+#
+# You can use this script to run a development version of the `vines` command in any
+# directory, without installing the vines gem.
+#
+# Before this will work, run ./bootstrap to install the necessary gems in ".bundle".
+#
+# For extra fun, you can symlink this file to somewhere in your path. For example:
+#
+#     sudo ln -s /home/me/vines/script/vines /usr/local/bin
+#
+
+base_dir = File.expand_path('..', File.dirname(File.symlink?(__FILE__) ? File.readlink(__FILE__) : __FILE__))
+exec("BUNDLE_GEMFILE='#{base_dir}/Gemfile' bundle exec vines #{ARGV.join(' ')}")
