@@ -137,12 +137,3 @@ end
 #  dir 'data'
 #end
 
-#storage 'sql' do
-#  adapter 'postgresql'
-#  host 'localhost'
-#  port 5432
-#  database 'xmpp'
-#  username ''
-#  password ''
-#  pool 5
-#end
