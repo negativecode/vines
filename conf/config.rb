@@ -137,16 +137,6 @@ end
 #  dir 'data'
 #end
 
-#storage 'mongodb' do
-#  host 'localhost', 27017
-#  host 'localhost', 27018 # optional, connects to replica set
-#  database 'xmpp'
-#  tls true
-#  username ''
-#  password ''
-#  pool 5
-#end
-
 #storage 'redis' do
 #  host 'localhost'
 #  port 6379
