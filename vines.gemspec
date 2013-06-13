@@ -16,7 +16,6 @@ Gem::Specification.new do |s|
   s.executables  = %w[vines]
   s.require_path = 'lib'
 
-  s.add_dependency 'activerecord', '~> 3.2.8'
   s.add_dependency 'bcrypt-ruby', '~> 3.0.1'
   s.add_dependency 'em-hiredis', '~> 0.1.1'
   s.add_dependency 'eventmachine', '~> 1.0.0'
