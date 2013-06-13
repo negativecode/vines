@@ -137,15 +137,6 @@ end
 #  dir 'data'
 #end
 
-#storage 'couchdb' do
-#  host 'localhost'
-#  port 6984
-#  database 'xmpp'
-#  tls true
-#  username ''
-#  password ''
-#end
-
 #storage 'mongodb' do
 #  host 'localhost', 27017
 #  host 'localhost', 27018 # optional, connects to replica set
