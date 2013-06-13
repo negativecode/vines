@@ -55,7 +55,6 @@ module Vines
 end
 
 %w[
-  active_record
   base64
   bcrypt
   digest/sha1
@@ -113,7 +112,6 @@ end
   vines/storage/mongodb
   vines/storage/null
   vines/storage/redis
-  vines/storage/sql
 
   vines/config
   vines/config/host
