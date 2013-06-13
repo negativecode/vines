@@ -20,8 +20,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'em-hiredis', '~> 0.1.1'
   s.add_dependency 'eventmachine', '~> 1.0.0'
   s.add_dependency 'http_parser.rb', '~> 0.5.3'
-  s.add_dependency 'mongo', '~> 1.5.2'
-  s.add_dependency 'bson_ext', '~> 1.5.2'
   s.add_dependency 'net-ldap', '~> 0.3.1'
   s.add_dependency 'nokogiri', '~> 1.5.5'
 
