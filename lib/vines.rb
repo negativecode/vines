@@ -64,7 +64,6 @@ end
   fileutils
   http/parser
   logger
-  mongo
   net/ldap
   nokogiri
   openssl
@@ -109,7 +108,6 @@ end
   vines/storage
   vines/storage/ldap
   vines/storage/local
-  vines/storage/mongodb
   vines/storage/null
   vines/storage/redis
 
