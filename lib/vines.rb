@@ -109,7 +109,6 @@ end
   vines/storage/ldap
   vines/storage/local
   vines/storage/null
-  vines/storage/redis
 
   vines/config
   vines/config/host
