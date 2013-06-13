@@ -21,6 +21,10 @@ Vines::Config.configure do
   # command. Change the example, 'wonderland.lit', domain name to your actual
   # domain.
   #
+  # The vines gem is distributed with a single 'fs' filesystem storage backend.
+  # Additional database support is provided by the vines-sql, vines-redis,
+  # vines-couchdb, and vines-mongodb gems.
+  #
   # The private_storage attribute allows clients to store XML fragments
   # on the server, using the XEP-0049 Private XML Storage feature.
   #
@@ -130,10 +134,3 @@ Vines::Config.configure do
   #  password ''
   #end
 end
-
-# Available storage implementations:
-
-#storage 'fs' do
-#  dir 'data'
-#end
-
