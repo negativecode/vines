@@ -59,7 +59,6 @@ end
   base64
   bcrypt
   digest/sha1
-  em-http
   em-hiredis
   eventmachine
   fiber
@@ -73,7 +72,6 @@ end
   resolv
   set
   socket
-  uri
   yaml
 
   vines/log
@@ -110,7 +108,6 @@ end
   vines/stanza/pubsub/unsubscribe
 
   vines/storage
-  vines/storage/couchdb
   vines/storage/ldap
   vines/storage/local
   vines/storage/mongodb
