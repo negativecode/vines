@@ -6,6 +6,16 @@ require 'vines'
 
 COMMANDS = %w[start stop restart init bcrypt cert ldap schema]
 
+def register_storage
+  %w[couchdb mongodb redis sql].each do |backend|
+    begin
+      require 'vines/storage/%s' % backend
+    rescue LoadError
+      # do nothing
+    end
+  end
+end
+
 def parse(args)
   options = {}
   parser = OptionParser.new do |opts|
@@ -80,6 +90,7 @@ def check_config(opts)
   end
 end
 
+register_storage
 opts = parse(ARGV)
 check_config(opts)
 command = Vines::Command.const_get(opts[:command].capitalize).new
