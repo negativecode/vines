@@ -3,90 +3,91 @@
 require 'test_helper'
 
 describe Vines::Stream::Server::Ready do
-  STANZAS = []
+  subject      { Vines::Stream::Server::Ready.new(stream, nil) }
+  let(:stream) { MiniTest::Mock.new }
+
+  SERVER_STANZAS = []
 
   before do
-    @stream = MiniTest::Mock.new
-    @state = Vines::Stream::Server::Ready.new(@stream, nil)
-    def @state.to_stanza(node)
-      Vines::Stanza.from_node(node, @stream).tap do |stanza|
+    def subject.to_stanza(node)
+      Vines::Stanza.from_node(node, stream).tap do |stanza|
         def stanza.process
-          STANZAS << self
+          SERVER_STANZAS << self
         end if stanza
       end
     end
   end
 
   after do
-    STANZAS.clear
+    SERVER_STANZAS.clear
   end
 
-  def test_good_node_processes
+  it 'processes a valid node' do
     config = MiniTest::Mock.new
     config.expect(:local_jid?, true, [Vines::JID.new('romeo@verona.lit')])
 
-    @stream.expect(:config, config)
-    @stream.expect(:remote_domain, 'wonderland.lit')
-    @stream.expect(:domain, 'verona.lit')
-    @stream.expect(:user=, nil, [Vines::User.new(jid: 'alice@wonderland.lit')])
+    stream.expect(:config, config)
+    stream.expect(:remote_domain, 'wonderland.lit')
+    stream.expect(:domain, 'verona.lit')
+    stream.expect(:user=, nil, [Vines::User.new(jid: 'alice@wonderland.lit')])
 
     node = node(%Q{<message from="alice@wonderland.lit" to="romeo@verona.lit"/>})
-    @state.node(node)
-    assert_equal 1, STANZAS.size
-    assert @stream.verify
+    subject.node(node)
+    assert_equal 1, SERVER_STANZAS.size
+    assert stream.verify
     assert config.verify
   end
 
-  def test_unsupported_stanza_type
+  it 'raises unsupported-stanza-type stream error' do
     node = node('<bogus/>')
-    assert_raises(Vines::StreamErrors::UnsupportedStanzaType) { @state.node(node) }
-    assert STANZAS.empty?
-    assert @stream.verify
+    -> { subject.node(node) }.must_raise Vines::StreamErrors::UnsupportedStanzaType
+    assert SERVER_STANZAS.empty?
+    assert stream.verify
   end
 
-  def test_improper_addressing_missing_to
+  it 'raises improper-addressing stream error when to address is missing' do
     node = node(%Q{<message from="alice@wonderland.lit"/>})
-    assert_raises(Vines::StreamErrors::ImproperAddressing) { @state.node(node) }
-    assert STANZAS.empty?
-    assert @stream.verify
+    -> { subject.node(node) }.must_raise Vines::StreamErrors::ImproperAddressing
+    assert SERVER_STANZAS.empty?
+    assert stream.verify
   end
 
-  def test_improper_addressing_invalid_to
+  it 'raises jid-malformed stanza error when to address is invalid' do
     node = node(%Q{<message from="alice@wonderland.lit" to=" "/>})
-    assert_raises(Vines::StanzaErrors::JidMalformed) { @state.node(node) }
-    assert STANZAS.empty?
-    assert @stream.verify
+    -> { subject.node(node) }.must_raise Vines::StanzaErrors::JidMalformed
+    assert SERVER_STANZAS.empty?
+    assert stream.verify
   end
 
-  def test_improper_addressing_missing_from
+  it 'raises improper-addressing stream error' do
     node = node(%Q{<message to="romeo@verona.lit"/>})
-    assert_raises(Vines::StreamErrors::ImproperAddressing) { @state.node(node) }
-    assert STANZAS.empty?
-    assert @stream.verify
+    -> { subject.node(node) }.must_raise Vines::StreamErrors::ImproperAddressing
+    assert SERVER_STANZAS.empty?
+    assert stream.verify
   end
 
-  def test_improper_addressing_invalid_from
+  it 'raises jid-malformed stanza error for invalid from address' do
     node = node(%Q{<message from=" " to="romeo@verona.lit"/>})
-    assert_raises(Vines::StanzaErrors::JidMalformed) { @state.node(node) }
-    assert STANZAS.empty?
-    assert @stream.verify
+    -> { subject.node(node) }.must_raise Vines::StanzaErrors::JidMalformed
+    assert SERVER_STANZAS.empty?
+    assert stream.verify
   end
 
-  def test_invalid_from
-    @stream.expect(:remote_domain, 'wonderland.lit')
+  it 'raises invalid-from stream error' do
+    stream.expect(:remote_domain, 'wonderland.lit')
     node = node(%Q{<message from="alice@bogus.lit" to="romeo@verona.lit"/>})
-    assert_raises(Vines::StreamErrors::InvalidFrom) { @state.node(node) }
-    assert STANZAS.empty?
-    assert @stream.verify
+    -> { subject.node(node) }.must_raise Vines::StreamErrors::InvalidFrom
+    assert SERVER_STANZAS.empty?
+    assert stream.verify
   end
 
-  def test_host_unknown
-    @stream.expect(:remote_domain, 'wonderland.lit')
-    @stream.expect(:domain, 'verona.lit')
+  it 'raises host-unknown stream error' do
+    stream.expect(:remote_domain, 'wonderland.lit')
+    stream.expect(:domain, 'verona.lit')
     node = node(%Q{<message from="alice@wonderland.lit" to="romeo@bogus.lit"/>})
-    assert_raises(Vines::StreamErrors::HostUnknown) { @state.node(node) }
-    assert STANZAS.empty?
-    assert @stream.verify
+    -> { subject.node(node) }.must_raise Vines::StreamErrors::HostUnknown
+    assert SERVER_STANZAS.empty?
+    assert stream.verify
   end
 
   private
