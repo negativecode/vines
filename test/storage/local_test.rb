@@ -3,7 +3,7 @@
 require 'storage_tests'
 require 'test_helper'
 
-class LocalTest < MiniTest::Unit::TestCase
+describe Vines::Storage::Local do
   include StorageTests
 
   DIR = Dir.mktmpdir
@@ -21,7 +21,7 @@ class LocalTest < MiniTest::Unit::TestCase
       :bcrypt     => "#{DIR}/user/bcrypt_password@wonderland.lit",
       :full       => "#{DIR}/user/full@wonderland.lit",
       :vcard      => "#{DIR}/vcard/full@wonderland.lit",
-      :fragment   => "#{DIR}/fragment/full@wonderland.lit-#{FRAGMENT_ID}"
+      :fragment   => "#{DIR}/fragment/full@wonderland.lit-#{StorageTests::FRAGMENT_ID}"
     }
     File.open(files[:empty], 'w') {|f| f.write('') }
     File.open(files[:no_pass], 'w') {|f| f.write('foo: bar') }
