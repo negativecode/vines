@@ -2,10 +2,10 @@
 
 require 'test_helper'
 
-class ParserTest < MiniTest::Unit::TestCase
+describe Vines::Stream::Parser do
   STREAM_START = '<stream:stream to="wonderland.lit" xmlns="jabber:client" xmlns:stream="http://etherx.jabber.org/streams">'.freeze
 
-  def setup
+  before do
     @events = []
     @parser = Vines::Stream::Parser.new.tap do |p|
       p.stream_open  {|el| @events << el }

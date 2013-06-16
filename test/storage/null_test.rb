@@ -2,8 +2,8 @@
 
 require 'test_helper'
 
-class NullStorageTest < MiniTest::Unit::TestCase
-  def setup
+describe Vines::Storage::Null do
+  before do
     @storage = Vines::Storage::Null.new
     @user = Vines::User.new(jid: 'alice@wonderland.lit')
   end

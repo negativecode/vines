@@ -2,22 +2,22 @@
 
 require 'test_helper'
 
-class ServerReadyTest < MiniTest::Unit::TestCase
+describe Vines::Stream::Server::Ready do
   STANZAS = []
 
-  def setup
+  before do
     @stream = MiniTest::Mock.new
     @state = Vines::Stream::Server::Ready.new(@stream, nil)
     def @state.to_stanza(node)
       Vines::Stanza.from_node(node, @stream).tap do |stanza|
         def stanza.process
-          ServerReadyTest::STANZAS << self
+          STANZAS << self
         end if stanza
       end
     end
   end
 
-  def teardown
+  after do
     STANZAS.clear
   end
 

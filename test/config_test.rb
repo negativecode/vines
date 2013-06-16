@@ -2,7 +2,7 @@
 
 require 'test_helper'
 
-class ConfigTest < MiniTest::Unit::TestCase
+describe Vines::Config do
   def test_missing_host
     assert_raises(RuntimeError) do
       Vines::Config.new do

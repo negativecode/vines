@@ -2,7 +2,7 @@
 
 require 'test_helper'
 
-class ProbeTest < MiniTest::Unit::TestCase
+describe Vines::Stanza::Presence::Probe do
   def setup
     @alice = Vines::JID.new('alice@wonderland.lit/tea')
     @stream = MiniTest::Mock.new

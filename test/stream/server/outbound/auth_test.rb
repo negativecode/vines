@@ -2,8 +2,8 @@
 
 require 'test_helper'
 
-class OutboundAuthTest < MiniTest::Unit::TestCase
-  def setup
+describe Vines::Stream::Server::Outbound::Auth do
+  before do
     @stream = MiniTest::Mock.new
     @state = Vines::Stream::Server::Outbound::Auth.new(@stream)
   end

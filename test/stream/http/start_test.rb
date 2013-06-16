@@ -2,8 +2,8 @@
 
 require 'test_helper'
 
-class HttpStartTest < MiniTest::Unit::TestCase
-  def setup
+describe Vines::Stream::Http::Start do
+  before do
     @stream = MiniTest::Mock.new
     @state = Vines::Stream::Http::Start.new(@stream)
   end

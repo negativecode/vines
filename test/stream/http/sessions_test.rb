@@ -2,7 +2,7 @@
 
 require 'test_helper'
 
-class SessionsTest < MiniTest::Unit::TestCase
+describe Vines::Stream::Http::Sessions do
   class MockSessions < Vines::Stream::Http::Sessions
     def start_timer
       # do nothing

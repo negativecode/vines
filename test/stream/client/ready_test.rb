@@ -2,10 +2,10 @@
 
 require 'test_helper'
 
-class ClientReadyTest < MiniTest::Unit::TestCase
+describe Vines::Stream::Client::Ready do
   STANZAS = []
 
-  def setup
+  before do
     @stream = MiniTest::Mock.new
     @state = Vines::Stream::Client::Ready.new(@stream, nil)
     def @state.to_stanza(node)
@@ -16,24 +16,24 @@ class ClientReadyTest < MiniTest::Unit::TestCase
         stanza.expect(:process, nil)
         stanza.expect(:validate_to, nil)
         stanza.expect(:validate_from, nil)
-        ClientReadyTest::STANZAS << stanza
+        STANZAS << stanza
         stanza
       end
     end
   end
 
-  def teardown
+  after do
     STANZAS.clear
   end
 
-  def test_good_node_processes
+  it 'processes a valid node' do
     node = node('<message/>')
     @state.node(node)
     assert_equal 1, STANZAS.size
     assert STANZAS.map {|s| s.verify }.all?
   end
 
-  def test_unsupported_stanza_type
+  it 'raises an unsupported-stanza-type stream error for invalid node' do
     node = node('<bogus/>')
     assert_raises(Vines::StreamErrors::UnsupportedStanzaType) { @state.node(node) }
     assert STANZAS.empty?

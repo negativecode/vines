@@ -2,7 +2,7 @@
 
 require 'test_helper'
 
-class HostTest < MiniTest::Unit::TestCase
+describe Vines::Config::Host do
   def test_missing_storage
     assert_raises(RuntimeError) do
       Vines::Config.new do

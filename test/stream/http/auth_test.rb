@@ -2,8 +2,8 @@
 
 require 'test_helper'
 
-class HttpAuthTest < MiniTest::Unit::TestCase
-  def setup
+describe Vines::Stream::Http::Auth do
+  before do
     @stream = MiniTest::Mock.new
     @state = Vines::Stream::Http::Auth.new(@stream, nil)
   end
