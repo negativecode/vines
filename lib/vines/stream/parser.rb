@@ -66,12 +66,13 @@ module Vines
       def node(name, attrs=[], prefix=nil, uri=nil, ns=[])
         ignore = stream?(name, uri) ? [] : IGNORE
         doc = @node ? @node.document : Document.new
-        doc.create_element(name) do |node|
+        node = doc.create_element(name) do |node|
           attrs.each {|attr| node[attr.localname] = attr.value }
           ns.each {|prefix, uri| node.add_namespace(prefix, uri) unless ignore.include?(uri) }
-          node.namespace = node.add_namespace(prefix, uri) unless ignore.include?(uri)
           doc << node unless @node
         end
+        node.namespace = node.add_namespace(prefix, uri) unless ignore.include?(uri)
+        return node
       end
     end
   end
