@@ -25,7 +25,7 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency 'minitest', '~> 5.0.5'
   s.add_development_dependency 'coffee-script', '~> 2.2.0'
-  s.add_development_dependency 'coffee-script-source', '~> 1.3.3'
+  s.add_development_dependency 'coffee-script-source', '~> 1.6.2'
   s.add_development_dependency 'uglifier', '~> 1.3.0'
   s.add_development_dependency 'rake', '~> 10.1.0'
 
