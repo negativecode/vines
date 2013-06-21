@@ -72,7 +72,7 @@ module Vines
           doc << node unless @node
         end
         node.namespace = node.add_namespace(prefix, uri) unless ignore.include?(uri)
-        return node
+        node
       end
     end
   end
