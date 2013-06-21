@@ -36,6 +36,18 @@ $ script/bootstrap
 $ script/tests
 ```
 
+To run a single test file:
+
+```
+$ script/tests test/stream/parser_test.rb
+```
+
+To run the `vines` command straight from the source directory:
+
+```
+$ /path-to-src/script/vines init wonderland.lit
+```
+
 ## Contact
 
 * David Graham <david@negativecode.com>
