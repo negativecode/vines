@@ -9,7 +9,7 @@ CLOBBER.include('pkg')
 directory 'pkg'
 
 desc 'Build distributable packages'
-task :build => [:assets, :pkg] do
+task :build => [:pkg] do
   system 'gem build vines.gemspec && mv vines-*.gem pkg/'
 end
 
