@@ -22,7 +22,6 @@ Additional documentation can be found at [getvines.org](http://www.getvines.org/
 $ gem install vines
 $ vines init wonderland.lit
 $ cd wonderland.lit && vines start
-$ open http://localhost:5280/chat/
 ```
 
 Login with your favorite chat program (iChat, Adium, Pidgin, etc.) to start chatting!
