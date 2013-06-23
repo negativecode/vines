@@ -10,10 +10,11 @@ custom storage implementation that you provide. LDAP authentication can be used
 so user names and passwords aren't stored in the chat database. SSL encryption
 is mandatory on all client and server connections.
 
-The Vines XMPP server includes a web chat client. The web application is available
-after starting the chat server at http://localhost:5280/chat/.
+The server includes support for web chat clients, using BOSH (XMPP over HTTP). A
+sample web application is available in the
+[vines-web](https://github.com/negativecode/vines-web) gem.
 
-Additional documentation can be found at www.getvines.org.
+Additional documentation can be found at [getvines.org](http://www.getvines.org/).
 
 ## Usage
 
