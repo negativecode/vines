@@ -68,11 +68,13 @@ end
   net/ldap
   nokogiri
   openssl
+  optparse
   resolv
   set
   socket
   yaml
 
+  vines/cli
   vines/log
   vines/jid
 
