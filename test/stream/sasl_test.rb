@@ -97,6 +97,18 @@ describe Vines::Stream::SASL do
       storage.verify
     end
 
+    it 'passes with valid password and unicode jid' do
+      user = Vines::User.new(jid: 'piñata@verona.lit')
+      storage.expect :authenticate, user, [user.jid, 'secr3t']
+      stream.expect :storage, storage
+
+      encoded = Base64.strict_encode64("\x00piñata\x00secr3t")
+      subject.plain_auth(encoded).must_equal user
+
+      stream.verify
+      storage.verify
+    end
+
     it 'passes with valid password and authzid provided by strophe and blather' do
       storage.expect :authenticate, romeo, [romeo.jid, 'secr3t']
       stream.expect :storage, storage
