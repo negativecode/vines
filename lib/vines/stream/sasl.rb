@@ -116,7 +116,10 @@ module Vines
       #
       # Returns a UTF-8 String.
       def decode64(encoded)
-        Base64.strict_decode64(encoded)
+        Base64.strict_decode64(encoded).tap do |decoded|
+          decoded.force_encoding(Encoding::UTF_8)
+          raise SaslErrors::IncorrectEncoding unless decoded.valid_encoding?
+        end
       rescue
         raise SaslErrors::IncorrectEncoding
       end
