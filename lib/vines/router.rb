@@ -52,6 +52,7 @@ module Vines
       case stream_type(stream)
       when :client then
         return unless stream.connected?
+        stream.user.jid.instance_variable_set("@node", stream.user.jid.node.force_encoding('utf-8'))
         jid = stream.user.jid.bare
         @clients[jid] ||= []
         @clients[jid] << stream
