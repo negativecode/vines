@@ -41,17 +41,19 @@ $ script/tests
 
 ## Standards support
 
-Vines implements the full XMPP specs in RFCs 6120 and 6121. It also implements the following extensions.
+Vines implements the full XMPP specs in [RFC 6120](http://www.rfc-editor.org/rfc/rfc6120.txt)
+and [RFC 6121](http://www.rfc-editor.org/rfc/rfc6121.txt). It also implements
+the following extensions.
 
-- XEP-0030 Service Discovery
-- XEP-0049 Private XML Storage
-- XEP-0054 vcard-temp
-- XEP-0060 Publish-Subscribe
-- XEP-0092 Software Version
-- XEP-0114 Component Protocol
-- XEP-0124 Bidirectional-streams Over Synchronous HTTP (BOSH)
-- XEP-0199 XMPP Ping
-- XEP-0206 XMPP Over BOSH
+- [XEP-0030](https://xmpp.org/extensions/xep-0030.html) Service Discovery
+- [XEP-0049](https://xmpp.org/extensions/xep-0049.html) Private XML Storage
+- [XEP-0054](https://xmpp.org/extensions/xep-0054.html) vcard-temp
+- [XEP-0060](https://xmpp.org/extensions/xep-0060.html) Publish-Subscribe
+- [XEP-0092](https://xmpp.org/extensions/xep-0092.html) Software Version
+- [XEP-0114](https://xmpp.org/extensions/xep-0114.html) Component Protocol
+- [XEP-0124](https://xmpp.org/extensions/xep-0124.html) Bidirectional-streams Over Synchronous HTTP (BOSH)
+- [XEP-0199](https://xmpp.org/extensions/xep-0199.html) XMPP Ping
+- [XEP-0206](https://xmpp.org/extensions/xep-0206.html) XMPP Over BOSH
 
 ## Contact
 
