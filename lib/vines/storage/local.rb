@@ -15,7 +15,7 @@ module Vines
           raise 'Must provide a writable storage directory'
         end
 
-        %w[user vcard fragment].each do |sub|
+        %w[user vcard fragment delayed_message].each do |sub|
           sub = File.expand_path(sub, @dir)
           Dir.mkdir(sub, 0700) unless File.exists?(sub)
         end
@@ -75,6 +75,33 @@ module Vines
         return if jid.empty?
         file = 'fragment/%s' % fragment_id(jid, node)
         save(file, node.to_xml)
+      end
+
+      def delay_message(jid, message)
+        jid = JID.new(jid).bare.to_s
+        return if jid.empty?
+        # Add delay element http://xmpp.org/extensions/xep-0203.html#schema
+        doc = Nokogiri::XML::Document.new
+        delay = doc.create_element('delay',
+                                  'xmlns' => 'urn:xmpp:delay',
+                                  'from'  => message['from'],
+                                  'stamp' => Time.now.strftime('%Y-%m-%dT%H:%M:%SZ'))
+        message = message.clone
+        message.add_child(delay)
+        file = absolute_path('delayed_message/%s-%s' % [jid, message['id']])
+        save(file, message.to_xml)
+      end
+
+      def fetch_delayed_messages(jid)
+        jid = JID.new(jid).bare.to_s
+        return if jid.empty?
+
+        messages = []
+        Dir[absolute_path('delayed_message/%s-*' % jid)].each do |file|
+          messages << Nokogiri::XML(read(file)).root rescue nil
+          File.delete(file)
+        end
+        messages
       end
 
       private

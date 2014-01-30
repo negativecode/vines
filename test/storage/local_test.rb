@@ -10,7 +10,7 @@ describe Vines::Storage::Local do
 
   def setup
     Dir.mkdir(DIR) unless File.exists?(DIR)
-    %w[user vcard fragment].each do |d|
+    %w[user vcard fragment delayed_message].each do |d|
       Dir.mkdir(File.join(DIR, d))
     end
 
