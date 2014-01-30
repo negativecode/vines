@@ -53,6 +53,7 @@ the following extensions.
 - [XEP-0114](https://xmpp.org/extensions/xep-0114.html) Component Protocol
 - [XEP-0124](https://xmpp.org/extensions/xep-0124.html) Bidirectional-streams Over Synchronous HTTP (BOSH)
 - [XEP-0199](https://xmpp.org/extensions/xep-0199.html) XMPP Ping
+- [XEP-0203](https://xmpp.org/extensions/xep-0203.html) Delayed Delivery
 - [XEP-0206](https://xmpp.org/extensions/xep-0206.html) XMPP Over BOSH
 
 ## Contact
