@@ -34,6 +34,14 @@ module Vines
       def save_fragment(jid, node)
         # do nothing
       end
+
+      def delay_message(jid, message)
+        # do nothing
+      end
+
+      def fetch_delayed_messages(jid)
+        []
+      end
     end
   end
 end

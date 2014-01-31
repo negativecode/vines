@@ -58,6 +58,9 @@ module Vines
           stream.remote_subscribed_to_contacts.each do |contact|
             send_probe(contact.jid.bare)
           end
+          storage(stream.user.jid.domain).fetch_delayed_messages(stream.user.jid).each do |message|
+            stream.write(message)
+          end
           stream.available!
         end
 

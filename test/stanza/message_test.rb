@@ -77,8 +77,9 @@ describe Vines::Stanza::Message do
       stream.expect :connected_resources, [], [hatter.jid]
     end
 
-    it 'raises a service-unavailable stanza error' do
+    it 'raises a service-unavailable stanza error but saves message for delayed delivery' do
       -> { subject.process }.must_raise Vines::StanzaErrors::ServiceUnavailable
+      # TODO: validate saved message
       stream.verify
       storage.verify
     end

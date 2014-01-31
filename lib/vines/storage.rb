@@ -186,6 +186,30 @@ module Vines
       raise 'subclass must implement'
     end
 
+    # Save the message for delayed delivery to the database and return when the save
+    # is complete. JID may be a +String+ or a +Vines::JID+ object.  It may be a bare
+    # JID or a full JID. Implementations of this method must convert the JID to a bare
+    # JID before saving the message. Card is a +Nokogiri::XML::Node+ object.
+    # Returns message with appended delay element
+    #
+    # message = Nokogiri::XML('<message>...</message>').root
+    # saved = storage.save_message('alice@wonderland.lit', message)
+    # puts saved
+    def delay_message(jid, message)
+      raise 'subclass must implement'
+    end
+
+    # Get delayed messages and remove them from database.
+    # JID may be a +String+ or a +Vines::JID+ object.  It may be a bare
+    # JID or a full JID. Implementations of this method must convert the JID to a bare
+    # JID before retrieving messages.
+    #
+    # messages = storage.fetch_delayed_messages('alice@wonderland.lit')
+    # puts messages
+    def fetch_delayed_messages(jid)
+      raise 'subclass must implement'
+    end
+
     private
 
     # Return true if any of the arguments are nil or empty strings.

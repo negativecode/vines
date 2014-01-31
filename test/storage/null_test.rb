@@ -6,6 +6,12 @@ describe Vines::Storage::Null do
   before do
     @storage = Vines::Storage::Null.new
     @user = Vines::User.new(jid: 'alice@wonderland.lit')
+    @message = Nokogiri::XML(%q{
+      <message type='chat' id='purple70c423f7' from='full@wonderland.lit/resource' to='offline_user@domain.tld/resource'>
+        <active xmlns='http://jabber.org/protocol/chatstates'/>
+        <body>Foo</body>
+      </message
+    }.strip).root
   end
 
   def test_find_user_returns_nil
@@ -25,5 +31,11 @@ describe Vines::Storage::Null do
     @storage.save_fragment(@user.jid, 'node')
     assert_nil @storage.find_fragment(@user.jid, 'node')
     nil
+  end
+
+  def test_fetch_delayed_messages_return_empty
+    assert_equal @storage.fetch_delayed_messages(@user.jid), []
+    @storage.delay_message(@user.jid, @message)
+    assert_equal @storage.fetch_delayed_messages(@user.jid), []
   end
 end

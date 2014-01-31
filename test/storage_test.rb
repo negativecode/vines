@@ -7,11 +7,11 @@ describe Vines::Storage do
   ALICE = 'alice@wonderland.lit'.freeze
 
   class MockLdapStorage < Vines::Storage
-    attr_reader :authenticate_calls, :find_user_calls, :save_user_calls
+    attr_reader :authenticate_calls, :find_user_calls, :save_user_calls, :delay_message_calls
 
     def initialize(found_user=nil)
       @found_user = found_user
-      @authenticate_calls = @find_user_calls = @save_user_calls = 0
+      @authenticate_calls = @find_user_calls = @save_user_calls = @delay_message_calls = 0
       @ldap = Class.new do
         attr_accessor :user, :auth
         def authenticate(username, password)
@@ -35,6 +35,10 @@ describe Vines::Storage do
 
     def save_user(user)
       @save_user_calls += 1
+    end
+
+    def delay_message(user, message)
+      @delay_message_calls += 1
     end
   end
 

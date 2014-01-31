@@ -20,6 +20,13 @@ module StorageTests
     </vCard>
   }.strip).root
 
+  MESSAGE = Nokogiri::XML(%q{
+    <message type='chat' id='purple70c423f7' from='full@wonderland.lit/resource' to='offline_user@domain.tld/resource'>
+      <active xmlns='http://jabber.org/protocol/chatstates'/>
+      <body>Foo</body>
+    </message
+  }.strip).root
+
   class EMLoop
     def initialize
       EM.run do
@@ -177,6 +184,22 @@ module StorageTests
       node = db.find_fragment('save_user@domain.tld', root)
       refute_nil node
       assert_equal FRAGMENT, node
+    end
+  end
+
+  def test_delay_message
+    EMLoop.new do
+      db = storage
+      db.save_user(Vines::User.new(:jid => 'offline_user@domain.tld'))
+      db.delay_message('offline_user@domain.tld/resource', MESSAGE)
+      messages = db.fetch_delayed_messages('offline_user@domain.tld')
+      refute_nil messages
+      assert_equal messages.count, 1
+      message = messages[0]
+      assert_equal MESSAGE['id'], message['id']
+      # Test if messages had been removed
+      messages = db.fetch_delayed_messages('offline_user@domain.tld')
+      assert_equal messages, []
     end
   end
 end
