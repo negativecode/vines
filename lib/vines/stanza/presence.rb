@@ -47,7 +47,6 @@ module Vines
         broadcast(stream.available_resources(stream.user.jid))
 
         if initial
-          puts 'initial'
           stream.available_subscribed_to_resources.each do |recipient|
             if recipient.last_broadcast_presence
               el = recipient.last_broadcast_presence.clone
