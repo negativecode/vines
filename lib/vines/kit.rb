@@ -5,7 +5,7 @@ module Vines
   module Kit
     # Create a hex-encoded, SHA-512 HMAC of the data, using the secret key.
     def self.hmac(key, data)
-      digest = OpenSSL::Digest::Digest.new("sha512")
+      digest = OpenSSL::Digest.new("sha512")
       OpenSSL::HMAC.hexdigest(digest, key, data)
     end
 
