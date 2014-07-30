@@ -6,7 +6,11 @@
 Vines::Config.configure do
   # Set the logging level to debug, info, warn, error, or fatal. The debug
   # level logs all XML sent and received by the server.
-  log :info
+  # If you want logging to STDOUT remove the path
+  # e.g. `log 'log/vines.log' do` becomes `log do`
+  log 'log/vines.log' do
+    level :info
+  end
 
   # Set the directory in which to look for virtual hosts' TLS certificates.
   # This is optional and defaults to the conf/certs directory created during

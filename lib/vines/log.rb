@@ -20,5 +20,9 @@ module Vines
       end
       @@logger
     end
+
+    def self.set_log_file(file)
+      @@logger = Logger.new(file)
+    end
   end
 end

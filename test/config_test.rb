@@ -353,10 +353,23 @@ describe Vines::Config do
     assert_equal 1, config.ports.size
   end
 
+  def test_not_existing_file_path
+    assert_raises(RuntimeError) do
+      config = Vines::Config.new do
+        log 'not/existing/path.log'
+      end
+      host 'wonderland.lit' do
+        storage(:fs) { dir Dir.tmpdir }
+      end
+    end
+  end
+
   def test_invalid_log_level
     assert_raises(RuntimeError) do
       config = Vines::Config.new do
-        log 'bogus'
+        log 'vines.log' do
+          level 'bogus'
+        end
         host 'wonderland.lit' do
           storage(:fs) { dir Dir.tmpdir }
         end
@@ -366,7 +379,9 @@ describe Vines::Config do
 
   def test_valid_log_level
     config = Vines::Config.new do
-      log :error
+      log 'vines.log' do
+        level :error
+      end
       host 'wonderland.lit' do
         storage(:fs) { dir Dir.tmpdir }
       end

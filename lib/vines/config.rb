@@ -62,7 +62,20 @@ module Vines
       @cluster = Cluster.new(self, &block)
     end
 
-    def log(level)
+    def log(file=nil, &block)
+      unless file.nil?
+        unless File.exists?(file)
+          File.new(file, 'w') rescue raise "log directory doesn't exists"
+        end
+        
+        if File.exists?(file)
+          Vines::Log.set_log_file(file)
+        end
+      end
+      instance_eval(&block) if block  
+    end
+
+    def level(level)
       const = Logger.const_get(level.to_s.upcase) rescue nil
       unless LOG_LEVELS.include?(level.to_s) && const
         raise "log level must be one of: #{LOG_LEVELS.join(', ')}"
