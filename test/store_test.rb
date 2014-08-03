@@ -7,13 +7,13 @@ describe Vines::Store do
   subject { Vines::Store.new(dir) }
 
   before do
-    domain, key = certificate('wonderland.lit')
-    File.open("#{dir}/wonderland.lit.crt", 'w') {|f| f.write(domain) }
-    File.open("#{dir}/wonderland.lit.key", 'w') {|f| f.write(key) }
+    domain_pair = certificate('wonderland.lit')
+    File.open("#{dir}/wonderland.lit.crt", 'w') {|f| f.write(domain_pair.cert) }
+    File.open("#{dir}/wonderland.lit.key", 'w') {|f| f.write(domain_pair.key) }
 
-    wildcard, key = certificate('*.wonderland.lit')
-    File.open("#{dir}/wildcard.lit.crt", 'w') {|f| f.write(wildcard) }
-    File.open("#{dir}/wildcard.lit.key", 'w') {|f| f.write(key) }
+    wildcard_pair = certificate('*.wonderland.lit')
+    File.open("#{dir}/wildcard.lit.crt", 'w') {|f| f.write(wildcard_pair.cert) }
+    File.open("#{dir}/wildcard.lit.key", 'w') {|f| f.write(wildcard_pair.key) }
   end
 
   after do
@@ -57,40 +57,43 @@ describe Vines::Store do
 
   describe 'domain?' do
     it 'handles invalid input' do
-      cert, key = certificate('wonderland.lit')
+      pair = certificate('wonderland.lit')
       refute subject.domain?(nil, nil)
-      refute subject.domain?(cert, nil)
-      refute subject.domain?(cert, '')
+      refute subject.domain?(pair.cert, nil)
+      refute subject.domain?(pair.cert, '')
       refute subject.domain?(nil, '')
-      assert subject.domain?(cert, 'wonderland.lit')
+      assert subject.domain?(pair.cert, 'wonderland.lit')
     end
 
     it 'verifies certificate subject domains' do
-      cert, key = certificate('wonderland.lit')
-      refute subject.domain?(cert, 'bogus')
-      refute subject.domain?(cert, 'www.wonderland.lit')
-      assert subject.domain?(cert, 'wonderland.lit')
+      pair = certificate('wonderland.lit')
+      refute subject.domain?(pair.cert, 'bogus')
+      refute subject.domain?(pair.cert, 'www.wonderland.lit')
+      assert subject.domain?(pair.cert, 'wonderland.lit')
     end
 
     it 'verifies certificate subject alt domains' do
-      cert, key = certificate('wonderland.lit', 'www.wonderland.lit')
-      refute subject.domain?(cert, 'bogus')
-      refute subject.domain?(cert, 'tea.wonderland.lit')
-      assert subject.domain?(cert, 'www.wonderland.lit')
-      assert subject.domain?(cert, 'wonderland.lit')
+      pair = certificate('wonderland.lit', 'www.wonderland.lit')
+      refute subject.domain?(pair.cert, 'bogus')
+      refute subject.domain?(pair.cert, 'tea.wonderland.lit')
+      assert subject.domain?(pair.cert, 'www.wonderland.lit')
+      assert subject.domain?(pair.cert, 'wonderland.lit')
     end
 
     it 'verifies certificate wildcard domains' do
-      cert, key = certificate('wonderland.lit', '*.wonderland.lit')
-      refute subject.domain?(cert, 'bogus')
-      refute subject.domain?(cert, 'one.two.wonderland.lit')
-      assert subject.domain?(cert, 'tea.wonderland.lit')
-      assert subject.domain?(cert, 'www.wonderland.lit')
-      assert subject.domain?(cert, 'wonderland.lit')
+      pair = certificate('wonderland.lit', '*.wonderland.lit')
+      refute subject.domain?(pair.cert, 'bogus')
+      refute subject.domain?(pair.cert, 'one.two.wonderland.lit')
+      assert subject.domain?(pair.cert, 'tea.wonderland.lit')
+      assert subject.domain?(pair.cert, 'www.wonderland.lit')
+      assert subject.domain?(pair.cert, 'wonderland.lit')
     end
   end
 
   private
+
+  # A public certificate + private key pair.
+  Pair = Struct.new(:cert, :key)
 
   def assert_certificate_matches_key(cert, key)
     refute_nil cert
@@ -124,6 +127,6 @@ describe Vines::Store do
       ].map {|k, v| factory.create_ext(k, v) }
     end
 
-    [cert.to_pem, key.to_pem]
+    Pair.new(cert.to_pem, key.to_pem)
   end
 end
