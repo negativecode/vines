@@ -4,21 +4,18 @@ require 'test_helper'
 
 describe Vines::Store do
   let(:dir) { 'conf/certs' }
+  let(:domain_pair) { certificate('wonderland.lit') }
+  let(:wildcard_pair) { certificate('*.wonderland.lit') }
   subject { Vines::Store.new(dir) }
 
   before do
-    domain_pair = certificate('wonderland.lit')
-    File.open("#{dir}/wonderland.lit.crt", 'w') {|f| f.write(domain_pair.cert) }
-    File.open("#{dir}/wonderland.lit.key", 'w') {|f| f.write(domain_pair.key) }
-
-    wildcard_pair = certificate('*.wonderland.lit')
-    File.open("#{dir}/wildcard.lit.crt", 'w') {|f| f.write(wildcard_pair.cert) }
-    File.open("#{dir}/wildcard.lit.key", 'w') {|f| f.write(wildcard_pair.key) }
+    @files =
+      save('wonderland.lit', domain_pair) +
+      save('wildcard.lit', wildcard_pair)
   end
 
   after do
-    %w[wonderland.lit.crt wonderland.lit.key wildcard.lit.crt wildcard.lit.key].each do |f|
-      name = "#{dir}/#{f}"
+    @files.each do |name|
       File.delete(name) if File.exists?(name)
     end
   end
@@ -128,5 +125,20 @@ describe Vines::Store do
     end
 
     Pair.new(cert.to_pem, key.to_pem)
+  end
+
+  # Write the domain's certificate and private key files to the filesystem for
+  # the store to use.
+  #
+  # domain - The domain name String to use in the file name (e.g. wonderland.lit).
+  # pair   - The Pair containing the public certificate and private key data.
+  #
+  # Returns a String Array of file names that were written.
+  def save(domain, pair)
+    crt = File.expand_path("#{domain}.crt", dir)
+    key = File.expand_path("#{domain}.key", dir)
+    File.open(crt, 'w') {|f| f.write(pair.cert) }
+    File.open(key, 'w') {|f| f.write(pair.key) }
+    [crt, key]
   end
 end
