@@ -50,7 +50,7 @@ module Vines
     # certificates are used to start the trust chain needed to validate certs
     # we receive from clients and servers.
     #
-    # Returns an Array of PEM encoded certificate Strings.
+    # Returns an Array of OpenSSL::X509::Certificate objects.
     def certs
       @@sources ||= begin
         pattern = /-{5}BEGIN CERTIFICATE-{5}\n.*?-{5}END CERTIFICATE-{5}\n/m
