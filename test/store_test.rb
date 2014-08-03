@@ -52,6 +52,17 @@ describe Vines::Store do
     end
   end
 
+  describe 'trusted?' do
+    it 'does not trust malformed certificates' do
+      refute subject.trusted?('bogus')
+    end
+
+    it 'does not trust unsigned certificates' do
+      pair = certificate('something.lit')
+      refute subject.trusted?(pair.cert)
+    end
+  end
+
   describe 'domain?' do
     it 'handles invalid input' do
       pair = certificate('wonderland.lit')
