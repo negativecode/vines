@@ -2,7 +2,7 @@
 
 module Vines
   class Cluster
-    # Subscribes to the redis nodes:all broadcast channel to listen for
+    # Subscribes to the redis `nodes:all` broadcast channel to listen for
     # heartbeats from other cluster members. Also subscribes to a channel
     # exclusively for this particular node, listening for stanzas routed to us
     # from other nodes.
@@ -22,6 +22,8 @@ module Vines
       # Create a new redis connection and subscribe to the nodes:all broadcast
       # channel as well as the channel for this cluster node. Redis connections
       # in subscribe mode cannot be used for other key/value operations.
+      #
+      # Returns nothing.
       def subscribe
         conn = @cluster.connect
         conn.subscribe(ALL)
@@ -35,6 +37,8 @@ module Vines
 
       # Recursively process incoming messages from the queue, guaranteeing they
       # are processed in the order they are received.
+      #
+      # Returns nothing.
       def process_messages
         @messages.pop do |channel, message|
           Fiber.new do
@@ -46,6 +50,11 @@ module Vines
 
       # Process messages as they arrive on the pubsub channels to which we're
       # subscribed.
+      #
+      # channel - The String channel name on which the message was received.
+      # message - The JSON formatted message String.
+      #
+      # Returns nothing.
       def on_message(channel, message)
         doc = JSON.parse(message)
         case channel
@@ -56,9 +65,13 @@ module Vines
         log.error("Cluster subscription message failed: #{e}")
       end
 
-      # Process a message sent to the nodes:all broadcast channel. In the case
+      # Process a message sent to the `nodes:all` broadcast channel. In the case
       # of node heartbeats, we update the last time we heard from this node so
       # we can cleanup its session if it goes offline.
+      #
+      # message - The parsed Hash of received message data.
+      #
+      # Returns nothing.
       def to_all(message)
         case message[TYPE]
         when ONLINE, HEARTBEAT
@@ -71,6 +84,10 @@ module Vines
       # Process a message published to this node's channel. Messages sent to
       # this channel are stanzas that need to be routed to connections attached
       # to this node.
+      #
+      # message - The parsed Hash of received message data.
+      #
+      # Returns nothing.
       def to_node(message)
         case message[TYPE]
         when STANZA then route_stanza(message)
@@ -80,6 +97,10 @@ module Vines
 
       # Send the stanza, from a remote cluster node, to locally connected
       # streams for the destination user.
+      #
+      # message - The parsed Hash of received message data.
+      #
+      # Returns nothing.
       def route_stanza(message)
         node = Nokogiri::XML(message[STANZA]).root rescue nil
         return unless node
@@ -95,6 +116,10 @@ module Vines
 
       # Update the roster information, that's cached in locally connected
       # streams, for this user.
+      #
+      # message - The parsed Hash of received message data.
+      #
+      # Returns nothing.
       def update_user(message)
         jid = JID.new(message['jid']).bare
         if user = @cluster.storage(jid.domain).find_user(jid)
