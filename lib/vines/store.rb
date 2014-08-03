@@ -52,7 +52,7 @@ module Vines
     #
     # Returns an Array of PEM encoded certificate Strings.
     def certs
-      unless @@sources
+      @@sources ||= begin
         pattern = /-{5}BEGIN CERTIFICATE-{5}\n.*?-{5}END CERTIFICATE-{5}\n/m
         pairs = Dir[File.join(@dir, '*.crt')].map do |name|
           File.open(name, "r:UTF-8") do |f|
@@ -62,7 +62,7 @@ module Vines
             [name, certs]
           end
         end
-        @@sources = Hash[pairs]
+        Hash[pairs]
       end
       @@sources.values.flatten
     end
