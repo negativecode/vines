@@ -5,6 +5,8 @@ module Vines
   # This uses the conf/certs/*.crt files as the list of trusted root
   # CA certificates.
   class Store
+    include Vines::Log
+
     @@sources = nil
 
     # Create a certificate store to read certificate files from the given
@@ -14,7 +16,14 @@ module Vines
     def initialize(dir)
       @dir = File.expand_path(dir)
       @store = OpenSSL::X509::Store.new
-      certs.each {|c| @store.add_cert(c) }
+      certs.each {|c|
+        begin
+          @store.add_cert(c)
+        rescue
+          # do nothing cert is already known
+          log.warn("WARNING! There are duplicate certificates")
+        end
+      }
     end
 
     # Return true if the certificate is signed by a CA certificate in the
