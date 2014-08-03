@@ -101,7 +101,7 @@ describe Vines::Store do
   end
 
   def certificate(domain, altname=nil)
-    # use small key so tests are fast
+    # Use small key so tests are fast.
     key = OpenSSL::PKey::RSA.generate(256)
 
     name = OpenSSL::X509::Name.parse("/C=US/ST=Colorado/L=Denver/O=Test/CN=#{domain}")
