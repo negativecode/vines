@@ -3,9 +3,9 @@
 require 'test_helper'
 
 describe Vines::Store do
-  before do
-    dir = 'conf/certs'
+  let(:dir) { 'conf/certs' }
 
+  before do
     domain, key = certificate('wonderland.lit')
     File.open("#{dir}/wonderland.lit.crt", 'w') {|f| f.write(domain) }
     File.open("#{dir}/wonderland.lit.key", 'w') {|f| f.write(key) }
@@ -14,12 +14,12 @@ describe Vines::Store do
     File.open("#{dir}/wildcard.lit.crt", 'w') {|f| f.write(wildcard) }
     File.open("#{dir}/wildcard.lit.key", 'w') {|f| f.write(key) }
 
-    @store = Vines::Store.new('conf/certs')
+    @store = Vines::Store.new(dir)
   end
 
   after do
     %w[wonderland.lit.crt wonderland.lit.key wildcard.lit.crt wildcard.lit.key].each do |f|
-      name = "conf/certs/#{f}"
+      name = "#{dir}/#{f}"
       File.delete(name) if File.exists?(name)
     end
   end
