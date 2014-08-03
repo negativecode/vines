@@ -11,7 +11,8 @@ describe Vines::Store do
   before do
     @files =
       save('wonderland.lit', domain_pair) +
-      save('wildcard.lit', wildcard_pair)
+      save('wildcard.lit', wildcard_pair) +
+      save('duplicate.lit', domain_pair)
   end
 
   after do
@@ -20,13 +21,19 @@ describe Vines::Store do
     end
   end
 
-  it 'parses certificate files' do
-    refute subject.certs.empty?
-    assert_equal OpenSSL::X509::Certificate, subject.certs.first.class
-  end
+  describe 'creating a store' do
+    it 'parses certificate files' do
+      refute subject.certs.empty?
+      assert_equal OpenSSL::X509::Certificate, subject.certs.first.class
+    end
 
-  it 'ignores expired certificates' do
-    assert subject.certs.all? {|c| c.not_after > Time.new }
+    it 'ignores expired certificates' do
+      assert subject.certs.all? {|c| c.not_after > Time.new }
+    end
+
+    it 'does not raise an error for duplicate certificates' do
+      assert Vines::Store.new(dir)
+    end
   end
 
   describe 'files_for_domain' do

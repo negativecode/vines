@@ -14,7 +14,7 @@ module Vines
     def initialize(dir)
       @dir = File.expand_path(dir)
       @store = OpenSSL::X509::Store.new
-      certs.each {|c| @store.add_cert(c) }
+      certs.each {|cert| append(cert) }
     end
 
     # Return true if the certificate is signed by a CA certificate in the
@@ -27,7 +27,7 @@ module Vines
     def trusted?(pem)
       if cert = OpenSSL::X509::Certificate.new(pem) rescue nil
         @store.verify(cert).tap do |trusted|
-          @store.add_cert(cert) if trusted rescue nil
+          append(cert) if trusted
         end
       end
     end
@@ -118,6 +118,20 @@ module Vines
         end
       end
       nil
+    end
+
+    private
+
+    # Add a trusted certificate to the store, suppressing any OpenSSL errors
+    # caused by the certificate already being stored.
+    #
+    # cert - The OpenSSL::X509::Certificate to add.
+    #
+    # Returns nothing.
+    def append(cert)
+      @store.add_cert(cert)
+    rescue OpenSSL::X509::StoreError
+      # Already added to store.
     end
   end
 end
