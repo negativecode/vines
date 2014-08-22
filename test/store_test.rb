@@ -120,7 +120,7 @@ describe Vines::Store do
 
   def certificate(domain, altname=nil)
     # Use small key so tests are fast.
-    key = OpenSSL::PKey::RSA.generate(256)
+    key = OpenSSL::PKey::RSA.generate(512)
 
     name = OpenSSL::X509::Name.parse("/C=US/ST=Colorado/L=Denver/O=Test/CN=#{domain}")
     cert = OpenSSL::X509::Certificate.new
@@ -141,6 +141,8 @@ describe Vines::Store do
         %w[subjectAltName] << [domain, altname].map {|n| "DNS:#{n}" }.join(',')
       ].map {|k, v| factory.create_ext(k, v) }
     end
+
+    cert.sign key, OpenSSL::Digest::SHA1.new
 
     Pair.new(cert.to_pem, key.to_pem)
   end
