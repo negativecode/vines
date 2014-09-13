@@ -72,6 +72,7 @@ end
   resolv
   set
   socket
+  uri
   yaml
 
   vines/cli

@@ -33,12 +33,14 @@ module Vines
         # parser - The Http::Parser that parsed the HTTP request.
         # body   - The String request body.
         def initialize(stream, parser, body)
-          @stream, @body = stream, body
+          uri       = URI(parser.request_url)
+          @stream   = stream
+          @body     = body
           @headers  = parser.headers
           @method   = parser.http_method
-          @path     = parser.request_path
           @url      = parser.request_url
-          @query    = parser.query_string
+          @path     = uri.path
+          @query    = uri.query
           @received = Time.now
         end
 
