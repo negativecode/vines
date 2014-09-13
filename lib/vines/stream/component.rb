@@ -46,10 +46,10 @@ module Vines
 
       def send_stream_header
         attrs = {
-          'xmlns' => NAMESPACES[:component],
+          'xmlns'        => NAMESPACES[:component],
           'xmlns:stream' => NAMESPACES[:stream],
-          'id' => @stream_id,
-          'from' => @remote_domain
+          'id'           => @stream_id,
+          'from'         => @remote_domain
         }
         write "<stream:stream %s>" % attrs.to_a.map{|k,v| "#{k}='#{v}'"}.join(' ')
       end

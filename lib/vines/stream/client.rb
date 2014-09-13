@@ -69,12 +69,12 @@ module Vines
 
       def send_stream_header(to)
         attrs = {
-          'xmlns' => NAMESPACES[:client],
+          'xmlns'        => NAMESPACES[:client],
           'xmlns:stream' => NAMESPACES[:stream],
-          'xml:lang' => 'en',
-          'id' => Kit.uuid,
-          'from' => @session.domain,
-          'version' => '1.0'
+          'xml:lang'     => 'en',
+          'id'           => Kit.uuid,
+          'from'         => @session.domain,
+          'version'      => '1.0'
         }
         attrs['to'] = to if to
         write "<stream:stream %s>" % attrs.to_a.map{|k,v| "#{k}='#{v}'"}.join(' ')

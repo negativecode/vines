@@ -135,13 +135,13 @@ module Vines
 
       def send_stream_header
         attrs = {
-          'xmlns' => NAMESPACES[:server],
+          'xmlns'        => NAMESPACES[:server],
           'xmlns:stream' => NAMESPACES[:stream],
-          'xml:lang' => 'en',
-          'id' => Kit.uuid,
-          'from' => @domain,
-          'to' => @remote_domain,
-          'version' => '1.0'
+          'xml:lang'     => 'en',
+          'id'           => Kit.uuid,
+          'from'         => @domain,
+          'to'           => @remote_domain,
+          'version'      => '1.0'
         }
         write "<stream:stream %s>" % attrs.to_a.map{|k,v| "#{k}='#{v}'"}.join(' ')
       end
