@@ -60,9 +60,13 @@ module Vines
 
       private
 
-      # The +to+ domain address set on the initial stream header must not change
+      # The `to` domain address set on the initial stream header must not change
       # during stream restarts. This prevents a user from authenticating in one
       # domain, then using a stream in a different domain.
+      #
+      # to - The String domain JID to verify (e.g. 'wonderland.lit').
+      #
+      # Returns true if the client connection is misbehaving and should be closed.
       def domain_change?(to)
         to != @session.domain
       end

@@ -17,6 +17,11 @@ module Vines
       @config = config
     end
 
+    # Initialize the stream after its connection to the server has completed.
+    # EventMachine calls this method when an incoming connection is accepted
+    # into the event loop.
+    #
+    # Returns nothing.
     def post_init
       @remote_addr, @local_addr = addresses
       @user, @closed, @stanza_size = nil, false, 0
@@ -33,6 +38,8 @@ module Vines
     # stream is first connected as well as for stream restarts during
     # negotiation. Subclasses can override this method to provide a different
     # type of parser (e.g. HTTP).
+    #
+    # Returns nothing.
     def create_parser
       @parser = Parser.new.tap do |parser|
         parser.stream_open {|node| @nodes.push(node) }
@@ -41,15 +48,24 @@ module Vines
       end
     end
 
-    # Advance the state machine into the +Closed+ state so any remaining queued
+    # Advance the state machine into the `Closed` state so any remaining queued
     # nodes are not processed while we're waiting for EM to actually close the
     # connection.
+    #
+    # Returns nothing.
     def close_connection(after_writing=false)
       super
       @closed = true
       advance(Client::Closed.new(self))
     end
 
+    # Read bytes off the stream and feed them into the XML parser. EventMachine
+    # is responsible for calling this method on its event loop as connections
+    # become readable.
+    #
+    # data - The byte String sent to the server from the client, hopefully XML.
+    #
+    # Returns nothing.
     def receive_data(data)
       return if @closed
       @stanza_size += data.bytesize
@@ -62,6 +78,8 @@ module Vines
 
     # Reset the connection's XML parser when a new <stream:stream> header
     # is received.
+    #
+    # Returns nothing.
     def reset
       create_parser
     end
@@ -72,7 +90,7 @@ module Vines
       @config.storage(domain || self.domain)
     end
 
-    # Returns the Vines::Config::Host virtual host for the stream's domain.
+    # Returns the Config::Host virtual host for the stream's domain.
     def vhost
       @config.vhost(domain)
     end
@@ -80,6 +98,10 @@ module Vines
     # Reload the user's information into their active connections. Call this
     # after storage.save_user() to sync the new user state with their other
     # connections.
+    #
+    # user - The User whose connection info needs refreshing.
+    #
+    # Returns nothing.
     def update_user_streams(user)
       connected_resources(user.jid.bare).each do |stream|
         stream.user.update_from(user)
@@ -112,6 +134,10 @@ module Vines
     end
 
     # Send the data over the wire to this client.
+    #
+    # data - The XML String or XML::Node to write to the socket.
+    #
+    # Returns nothing.
     def write(data)
       log_node(data, :out)
       if data.respond_to?(:to_xml)
@@ -139,7 +165,11 @@ module Vines
     end
 
     # Advance the stream's state machine to the new state. XML nodes received
-    # by the stream will be passed to this state's +node+ method.
+    # by the stream will be passed to this state's `node` method.
+    #
+    # state - The Stream::State to process the stanzas next.
+    #
+    # Returns the new Stream::State.
     def advance(state)
       @state = state
     end
@@ -147,6 +177,10 @@ module Vines
     # Stream level errors close the stream while stanza and SASL errors are
     # written to the client and leave the stream open. All exceptions should
     # pass through this method for consistent handling.
+    #
+    # e - The StandardError, usually XmppError, that occurred.
+    #
+    # Returns nothing.
     def error(e)
       case e
       when SaslError, StanzaError
@@ -167,7 +201,9 @@ module Vines
 
     private
 
-    # Return the remote and local socket addresses used by this connection.
+    # Determine the remote and local socket addresses used by this connection.
+    #
+    # Returns a two-element Array of String addresses.
     def addresses
       [get_peername, get_sockname].map do |addr|
         addr ? Socket.unpack_sockaddr_in(addr)[0, 2].reverse.join(':') : 'unknown'
@@ -176,12 +212,21 @@ module Vines
 
     # Write the StreamError's xml to the stream. Subclasses can override
     # this method with custom error writing behavior.
+    #
+    # A call to `close_stream` should follow this method. Stream level errors
+    # are fatal to the connection.
+    #
+    # e - The StreamError that caused the connection to close.
+    #
+    # Returns nothing.
     def send_stream_error(e)
       write(e.to_xml)
     end
 
-    # Write a closing stream tag to the stream then close the stream. Subclasses
-    # can override this method for custom close behavior.
+    # Write a closing stream tag and close the connection. Subclasses can
+    # override this method for custom close behavior.
+    #
+    # Returns nothing.
     def close_stream
       write('</stream:stream>')
       close_connection_after_writing
@@ -194,7 +239,14 @@ module Vines
 
     # Schedule a queue pop on the EM thread to handle the next element. This
     # guarantees all stanzas received on this stream are processed in order.
-    # http://tools.ietf.org/html/rfc6120#section-10.1
+    #
+    #   http://tools.ietf.org/html/rfc6120#section-10.1
+    #
+    # Once a node is processed, this method recursively schedules itself to pop
+    # the next node and so on. A single call to this method effectively begins
+    # an asynchronous node processing loop.
+    #
+    # Returns nothing.
     def process_node_queue
       @nodes.pop do |node|
         Fiber.new do
@@ -232,14 +284,20 @@ module Vines
         ["#{label} stanza:".ljust(PAD), from, to, node])
     end
 
-    # Returns the current +State+ of the stream's state machine. Provided as a
+    # Inspects the current state of the stream's state machine. Provided as a
     # method so subclasses can override the behavior.
+    #
+    # Returns the current Stream::State.
     def state
       @state
     end
 
-    # Return +true+ if this is a valid domain-only JID that can be used in
+    # Determine if this is a valid domain-only JID that can be used in
     # stream initiation stanza headers.
+    #
+    # jid - The String or JID to verify (e.g. 'wonderland.lit').
+    #
+    # Return true if the jid is domain-only.
     def valid_address?(jid)
       JID.new(jid).domain? rescue false
     end

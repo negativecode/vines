@@ -10,8 +10,10 @@ module Vines
         @session = Http::Session.new(self)
       end
 
-      # Override +Stream#create_parser+ to provide an HTTP parser rather than
+      # Override Stream#create_parser to provide an HTTP parser rather than
       # a Nokogiri XML parser.
+      #
+      # Returns nothing.
       def create_parser
         @parser = ::Http::Parser.new.tap do |parser|
           body = ''
@@ -26,6 +28,10 @@ module Vines
       # If the session ID is valid, switch this stream's session to the new
       # ID and return true. Some clients, like Google Chrome, reuse one stream
       # for multiple sessions.
+      #
+      # sid - The String session ID.
+      #
+      # Returns true if the server previously distributed this SID to a client.
       def valid_session?(sid)
         if session = Sessions[sid]
           @session = session
@@ -62,13 +68,27 @@ module Vines
 
       # Override Stream#write to queue stanzas rather than immediately writing
       # to the stream. Stanza responses must be paired with a queued request.
+      #
+      # If a request is not waiting, the written stanzas will buffer until they
+      # can be sent in the next response.
+      #
+      # data - The XML String or XML::Node to write to the HTTP socket.
+      #
+      # Returns nothing.
       def write(data)
         @session.write(data)
       end
 
-      # Return an array of Node objects inside the body element.
+      # Parse the one or more stanzas from a single body element. BOSH clients
+      # buffer stanzas sent in quick succession, and send them as a bundle, to
+      # save on the request/response cycle.
+      #
       # TODO This parses the XML again just to strip namespaces. Figure out
       # Nokogiri namespace handling instead.
+      #
+      # body - The XML::Node containing the BOSH `body` element.
+      #
+      # Returns an Array of XML::Node stanzas.
       def parse_body(body)
         body.namespace = nil
         body.elements.map do |node|
@@ -133,8 +153,12 @@ module Vines
         @session.reply(node)
       end
 
-      # Override +Stream#send_stream_error+ to wrap the error XML in a BOSH
+      # Override Stream#send_stream_error to wrap the error XML in a BOSH
       # terminate body tag.
+      #
+      # e - The StreamError that caused the connection to close.
+      #
+      # Returns nothing.
       def send_stream_error(e)
         doc = Nokogiri::XML::Document.new
         node = doc.create_element('body',
@@ -146,8 +170,10 @@ module Vines
         @session.reply(node)
       end
 
-      # Override +Stream#close_stream+ to simply close the connection without
+      # Override Stream#close_stream to simply close the connection without
       # writing a closing stream tag.
+      #
+      # Returns nothing.
       def close_stream
         close_connection_after_writing
         @session.close

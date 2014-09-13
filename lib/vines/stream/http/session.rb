@@ -73,6 +73,10 @@ module Vines
 
         # Send an HTTP 200 OK response wrapping the XMPP node content back
         # to the client.
+        #
+        # node - The XML::Node to send to the client.
+        #
+        # Returns nothing.
         def reply(node)
           if request = @requests.shift
             request.reply(node, @content_type)
@@ -83,6 +87,10 @@ module Vines
         # Write the XMPP node to the client stream after wrapping it in a BOSH
         # body tag. If there's a waiting request, the node is written
         # immediately. If not, it's queued until the next request arrives.
+        #
+        # data - The XML String or XML::Node to send in the next HTTP response.
+        #
+        # Returns nothing.
         def write(node)
           if request = @requests.shift
             request.reply(wrap_body(node), @content_type)

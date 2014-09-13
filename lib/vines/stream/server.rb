@@ -125,10 +125,16 @@ module Vines
 
       private
 
-      # The +to+ and +from+ domain addresses set on the initial stream header
+      # The `to` and `from` domain addresses set on the initial stream header
       # must not change during stream restarts. This prevents a server from
       # authenticating as one domain, then sending stanzas from users in a
       # different domain.
+      #
+      # to   - The String domain the other server thinks we are.
+      # from - The String domain the other server is asserting as its identity.
+      #
+      # Returns true if the other server is misbehaving and its connection
+      #   should be closed.
       def domain_change?(to, from)
         to != @domain || from != @remote_domain
       end
