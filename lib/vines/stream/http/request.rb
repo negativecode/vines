@@ -25,6 +25,13 @@ module Vines
 
         attr_reader :stream, :body, :headers, :method, :path, :url, :query
 
+        # Create a new request parsed from an HTTP client connection. We'll try
+        # to keep this request open until there are stanzas available to send
+        # as a response.
+        #
+        # stream - The Stream::Http client connection that received the request.
+        # parser - The Http::Parser that parsed the HTTP request.
+        # body   - The String request body.
         def initialize(stream, parser, body)
           @stream, @body = stream, body
           @headers  = parser.headers
@@ -44,10 +51,12 @@ module Vines
         # directory. Take care to prevent directory traversal attacks with paths
         # like ../../../etc/passwd. Use the If-Modified-Since request header
         # to implement caching.
+        #
+        # Returns nothing.
         def reply_with_file(dir)
           path = File.expand_path(File.join(dir, @path))
 
-          # redirect requests missing a slash so relative links work
+          # Redirect requests missing a slash so relative links work.
           if File.directory?(path) && !@path.end_with?('/')
             send_status(301, MOVED, "Location: #{redirect_uri}")
             return
@@ -69,6 +78,8 @@ module Vines
 
         # Send an HTTP 200 OK response wrapping the XMPP node content back
         # to the client.
+        #
+        # Returns nothing.
         def reply(node, content_type)
           body = node.to_s
           header = [
@@ -90,6 +101,8 @@ module Vines
         # Send a 200 OK response, allowing any origin domain to connect to the
         # server, in response to CORS preflight OPTIONS requests. This allows
         # any web application using strophe.js to connect to our BOSH port.
+        #
+        # Returns nothing.
         def reply_to_options
           allow = @headers['Access-Control-Request-Headers']
           headers = [
@@ -107,6 +120,8 @@ module Vines
         # wasn't sent by the client, just return the relative path that
         # was requested. The Location response header must contain the fully
         # qualified URI, but most browsers will accept relative paths as well.
+        #
+        # Returns the String URL.
         def redirect_uri
           host = headers['Host']
           uri = "#{path}/"
@@ -137,6 +152,8 @@ module Vines
         # Stream the contents of the file to the client in a 200 OK response.
         # Send a Last-Modified response header so clients can send us an
         # If-Modified-Since request header for caching.
+        #
+        # Returns nothing.
         def send_file(path, status=200, message='OK')
           header = [
             "HTTP/1.1 #{status} #{message}",
@@ -162,6 +179,8 @@ module Vines
         # HTTP server. Reverse proxy servers (nginx/apache) can use this cookie
         # to implement sticky sessions. Return nil if vroute was not set in
         # config.rb and no cookie should be sent.
+        #
+        # Returns a String cookie value or nil if disabled.
         def vroute_cookie
           route = @stream.config[:http].vroute
           route ? "Set-Cookie: vroute=#{route}; path=/; HttpOnly" : nil
