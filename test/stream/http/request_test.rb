@@ -3,8 +3,8 @@
 require 'test_helper'
 
 describe Vines::Stream::Http::Request do
-  PASSWORD = File.expand_path('../passwords')
-  INDEX    = File.expand_path('index.html')
+  PASSWORD = File.expand_path('../passwords').freeze
+  INDEX    = File.expand_path('index.html').freeze
 
   before do
     File.open(PASSWORD, 'w') {|f| f.puts '/etc/passwd contents' }
