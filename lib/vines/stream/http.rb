@@ -18,10 +18,10 @@ module Vines
         @parser = ::Http::Parser.new.tap do |parser|
           body = ''
           parser.on_body = proc {|data| body << data }
-          parser.on_message_complete = proc {
+          parser.on_message_complete = proc do
             process_request(Request.new(self, @parser, body))
             body = ''
-          }
+          end
         end
       end
 
