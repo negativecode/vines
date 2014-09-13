@@ -34,10 +34,10 @@ module Vines
     # negotiation. Subclasses can override this method to provide a different
     # type of parser (e.g. HTTP).
     def create_parser
-      @parser = Parser.new.tap do |p|
-        p.stream_open {|node| @nodes.push(node) }
-        p.stream_close { close_connection }
-        p.stanza {|node| @nodes.push(node) }
+      @parser = Parser.new.tap do |parser|
+        parser.stream_open {|node| @nodes.push(node) }
+        parser.stream_close { close_connection }
+        parser.stanza {|node| @nodes.push(node) }
       end
     end
 

@@ -13,10 +13,10 @@ module Vines
       # Override +Stream#create_parser+ to provide an HTTP parser rather than
       # a Nokogiri XML parser.
       def create_parser
-        @parser = ::Http::Parser.new.tap do |p|
+        @parser = ::Http::Parser.new.tap do |parser|
           body = ''
-          p.on_body = proc {|data| body << data }
-          p.on_message_complete = proc {
+          parser.on_body = proc {|data| body << data }
+          parser.on_message_complete = proc {
             process_request(Request.new(self, @parser, body))
             body = ''
           }
